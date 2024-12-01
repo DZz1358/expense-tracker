@@ -1,0 +1,148 @@
+<div class="container">
+  <button
+    mat-fab
+    color="primary"
+    class="add-btn"
+    (click)="addTransaction()"
+    >
+      <mat-icon> add </mat-icon>
+</button>
+
+<mat-card>
+  <form class="table-header" [formGroup]="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="category">
+        <mat-option *ngFor="let category of categories" [value]="category">
+          {{ category }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Transaction Type</mat-label>
+      <mat-select formControlName="transactionType">
+        <mat-option *ngFor="let type of transactionTypes" [value]="type">
+          {{ type }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Transaction Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="date" />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <div class="table-header-balance">
+      <span>Balance: </span>
+      <span>{{ balance | currency }}</span>
+    </div>
+  </form>
+</mat-card>
+
+
+<mat-card
+  appearance="outlined"
+  class="transaction-table"
+  >
+  <div *ngIf="filteredData.length > 0">
+    <mat-table  [dataSource]="filteredData" matSort #table>
+      <ng-container matColumnDef="transactionName">
+        <mat-header-cell
+          mat-header-cell
+          *matHeaderCellDef
+          >Transaction name</mat-header-cell
+        >
+        <mat-cell
+          mat-cell
+          *matCellDef="let row"
+          matTooltip="{{row.title}}"
+        >
+          <span class="text-truncate ">{{ row.title }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <mat-header-cell
+          mat-header-cell
+          *matHeaderCellDef
+          >Category</mat-header-cell
+        >
+        <mat-cell
+          mat-cell
+          *matCellDef="let row"
+        >
+          <span >{{ row.category }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="date">
+        <mat-header-cell
+          mat-header-cell
+          *matHeaderCellDef
+          >Date</mat-header-cell
+        >
+        <mat-cell
+          mat-cell
+          *matCellDef="let row"
+        >
+          <span >{{ row.date | date: 'dd.MM.yyyy' }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <mat-header-cell
+          mat-header-cell
+          *matHeaderCellDef
+          >Total</mat-header-cell
+        >
+        <mat-cell
+          mat-cell
+          *matCellDef="let row"
+        >
+          <span class="text-truncate">{{ row.amount | currency }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+      [style.background-color]="row.transactionType | transactionType"
+       *matRowDef="let row; columns: displayedColumns"> </mat-row>
+    </mat-table>
+
+  </div>
+
+  <div class="isEmpty" *ngIf="filteredData.length === 0"><h1>Data is empty</h1></div>
+
+</mat-card>
+
+<div
+  class="transaction-cards"
+  *ngFor="let card of filteredData"
+  >
+  <mat-card [style.background-color]="card.transactionType | transactionType" class="transaction-cards-item">
+    <div>
+      <span class="transaction-cards-item--title">Transaction name: </span>
+      <span class="text-truncate" matTooltip="{{card.title}}">{{card.title}}</span>
+    </div>
+    <div>
+      <span class="transaction-cards-item--title">Category: </span>
+      <span class="text-truncate">{{card.category}}</span>
+    </div>
+    <div>
+      <span class="transaction-cards-item--title">Date: </span>
+      <span class="text-truncate">{{card.date | date: 'dd.MM.yyyy'}}</span>
+    </div>
+    <div>
+      <span class="transaction-cards-item--title">Total: </span>
+      <span class="text-truncate">{{card.amount | currency}}</span>
+    </div>
+  </mat-card>
+
+</div>
+
+
+</div>
+

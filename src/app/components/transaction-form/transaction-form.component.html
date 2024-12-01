@@ -1,0 +1,74 @@
+<div
+  class="header-modal"
+>
+  <span>Add transaction</span>
+
+  <button mat-icon-button (click)="cancel()" aria-label="Close dialog button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="expense-form">
+  <mat-form-field appearance="outline" >
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="title" required />
+    <mat-error *ngIf="transactionForm.get('title')?.hasError('required')">
+      Name is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" >
+    <mat-label>Type transaction</mat-label>
+    <mat-select formControlName="transactionType" required>
+      <mat-option *ngFor="let transaction of transactionTypes" [value]="transaction">
+        {{ transaction }}
+      </mat-option>
+    </mat-select>
+    <mat-error
+      *ngIf="transactionForm.get('transactionType')?.hasError('required')"
+    >
+      Type transaction is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" >
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="category" required>
+      <mat-option *ngFor="let category of categories" [value]="category">
+        {{ category }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="transactionForm.get('category')?.hasError('required')">
+      Category is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" >
+    <mat-label>Date</mat-label>
+    <input matInput [matDatepicker]="picker" formControlName="date" required />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="transactionForm.get('date')?.hasError('required')">
+      Date is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" >
+    <mat-label>Amount</mat-label>
+    <input (input)="validateAmountInput()" matInput type="text" formControlName="amount" required />
+    <mat-error *ngIf="transactionForm.get('amount')?.hasError('required')">
+      The amount is required
+    </mat-error>
+    <mat-error *ngIf="transactionForm.get('amount')?.hasError('pattern')">
+      Enter a valid number (maximum 2 decimal places)
+    </mat-error>
+    <mat-error *ngIf="transactionForm.get('amount')?.hasError('min')">
+      Minimum amount - 0.01
+    </mat-error>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="transactionForm.invalid">
+    Add
+  </button>
+</form>
+

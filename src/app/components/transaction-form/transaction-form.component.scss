@@ -1,0 +1,27 @@
+.header-modal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+
+  & span {
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  padding: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.expense-list {
+  margin-top: 2rem;
+}
