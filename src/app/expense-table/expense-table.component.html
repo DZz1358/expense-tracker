@@ -1,2 +1,26 @@
 <p>expense-table works!</p>
 <h1 class="text-3xl font-bold underline">Hello world!</h1>
+
+<div class="sidenav-scroll-wrapper">
+  <div class="sidenav-content">
+    <!-- for test -->
+    <h1>Hello world</h1>
+    <app-theme-toggle></app-theme-toggle>
+    <form>
+      <mat-form-field appearance="outline">
+        <mat-label>Favorite food</mat-label>
+        <input required matInput placeholder="Ex. Pizza" />
+      </mat-form-field>
+
+      <button mat-flat-button>Basic</button>
+      <button mat-flat-button disabled>Disabled</button>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Leave a comment</mat-label>
+        <textarea matInput placeholder="Ex. It makes me feel..."></textarea>
+      </mat-form-field>
+    </form>
+
+    <ng-content></ng-content>
+  </div>
+</div>
