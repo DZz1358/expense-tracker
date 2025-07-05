@@ -16,10 +16,6 @@ export class ThemeService {
 
   themeIcon = computed(() => this.activeTheme());
 
-  constructor() {
-    console.log('ThemeService initialized with theme:', this.activeTheme());
-  }
-
   toggleTheme(): void {
     this.#activeThemeSignal.update((theme) => theme === Theme.Dark ? Theme.Light : Theme.Dark);
     this.#localStorageService.setItem(StorageKey.Theme, this.#activeThemeSignal());
