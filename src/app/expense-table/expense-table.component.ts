@@ -1,6 +1,5 @@
 import { Component, viewChild } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +12,7 @@ import { expenses } from '../mocks/table.mock';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatToolbarModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss'
 })
