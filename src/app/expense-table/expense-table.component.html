@@ -1,26 +1,40 @@
-<p>expense-table works!</p>
-<h1 class="text-3xl font-bold underline">Hello world!</h1>
+<table
+  mat-table
+  [dataSource]="dataSource"
+  class="mat-elevation-z8"
+  matSort
+  #sort="matSort"
+>
+  <ng-container matColumnDef="description">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+    <td mat-cell *matCellDef="let element">{{ element.description }}</td>
+  </ng-container>
 
-<div class="sidenav-scroll-wrapper">
-  <div class="sidenav-content">
-    <!-- for test -->
-    <h1>Hello world</h1>
-    <app-theme-toggle></app-theme-toggle>
-    <form>
-      <mat-form-field appearance="outline">
-        <mat-label>Favorite food</mat-label>
-        <input required matInput placeholder="Ex. Pizza" />
-      </mat-form-field>
+  <ng-container matColumnDef="category">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+    <td mat-cell *matCellDef="let element">{{ element.category }}</td>
+  </ng-container>
 
-      <button mat-flat-button>Basic</button>
-      <button mat-flat-button disabled>Disabled</button>
+  <ng-container matColumnDef="paymentMethod">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Payment Method</th>
+    <td mat-cell *matCellDef="let element">{{ element.paymentMethod }}</td>
+  </ng-container>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Leave a comment</mat-label>
-        <textarea matInput placeholder="Ex. It makes me feel..."></textarea>
-      </mat-form-field>
-    </form>
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+    <td mat-cell *matCellDef="let element">{{ element.date }}</td>
+  </ng-container>
 
-    <ng-content></ng-content>
-  </div>
-</div>
+  <ng-container matColumnDef="amount">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
+    <td mat-cell *matCellDef="let element">{{ element.amount }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="createdAt">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
+    <td mat-cell *matCellDef="let element">{{ element.createdAt }}</td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
