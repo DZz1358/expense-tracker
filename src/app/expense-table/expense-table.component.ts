@@ -1,4 +1,4 @@
-import { Component, viewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, viewChild } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 
 import { expenses } from '../mocks/table.mock';
+import { FireStoreService } from '../services/fire-store.service';
 
 @Component({
   selector: 'app-expense-table',
@@ -16,11 +17,16 @@ import { expenses } from '../mocks/table.mock';
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss'
 })
-export class ExpenseTableComponent {
+export class ExpenseTableComponent implements AfterViewInit, OnInit {
+  fireStoreService = inject(FireStoreService);
   displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt'];
   dataSource = new MatTableDataSource(expenses);
 
   readonly paginator = viewChild<MatPaginator>('paginator');
+
+  ngOnInit() {
+    this.getAll();
+  }
   readonly sort = viewChild<MatSort>('sort');
 
   ngAfterViewInit() {
@@ -29,4 +35,11 @@ export class ExpenseTableComponent {
       this.dataSource.sort = sort;
     }
   }
+
+  getAll() {
+    this.fireStoreService.getAll('expenses').then(data => {
+      console.log('data', data);
+    })
+  }
+
 }
