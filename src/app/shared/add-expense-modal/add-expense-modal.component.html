@@ -1,0 +1,39 @@
+<div mat-dialog-title class="d-flex align-items-center justify-content-between">
+  <span>Add new expense</span>
+  <button mat-icon-button (click)="dialogRef.close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="pt-2">
+    <mat-form-field appearance="outline" class="col-12 px-0">
+      <mat-label>
+        <span>Коментар</span>
+      </mat-label>
+      <textarea
+        matInput
+        formControlName="comment"
+        minlength="3"
+        placeholder="Додати коментар"
+      ></textarea>
+      <mat-error>Поле не може бути пустим</mat-error>
+    </mat-form-field>
+
+    <div
+      class="text-center d-flex justify-content-end mt-3 mb-1 col-12 px-0 mb-3"
+    >
+      <button
+        class="full-width"
+        type="button"
+        [disabled]="form.invalid"
+        mat-flat-button
+        (click)="addExpense()"
+        color="primary"
+        id="save"
+      >
+        Додати
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

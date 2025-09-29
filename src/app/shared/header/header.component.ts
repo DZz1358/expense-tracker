@@ -11,6 +11,6 @@ import { MatMenuModule } from '@angular/material/menu';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-  avatarUrl = signal('assets/cat.jpg');
+  avatarUrl = signal('/cat.jpg');
 
 }
