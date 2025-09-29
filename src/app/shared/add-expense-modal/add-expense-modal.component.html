@@ -1,37 +1,68 @@
-<div mat-dialog-title class="d-flex align-items-center justify-content-between">
-  <span>Add new expense</span>
-  <button mat-icon-button (click)="dialogRef.close()">
+<div class="add-expense-modal__header">
+  <h3>Add new expense</h3>
+  <button matIconButton (click)="dialogRef.close()">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
 <mat-dialog-content>
-  <form [formGroup]="form" class="pt-2">
-    <mat-form-field appearance="outline" class="col-12 px-0">
+  <form class="add-expense-modal__content" [formGroup]="form">
+    <mat-form-field appearance="outline" class="">
       <mat-label>
-        <span>Коментар</span>
+        <span>Amount</span>
+      </mat-label>
+      <input matInput formControlName="amount" placeholder="Enter amount" />
+      <mat-error>This field cannot be empty</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Choose category</mat-label>
+      <mat-select formControlName="category">
+        @for (category of categories; track category.value) {
+        <mat-option [value]="category.value">{{
+          category.viewValue
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Choose payment method</mat-label>
+      <mat-select formControlName="paymentMethod">
+        @for (paymentMethod of paymentMethods; track paymentMethod.value) {
+        <mat-option [value]="paymentMethod.value">{{
+          paymentMethod.viewValue
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Custom calendar header</mat-label>
+      <input formControlName="date" matInput [matDatepicker]="picker" />
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="picker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="">
+      <mat-label>
+        <span>Description</span>
       </mat-label>
       <textarea
         matInput
-        formControlName="comment"
+        formControlName="description"
         minlength="3"
-        placeholder="Додати коментар"
+        placeholder="Enter description"
       ></textarea>
-      <mat-error>Поле не може бути пустим</mat-error>
+      <mat-error>This field cannot be empty</mat-error>
     </mat-form-field>
 
-    <div
-      class="text-center d-flex justify-content-end mt-3 mb-1 col-12 px-0 mb-3"
-    >
-      <button
-        class="full-width"
-        type="button"
-        [disabled]="form.invalid"
-        mat-flat-button
-        (click)="addExpense()"
-        color="primary"
-        id="save"
-      >
+    <div class="add-expense-modal__actions">
+      <button type="button" matButton="tonal" (click)="addExpense()" id="save">
         Додати
       </button>
     </div>

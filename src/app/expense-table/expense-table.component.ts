@@ -10,24 +10,28 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
+import { DatePipe } from '@angular/common';
 
-import { expenses } from '../mocks/table.mock';
+import { Timestamp } from 'firebase/firestore';
+
 import { FireStoreService } from '../services/fire-store.service';
 import { AddExpenseModalComponent } from '../shared/add-expense-modal/add-expense-modal.component';
+import { TimestampToDatePipe } from '../shared/pipes/timestampToDate.pipe';
 
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe],
   templateUrl: './expense-table.component.html',
-  styleUrl: './expense-table.component.scss'
+  styleUrl: './expense-table.component.scss',
+  providers: []
 })
 export class ExpenseTableComponent implements AfterViewInit, OnInit {
   dialog = inject(MatDialog);
   destroyRef = inject(DestroyRef);
   fireStoreService = inject(FireStoreService);
   displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt'];
-  dataSource = new MatTableDataSource(expenses);
+  dataSource = new MatTableDataSource<any>([]);
 
   readonly paginator = viewChild<MatPaginator>('paginator');
 
@@ -46,6 +50,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   getAll() {
     this.fireStoreService.getAll('expenses').then(data => {
       console.log('data', data);
+      this.dataSource.data = data;
     })
   }
 
@@ -60,7 +65,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
       .subscribe((result) => {
         console.log('result :>> ', result);
         if (!result) return;
-
+        this.fireStoreService.addItem('expenses', result);
       });
   }
 

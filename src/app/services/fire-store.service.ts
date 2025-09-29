@@ -18,6 +18,8 @@ export class FireStoreService {
    * CREATE: добавить документ в коллекцию
    */
   async addItem<T>(collectionPath: string, data: T) {
+    console.log('data :>> ', data);
+    console.log('collectionPath :>> ', collectionPath);
     const colRef = this.getCollectionRef(collectionPath);
     return await addDoc(colRef, data as any);
   }
