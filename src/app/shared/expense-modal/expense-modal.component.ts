@@ -25,6 +25,7 @@ export class ExpenseModalComponent {
   }
 
   constructor() {
+    console.log('this.dialogData :>> ', this.dialogData);
     if (this.dialogData.isEdit && this.dialogData.expense) {
       this.form.patchValue(this.dialogData.expense);
       this.dateFC.setValue(this.dialogData.expense.date.toDate());
@@ -45,6 +46,7 @@ export class ExpenseModalComponent {
       createdAt: this.dialogData.isEdit ? this.dialogData.expense.createdAt : new Date(),
       id: this.dialogData.isEdit ? this.dialogData.expense.id : null,
     };
+    console.log('data :>> ', data);
     this.dialogRef.close(data);
   }
 

@@ -103,6 +103,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
+        console.log('result :>> ', result);
         if (!result.confirmed) return;
         this.fireStoreService.deleteItem('expenses', result.expenseId);
         this.getAll();
