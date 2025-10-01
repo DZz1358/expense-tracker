@@ -1,5 +1,5 @@
 <div class="add-expense-modal__header">
-  <h3>Add new expense</h3>
+  <h3>{{ dialogData.isEdit ? "Edit expense" : "Add new expense" }}</h3>
   <button matIconButton (click)="dialogRef.close()">
     <mat-icon>close</mat-icon>
   </button>
@@ -40,7 +40,7 @@
     <mat-form-field appearance="outline">
       <mat-label>Custom calendar header</mat-label>
       <input formControlName="date" matInput [matDatepicker]="picker" />
-      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-hint>DD/MM/YYYY</mat-hint>
       <mat-datepicker-toggle
         matIconSuffix
         [for]="picker"
@@ -63,7 +63,7 @@
 
     <div class="add-expense-modal__actions">
       <button type="button" matButton="tonal" (click)="addExpense()" id="save">
-        Додати
+        {{ dialogData.isEdit ? "Save" : "Add" }}
       </button>
     </div>
   </form>

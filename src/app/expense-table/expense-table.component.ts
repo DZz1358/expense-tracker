@@ -13,8 +13,8 @@ import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 
 import { FireStoreService } from '../services/fire-store.service';
-import { AddExpenseModalComponent } from '../shared/add-expense-modal/add-expense-modal.component';
 import { ConfirmationModalComponent } from '../shared/confirmation-modal/confirmation-modal.component';
+import { ExpenseModalComponent } from '../shared/expense-modal/expense-modal.component';
 import { TimestampToDatePipe } from '../shared/pipes/timestampToDate.pipe';
 
 
@@ -52,22 +52,45 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
     })
   }
 
-
   public openAddExpenseModal(): void {
-    this.dialog.open(AddExpenseModalComponent, {
+    this.dialog.open(ExpenseModalComponent, {
       width: 'calc(100% - 30px)',
       maxWidth: '600px',
+      data: {
+        expense: null,
+        title: 'Add new expense',
+        isEdit: false,
+      }
     })
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
-        console.log('result :>> ', result);
         if (!result) return;
         this.fireStoreService.addItem('expenses', result);
+        this.getAll();
+      });
+  }
+  public openEditExpenseModal(expense: any): void {
+    console.log('expense :>> ', expense);
+    this.dialog.open(ExpenseModalComponent, {
+      width: 'calc(100% - 30px)',
+      maxWidth: '600px',
+      data: {
+        expense,
+        title: 'Edit expense',
+        isEdit: true,
+      }
+    })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (!result) return;
+        this.fireStoreService.updateItem('expenses', expense.id, result);
+        this.getAll();
       });
   }
 
-  public openDeleteModal(expenseId: string): void {
+  public openDeleteExpenseModal(expenseId: string): void {
     this.dialog.open(ConfirmationModalComponent, {
       width: 'calc(100% - 30px)',
       maxWidth: '600px',
@@ -80,9 +103,8 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
-        if (result.confirmed) {
-          this.fireStoreService.deleteItem('expenses', result.expenseId);
-        }
+        if (!result.confirmed) return;
+        this.fireStoreService.deleteItem('expenses', result.expenseId);
         this.getAll();
       });
   }

@@ -6,14 +6,13 @@ import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/in
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
-
 @Component({
-  selector: 'app-add-expense-modal',
+  selector: 'app-expense-modal',
   imports: [MatIcon, MatDialogModule, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatSelectModule, MatDatepickerModule, MatButtonModule],
-  templateUrl: './add-expense-modal.component.html',
-  styleUrl: './add-expense-modal.component.scss'
+  templateUrl: './expense-modal.component.html',
+  styleUrl: './expense-modal.component.scss'
 })
-export class AddExpenseModalComponent {
+export class ExpenseModalComponent {
   dialogData = inject(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
   fb = inject(FormBuilder);
@@ -21,11 +20,15 @@ export class AddExpenseModalComponent {
   categories = [{ value: 'food', viewValue: 'Food' }, { value: 'health', viewValue: 'Health' }, { value: 'transport', viewValue: 'Transport' }];
   paymentMethods = [{ value: 'cash', viewValue: 'Cash' }, { value: 'creditCard', viewValue: 'Credit Card' }, { value: 'paypal', viewValue: 'PayPal' }];
 
-  minTime = signal(new Date());
-  minDate = signal(new Date());
-
   public get dateFC(): FormControl {
     return this.form.get('date') as FormControl;
+  }
+
+  constructor() {
+    if (this.dialogData.isEdit && this.dialogData.expense) {
+      this.form.patchValue(this.dialogData.expense);
+      this.dateFC.setValue(this.dialogData.expense.date.toDate());
+    }
   }
 
   public form = this.fb.group({
@@ -37,8 +40,11 @@ export class AddExpenseModalComponent {
   });
 
   addExpense() {
-    console.log('this.form.value :>> ', this.form.value);
-    const data = this.form.value;
+    const data = {
+      ...this.form.value,
+      createdAt: this.dialogData.isEdit ? this.dialogData.expense.createdAt : new Date(),
+      id: this.dialogData.isEdit ? this.dialogData.expense.id : null,
+    };
     this.dialogRef.close(data);
   }
 

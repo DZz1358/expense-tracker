@@ -37,7 +37,7 @@
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
         <td mat-cell *matCellDef="let element">
-          {{ element.date | timestampToDate | date : "dd.MM.yyyy  " }}
+          {{ element.date | timestampToDate | date : "dd.MM.yyyy" }}
         </td>
       </ng-container>
 
@@ -48,20 +48,18 @@
 
       <ng-container matColumnDef="createdAt">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
-        <td mat-cell *matCellDef="let element">{{ element.createdAt }}</td>
+        <td mat-cell *matCellDef="let element">
+          {{ element.createdAt | timestampToDate | date : "dd.MM.yyyy" }}
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="settings">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Settings</th>
         <td mat-cell *matCellDef="let element">
-          <button
-            mat-icon-button
-            color="warn"
-            (click)="openDeleteModal(element.id)"
-          >
+          <button mat-icon-button (click)="openDeleteExpenseModal(element.id)">
             <mat-icon>delete</mat-icon>
           </button>
-          <button mat-icon-button color="warn">
+          <button mat-icon-button (click)="openEditExpenseModal(element)">
             <mat-icon>edit</mat-icon>
           </button>
         </td>
