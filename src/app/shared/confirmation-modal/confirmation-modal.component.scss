@@ -1,0 +1,19 @@
+.add-expense-modal__header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 1rem 2rem 0 2rem;
+  box-sizing: border-box;
+}
+
+.add-expense-modal__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-expense-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+}
