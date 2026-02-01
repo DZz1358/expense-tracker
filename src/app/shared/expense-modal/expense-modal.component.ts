@@ -1,14 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-expense-modal',
-  imports: [MatIcon, MatDialogModule, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatSelectModule, MatDatepickerModule, MatButtonModule],
+  imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule],
   templateUrl: './expense-modal.component.html',
   styleUrl: './expense-modal.component.scss'
 })
@@ -44,9 +44,8 @@ export class ExpenseModalComponent {
     const data = {
       ...this.form.value,
       createdAt: this.dialogData.isEdit ? this.dialogData.expense.createdAt : new Date(),
-      id: this.dialogData.isEdit ? this.dialogData.expense.id : null,
+      id: this.dialogData.isEdit ? this.dialogData.expense.id : crypto.randomUUID(),
     };
-    console.log('data :>> ', data);
     this.dialogRef.close(data);
   }
 
