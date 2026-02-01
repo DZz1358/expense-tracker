@@ -49,6 +49,7 @@ export class FireStoreService {
    * UPDATE: обновить документ по ID
    */
   async updateItem<T>(collectionPath: string, id: string, data: Partial<T>) {
+    console.log('updateItem', { collectionPath, id, data });
     const docRef = doc(this.firestore, `${collectionPath}/${id}`);
     return await updateDoc(docRef, data as any);
   }

@@ -44,10 +44,8 @@ export class ExpenseModalComponent {
     const data = {
       ...this.form.value,
       createdAt: this.dialogData.isEdit ? this.dialogData.expense.createdAt : new Date(),
-      id: this.dialogData.isEdit ? this.dialogData.expense.id : crypto.randomUUID(),
     };
     this.dialogRef.close(data);
   }
-
 
 }
