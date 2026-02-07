@@ -1,6 +1,6 @@
 <div class="add-expense-modal__header">
   <h3>{{ dialogData.title ? dialogData.title : "Delete?" }}</h3>
-  <button matIconButton (click)="dialogRef.close()">
+  <button matIconButton (click)="dialogRef.close(false)">
     <mat-icon>close</mat-icon>
   </button>
 </div>

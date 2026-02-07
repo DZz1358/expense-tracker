@@ -13,7 +13,6 @@ export class ConfirmationModalComponent {
   dialogData = inject(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
 
-
   confirm() {
     this.dialogRef.close({ confirmed: true, expenseId: this.dialogData.expenseId });
   }

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, DestroyRef, inject, OnInit, viewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, DestroyRef, HostListener, inject, OnInit, viewChild, signal, effect } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,16 +11,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
 
 import { FireStoreService } from '../services/fire-store.service';
 import { ConfirmationModalComponent } from '../shared/confirmation-modal/confirmation-modal.component';
 import { ExpenseModalComponent } from '../shared/expense-modal/expense-modal.component';
 import { TimestampToDatePipe } from '../shared/pipes/timestampToDate.pipe';
 
-
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
 })
@@ -31,18 +31,23 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
+  isMobile = signal(window.innerWidth < 768);
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: UIEvent) {
+    const width = (event.target as Window).innerWidth;
+    this.isMobile.set(width < 768);
+  }
   readonly paginator = viewChild<MatPaginator>('paginator');
+  readonly sort = viewChild<MatSort>('sort');
+
+  constructor() {
+    effect(() => {
+    })
+  }
 
   ngOnInit() {
     this.getAll();
-  }
-  readonly sort = viewChild<MatSort>('sort');
-
-  ngAfterViewInit() {
-    const sort = this.sort();
-    if (sort) {
-      this.dataSource.sort = sort;
-    }
   }
 
   getAll() {
@@ -50,6 +55,13 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
       console.log('data', data);
       this.dataSource.data = data;
     })
+  }
+
+  ngAfterViewInit() {
+    const sort = this.sort();
+    if (sort) {
+      this.dataSource.sort = sort;
+    }
   }
 
   public openAddExpenseModal(): void {
@@ -103,7 +115,6 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
-        console.log('result :>> ', result);
         if (!result.confirmed) return;
         this.fireStoreService.deleteItem('expenses', result.expenseId);
         this.getAll();
