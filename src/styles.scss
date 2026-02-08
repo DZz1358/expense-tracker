@@ -40,6 +40,8 @@ body {
 }
 
 .logo {
+  min-height: 64px;
+  border-bottom: 1px solid #d2e2f6;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -49,7 +51,7 @@ body {
   }
 
   span {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 1.25rem;
   }
 }
