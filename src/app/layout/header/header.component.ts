@@ -4,9 +4,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 
+import { ThemeToggleComponent } from '../../shared/theme-toggle/theme-toggle.component';
+
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, MatButtonModule, MatToolbarModule, MatMenuModule],
+  imports: [MatIconModule, MatButtonModule, MatToolbarModule, MatMenuModule, ThemeToggleComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

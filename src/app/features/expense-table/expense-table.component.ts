@@ -13,10 +13,10 @@ import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 
-import { FireStoreService } from '../services/fire-store.service';
-import { ConfirmationModalComponent } from '../shared/confirmation-modal/confirmation-modal.component';
-import { ExpenseModalComponent } from '../shared/expense-modal/expense-modal.component';
-import { TimestampToDatePipe } from '../shared/pipes/timestampToDate.pipe';
+import { FireStoreService } from '../../services/fire-store.service';
+import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
+import { ExpenseModalComponent } from '../../shared/expense-modal/expense-modal.component';
+import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
 
 @Component({
   selector: 'app-expense-table',

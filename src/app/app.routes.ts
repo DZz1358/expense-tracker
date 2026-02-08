@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { ExpenseTableComponent } from './expense-table/expense-table.component';
+import { ExpenseTableComponent } from './features/expense-table/expense-table.component';
 
 export const routes: Routes = [
   {

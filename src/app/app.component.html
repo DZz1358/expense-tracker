@@ -1,3 +1,15 @@
-<app-header />
-<router-outlet />
-<!-- <app-footer /> -->
+<div class="layout">
+  <aside class="layout-sidebar">
+    <app-sidebar />
+  </aside>
+
+  <main class="layout-content">
+    <app-header></app-header>
+
+    <section class="layout-body">
+      <router-outlet></router-outlet>
+    </section>
+
+    <app-footer></app-footer>
+  </main>
+</div>
