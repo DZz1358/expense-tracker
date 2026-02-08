@@ -38,3 +38,55 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
+
+  span {
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+}
+
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 280px;
+  height: 100vh;
+
+  transform: translateX(-100%);
+  transition: transform 200ms ease;
+
+  z-index: 1200;
+}
+
+.mobile-drawer.open {
+  transform: translateX(0);
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 200ms ease;
+
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1100;
+}
+
+.backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}

@@ -14,6 +14,7 @@ import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 
 import { FireStoreService } from '../../services/fire-store.service';
+import { ViewportServiceService } from '../../services/viewport-service.service';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { ExpenseModalComponent } from '../../shared/expense-modal/expense-modal.component';
 import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
@@ -28,16 +29,10 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   dialog = inject(MatDialog);
   destroyRef = inject(DestroyRef);
   fireStoreService = inject(FireStoreService);
+  viewportServiceService = inject(ViewportServiceService);
   displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
-  isMobile = signal(window.innerWidth < 768);
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: UIEvent) {
-    const width = (event.target as Window).innerWidth;
-    this.isMobile.set(width < 768);
-  }
   readonly paginator = viewChild<MatPaginator>('paginator');
   readonly sort = viewChild<MatSort>('sort');
 

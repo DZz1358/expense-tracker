@@ -1,10 +1,23 @@
 <div class="layout">
-  <aside class="layout-sidebar">
-    <app-sidebar />
-  </aside>
+  @if (!viewportServiceService.isMobile()) {
+    <aside class="layout-sidebar">
+      <app-sidebar />
+    </aside>
+  }
 
   <main class="layout-content">
-    <app-header></app-header>
+    <app-header (menuClick)="toggleMobileSidebar()"></app-header>
+    @if (viewportServiceService.isMobile()) {
+      <div
+        class="backdrop"
+        [class.open]="mobileSidebarOpen"
+        (click)="closeMobileSidebar()"
+      ></div>
+
+      <aside class="mobile-drawer" [class.open]="mobileSidebarOpen">
+        <app-sidebar (click)="closeMobileSidebar()"></app-sidebar>
+      </aside>
+    }
 
     <section class="layout-body">
       <router-outlet></router-outlet>

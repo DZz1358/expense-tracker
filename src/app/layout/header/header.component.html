@@ -1,5 +1,10 @@
 <mat-toolbar>
-  <span>My App</span>
+  @if (viewportServiceService.isMobile()) {
+    <div class="logo" (click)="menuClick.emit()">
+      <mat-icon>account_balance_wallet</mat-icon>
+    </div>
+  }
+
   <span class="example-spacer"></span>
   <app-theme-toggle />
   <div [matMenuTriggerFor]="menu" class="avatar">

@@ -10,9 +10,6 @@
 }
 
 mat-toolbar {
-  box-shadow: 0px 10px 10px 0px rgba(144, 141, 141, 0.75);
-  -webkit-box-shadow: 0px 10px 10px 0px rgba(144, 141, 141, 0.75);
-  -moz-box-shadow: 0px 10px 10px 0px rgba(144, 141, 141, 0.75);
-  border-bottom: 1px solid rgb(216, 207, 207);
-  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #e5e7eb;
 }

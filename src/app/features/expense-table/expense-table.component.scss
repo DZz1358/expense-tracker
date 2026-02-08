@@ -1,7 +1,7 @@
 .add-expense-button {
   position: absolute;
   bottom: 10%;
-  right: 20px;
+  right: 5%;
   z-index: 100;
 }
 
@@ -44,4 +44,27 @@
     display: flex;
     gap: 0.5rem;
   }
+}
+
+.add-expense-mobile {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+
+  width: 100vw;
+  height: 56px;
+
+  border-radius: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  z-index: 1000;
+
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, .15);
 }

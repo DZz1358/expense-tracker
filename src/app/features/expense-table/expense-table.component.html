@@ -1,4 +1,4 @@
-@if (!isMobile()) {
+@if (!viewportServiceService.isMobile()) {
   <button
     mat-fab
     color="accent"
@@ -10,7 +10,19 @@
   </button>
 }
 
-@if (!isMobile()) {
+@if (viewportServiceService.isMobile()) {
+  <button
+    mat-raised-button
+    color="accent"
+    class="add-expense-mobile"
+    (click)="openAddExpenseModal()"
+  >
+    <mat-icon>add</mat-icon>
+    Add expense
+  </button>
+}
+
+@if (!viewportServiceService.isMobile()) {
   <section class="expense-table-wrapper">
     <table mat-table [dataSource]="dataSource" matSort #sort="matSort">
       <ng-container matColumnDef="description">
@@ -70,7 +82,7 @@
     </table>
   </section>
 }
-@if (isMobile()) {
+@if (viewportServiceService.isMobile()) {
   <section class="expense-cards-wrapper">
     @for (expense of dataSource.data; track $index) {
       <mat-card class="expense-card-item">
