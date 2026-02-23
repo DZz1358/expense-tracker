@@ -19,9 +19,9 @@
       <mat-label>Choose category</mat-label>
       <mat-select formControlName="category">
         @for (category of categories; track category.value) {
-        <mat-option [value]="category.value">{{
-          category.viewValue
-        }}</mat-option>
+          <mat-option [value]="category.value">{{
+            category.viewValue
+          }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -30,9 +30,9 @@
       <mat-label>Choose payment method</mat-label>
       <mat-select formControlName="paymentMethod">
         @for (paymentMethod of paymentMethods; track paymentMethod.value) {
-        <mat-option [value]="paymentMethod.value">{{
-          paymentMethod.viewValue
-        }}</mat-option>
+          <mat-option [value]="paymentMethod.value">{{
+            paymentMethod.viewValue
+          }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -62,9 +62,14 @@
     </mat-form-field>
 
     <div class="add-expense-modal__actions">
-      <button type="button" matButton="tonal" (click)="addExpense()" id="save">
-        {{ dialogData.isEdit ? "Save" : "Add" }}
-      </button>
+      <app-button
+        [appearance]="'tonal'"
+        [label]="dialogData.isEdit ? 'Save' : 'Add'"
+        typeBtn="submit"
+        (clicked)="addExpense()"
+        id="save"
+        [disabled]="form.invalid"
+      ></app-button>
     </div>
   </form>
 </mat-dialog-content>

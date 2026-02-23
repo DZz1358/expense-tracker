@@ -9,10 +9,28 @@
   max-width: 200px;
 }
 
+.expense-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.expense-table-header-info {
+  display: flex;
+  flex-direction: column;
+
+  h2,
+  p {
+    margin: 0;
+  }
+}
+
 .expense-table-wrapper {
   margin: 1rem;
+  overflow: auto;
   border-radius: 12px;
-  overflow: hidden;
+  border: 1px solid #cccccc;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
 }
 

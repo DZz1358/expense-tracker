@@ -15,13 +15,14 @@ import { MatCardModule } from '@angular/material/card';
 
 import { FireStoreService } from '../../services/fire-store.service';
 import { ViewportServiceService } from '../../services/viewport-service.service';
+import { ButtonComponent } from '../../shared/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { ExpenseModalComponent } from '../../shared/expense-modal/expense-modal.component';
 import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
 })

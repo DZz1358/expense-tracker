@@ -6,9 +6,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
+
+import { ButtonComponent } from '../button/button.component';
 @Component({
   selector: 'app-expense-modal',
-  imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule],
+  imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent],
   templateUrl: './expense-modal.component.html',
   styleUrl: './expense-modal.component.scss'
 })

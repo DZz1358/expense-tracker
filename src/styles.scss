@@ -8,7 +8,7 @@ html {
   color-scheme: light;
   @include mat.theme((color: palettes.$primary-palette,
       typography: Roboto Mono,
-      density: 0,
+      density: -2,
     ));
 }
 

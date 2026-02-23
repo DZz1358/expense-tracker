@@ -1,0 +1,10 @@
+<button
+  [type]="typeBtn()"
+  [matButton]="appearance()"
+  [ngClass]="buttonClass()"
+  [disabled]="disabled()"
+  (click)="clicked.emit()"
+  [attr.aria-label]="label()"
+>
+  {{ label() }}
+</button>

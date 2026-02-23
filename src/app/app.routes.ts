@@ -1,31 +1,36 @@
 import { Routes } from '@angular/router';
 
-import { AnalyticsComponent } from './features/analytics/analytics.component';
-import { ExpenseTableComponent } from './features/expense-table/expense-table.component';
-import { ProfileComponent } from './features/profile/profile.component';
-import { SettingsComponent } from './features/settings/settings.component';
-
 export const routes: Routes = [
   {
     path: '',
-    component: ExpenseTableComponent,
-    pathMatch: 'full'
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/expense-table/expense-table.component')
+        .then(m => m.ExpenseTableComponent),
   },
   {
     path: 'expenses-table',
-    component: ExpenseTableComponent,
+    loadComponent: () =>
+      import('./features/expense-table/expense-table.component')
+        .then(m => m.ExpenseTableComponent),
   },
   {
     path: 'analytics',
-    component: AnalyticsComponent,
+    loadComponent: () =>
+      import('./features/analytics/analytics.component')
+        .then(m => m.AnalyticsComponent),
   },
   {
     path: 'profile',
-    component: ProfileComponent,
+    loadComponent: () =>
+      import('./features/profile/profile.component')
+        .then(m => m.ProfileComponent),
   },
   {
     path: 'settings',
-    component: SettingsComponent,
+    loadComponent: () =>
+      import('./features/settings/settings.component')
+        .then(m => m.SettingsComponent),
   },
 ];
 
