@@ -62,6 +62,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
 
   public openAddExpenseModal(): void {
     this.dialog.open(ExpenseModalComponent, {
+      disableClose: true,
       width: 'calc(100% - 30px)',
       maxWidth: '600px',
       data: {
@@ -81,6 +82,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   public openEditExpenseModal(expense: any): void {
     console.log('expense :>> ', expense);
     this.dialog.open(ExpenseModalComponent, {
+      disableClose: true,
       width: 'calc(100% - 30px)',
       maxWidth: '600px',
       data: {
@@ -100,6 +102,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
 
   public openDeleteExpenseModal(expenseId: string): void {
     this.dialog.open(ConfirmationModalComponent, {
+      disableClose: true,
       width: 'calc(100% - 30px)',
       maxWidth: '600px',
       data: {
