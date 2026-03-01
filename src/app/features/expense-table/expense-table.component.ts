@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, DestroyRef, HostListener, inject, OnInit, viewChild, signal, effect, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, DestroyRef, inject, OnInit, viewChild, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +25,7 @@ import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExpenseTableComponent implements AfterViewInit, OnInit {
   dialog = inject(MatDialog);
@@ -34,10 +35,10 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
-  length = signal<number>(30);
+  length = signal<number>(0);
   pageSize = signal<number>(5);
-  pageNumber = signal<number>(1);
-  pageSizeOptions = signal<number[]>([1, 3, 5, 10, 25, 50]);
+  pageNumber = signal<number>(0);
+  readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
   allData = signal<any[]>([]);
 
   paginatedCards = computed(() => {
@@ -48,6 +49,11 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
 
   readonly paginator = viewChild<MatPaginator>('paginator');
   readonly sort = viewChild<MatSort>('sort');
+  private readonly dialogConfig = {
+    disableClose: true,
+    width: 'calc(100% - 30px)',
+    maxWidth: '600px',
+  };
 
   constructor() {
     effect(() => {
@@ -85,9 +91,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
 
   public openAddExpenseModal(): void {
     this.dialog.open(ExpenseModalComponent, {
-      disableClose: true,
-      width: 'calc(100% - 30px)',
-      maxWidth: '600px',
+      ...this.dialogConfig,
       data: {
         expense: null,
         title: 'Add new expense',
@@ -102,12 +106,11 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
         this.getAll();
       });
   }
+
   public openEditExpenseModal(expense: any): void {
     console.log('expense :>> ', expense);
     this.dialog.open(ExpenseModalComponent, {
-      disableClose: true,
-      width: 'calc(100% - 30px)',
-      maxWidth: '600px',
+      ...this.dialogConfig,
       data: {
         expense,
         title: 'Edit expense',
@@ -125,9 +128,7 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
 
   public openDeleteExpenseModal(expenseId: string): void {
     this.dialog.open(ConfirmationModalComponent, {
-      disableClose: true,
-      width: 'calc(100% - 30px)',
-      maxWidth: '600px',
+      ...this.dialogConfig,
       data: {
         title: 'Delete Expense',
         message: 'Are you sure you want to delete this expense?',
@@ -142,10 +143,5 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
         this.getAll();
       });
   }
-
-
-
-
-
 
 }

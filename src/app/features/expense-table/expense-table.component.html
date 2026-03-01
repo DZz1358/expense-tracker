@@ -104,7 +104,7 @@
       #paginator
       [length]="length()"
       [pageSize]="pageSize()"
-      [pageSizeOptions]="pageSizeOptions()"
+      [pageSizeOptions]="pageSizeOptions"
       [pageIndex]="pageNumber() - 1"
       aria-label="Select page"
       (page)="onPageChange($event)"
@@ -138,7 +138,7 @@
   </section>
   <mat-paginator
     #paginator
-    [pageSizeOptions]="pageSizeOptions()"
+    [pageSizeOptions]="pageSizeOptions"
     [pageSize]="pageSize()"
     [length]="length()"
     aria-label="Select page of expenses"
