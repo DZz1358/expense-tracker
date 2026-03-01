@@ -1,4 +1,4 @@
-@if (!viewportServiceService.isMobile()) {
+<!-- @if (!viewportServiceService.isMobile()) {
   <button
     mat-fab
     color="accent"
@@ -8,7 +8,7 @@
   >
     <mat-icon>add</mat-icon>
   </button>
-}
+} -->
 
 @if (viewportServiceService.isMobile()) {
   <button
@@ -100,11 +100,21 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
+    <mat-paginator
+      #paginator
+      [length]="length()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions()"
+      [pageIndex]="pageNumber() - 1"
+      aria-label="Select page"
+      (page)="onPageChange($event)"
+    >
+    </mat-paginator>
   </section>
 }
 @if (viewportServiceService.isMobile()) {
   <section class="expense-cards-wrapper">
-    @for (expense of dataSource.data; track $index) {
+    @for (expense of paginatedCards(); track $index) {
       <mat-card class="expense-card-item">
         <div class="expense-card-item-info">
           <p>
@@ -126,4 +136,13 @@
       </mat-card>
     }
   </section>
+  <mat-paginator
+    #paginator
+    [pageSizeOptions]="pageSizeOptions()"
+    [pageSize]="pageSize()"
+    [length]="length()"
+    aria-label="Select page of expenses"
+    (page)="onPageChange($event)"
+  >
+  </mat-paginator>
 }

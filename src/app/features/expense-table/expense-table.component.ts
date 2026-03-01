@@ -1,11 +1,11 @@
-import { AfterViewInit, Component, computed, DestroyRef, HostListener, inject, OnInit, viewChild, signal, effect } from '@angular/core';
+import { AfterViewInit, Component, computed, DestroyRef, HostListener, inject, OnInit, viewChild, signal, effect, ViewChild } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,6 +34,18 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
+  length = signal<number>(30);
+  pageSize = signal<number>(5);
+  pageNumber = signal<number>(1);
+  pageSizeOptions = signal<number[]>([1, 3, 5, 10, 25, 50]);
+  allData = signal<any[]>([]);
+
+  paginatedCards = computed(() => {
+    const start = this.pageNumber() * this.pageSize();
+    const end = start + this.pageSize();
+    return this.allData().slice(start, end);
+  });
+
   readonly paginator = viewChild<MatPaginator>('paginator');
   readonly sort = viewChild<MatSort>('sort');
 
@@ -49,7 +61,9 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   getAll() {
     this.fireStoreService.getAll('expenses').then(data => {
       console.log('data', data);
+      this.allData.set(data);
       this.dataSource.data = data;
+      this.length.set(data.length);
     })
   }
 
@@ -58,6 +72,15 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
     if (sort) {
       this.dataSource.sort = sort;
     }
+    const paginator = this.paginator();
+    if (paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageSize.set(event.pageSize);
+    this.pageNumber.set(event.pageIndex);
   }
 
   public openAddExpenseModal(): void {
@@ -119,6 +142,10 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
         this.getAll();
       });
   }
+
+
+
+
 
 
 }

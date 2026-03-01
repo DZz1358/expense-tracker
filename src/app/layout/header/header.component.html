@@ -7,9 +7,7 @@
 
   <span class="example-spacer"></span>
   <app-theme-toggle />
-  <div [matMenuTriggerFor]="menu" class="avatar">
-    <img [src]="avatarUrl()" alt="qq" />
-  </div>
+  <img [matMenuTriggerFor]="menu" class="avatar" [src]="avatarUrl()" alt="qq" />
 
   <mat-menu #menu="matMenu">
     <button mat-menu-item>
