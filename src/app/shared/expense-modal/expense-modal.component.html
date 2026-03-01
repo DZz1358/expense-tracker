@@ -6,41 +6,45 @@
 </div>
 
 <mat-dialog-content>
-  <form class="add-expense-modal__content" [formGroup]="form">
+  <form class="add-expense-modal__content">
     <mat-form-field appearance="outline" class="">
       <mat-label>
         <span>Amount</span>
       </mat-label>
-      <input matInput formControlName="amount" placeholder="Enter amount" />
-      <mat-error>This field cannot be empty</mat-error>
+      <input
+        matInput
+        [formField]="expenseForm.amount"
+        placeholder="Enter amount"
+      />
+      <mat-error>
+        @for (error of expenseForm.amount().errors(); track error) {
+          <span>{{ error.message }}</span>
+        }
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Choose category</mat-label>
-      <mat-select formControlName="category">
+      <mat-select
+        [formField]="expenseForm.category"
+        placeholder="Select category"
+      >
         @for (category of categories; track category.value) {
           <mat-option [value]="category.value">{{
             category.viewValue
           }}</mat-option>
         }
       </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Choose payment method</mat-label>
-      <mat-select formControlName="paymentMethod">
-        @for (paymentMethod of paymentMethods; track paymentMethod.value) {
-          <mat-option [value]="paymentMethod.value">{{
-            paymentMethod.viewValue
-          }}</mat-option>
+      <mat-error>
+        @for (error of expenseForm.category().errors(); track error) {
+          <span>{{ error.message }}</span>
         }
-      </mat-select>
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Custom calendar header</mat-label>
-      <input formControlName="date" matInput [matDatepicker]="picker" />
-      <mat-hint>DD/MM/YYYY</mat-hint>
+      <input [formField]="expenseForm.date" matInput [matDatepicker]="picker" />
       <mat-datepicker-toggle
         matIconSuffix
         [for]="picker"
@@ -54,11 +58,15 @@
       </mat-label>
       <textarea
         matInput
-        formControlName="description"
-        minlength="3"
+        [formField]="expenseForm.description"
         placeholder="Enter description"
       ></textarea>
-      <mat-error>This field cannot be empty</mat-error>
+
+      <mat-error>
+        @for (error of expenseForm.description().errors(); track error) {
+          <span>{{ error.message }}</span>
+        }
+      </mat-error>
     </mat-form-field>
 
     <div class="add-expense-modal__actions">
@@ -68,7 +76,7 @@
         typeBtn="submit"
         (clicked)="addExpense()"
         id="save"
-        [disabled]="form.invalid"
+        [disabled]="expenseForm().invalid()"
       ></app-button>
     </div>
   </form>

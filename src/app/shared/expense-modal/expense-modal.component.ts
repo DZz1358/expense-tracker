@@ -1,16 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
+import { form, min, minLength, required, FormField } from '@angular/forms/signals';
 
 import { ButtonComponent } from '../button/button.component';
 @Component({
   selector: 'app-expense-modal',
-  imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent],
+  imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField],
   templateUrl: './expense-modal.component.html',
   styleUrl: './expense-modal.component.scss'
 })
@@ -20,31 +21,39 @@ export class ExpenseModalComponent {
   fb = inject(FormBuilder);
 
   categories = [{ value: 'food', viewValue: 'Food' }, { value: 'health', viewValue: 'Health' }, { value: 'transport', viewValue: 'Transport' }];
-  paymentMethods = [{ value: 'cash', viewValue: 'Cash' }, { value: 'creditCard', viewValue: 'Credit Card' }, { value: 'paypal', viewValue: 'PayPal' }];
 
-  public get dateFC(): FormControl {
-    return this.form.get('date') as FormControl;
-  }
+  expenseModel = signal({
+    amount: '',
+    category: '',
+    description: '',
+    date: new Date(),
+  })
+
+  expenseForm = form(this.expenseModel, (expense) => {
+    required(expense.amount, { message: 'Amount is required' });
+    min(expense.amount, 0.01, { message: 'Amount must be greater than 0' });
+
+    required(expense.category, { message: 'Category is required' });
+
+    required(expense.description, { message: 'Description is required' });
+    minLength(expense.description, 2, { message: 'Description must be at least 2 characters long' });
+  });
+
 
   constructor() {
     console.log('this.dialogData :>> ', this.dialogData);
     if (this.dialogData.isEdit && this.dialogData.expense) {
-      this.form.patchValue(this.dialogData.expense);
-      this.dateFC.setValue(this.dialogData.expense.date.toDate());
+      this.expenseModel.set({
+        ...this.expenseModel(),
+        ...this.dialogData.expense,
+        date: this.dialogData.expense.date.toDate()
+      });
     }
   }
 
-  public form = this.fb.group({
-    amount: ['', [Validators.required, Validators.min(0.01)]],
-    category: ['', Validators.required],
-    paymentMethod: ['', Validators.required],
-    date: [new Date(), Validators.required],
-    description: [''],
-  });
-
   addExpense() {
     const data = {
-      ...this.form.value,
+      ...this.expenseModel(),
       createdAt: this.dialogData.isEdit ? this.dialogData.expense.createdAt : new Date(),
     };
     this.dialogRef.close(data);
