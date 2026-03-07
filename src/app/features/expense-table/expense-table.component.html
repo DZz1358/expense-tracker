@@ -105,7 +105,7 @@
       [length]="length()"
       [pageSize]="pageSize()"
       [pageSizeOptions]="pageSizeOptions"
-      [pageIndex]="pageNumber() - 1"
+      [pageIndex]="pageNumber()"
       aria-label="Select page"
       (page)="onPageChange($event)"
     >
@@ -143,6 +143,7 @@
     #paginator
     [pageSizeOptions]="pageSizeOptions"
     [pageSize]="pageSize()"
+    [pageIndex]="pageNumber()"
     [length]="length()"
     aria-label="Select page of expenses"
     (page)="onPageChange($event)"
