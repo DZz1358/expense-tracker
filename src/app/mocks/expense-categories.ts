@@ -108,7 +108,7 @@ export function getExpenseCategoryIcon(
 export function getExpenseCategoryLabel(
   category: ExpenseCategory | null | undefined,
 ): string {
-  return getExpenseCategoryMeta(category)?.label ?? 'Unknown';
+  return getExpenseCategoryMeta(category)?.label ?? 'Other';
 }
 
 export function getExpenseCategoryColor(

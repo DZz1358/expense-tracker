@@ -80,6 +80,11 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
     const sort = this.sort();
     if (sort) {
       this.dataSource.sort = sort;
+      this.dataSource.sort.sort({
+        id: 'createdAt',
+        start: 'desc',
+        disableClear: true,
+      });
     }
     const paginator = this.paginator();
     if (paginator) {
