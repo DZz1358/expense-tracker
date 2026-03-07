@@ -15,9 +15,10 @@
         matInput
         [formField]="expenseForm.amount"
         placeholder="Enter amount"
+        type="tel"
       />
       <mat-error>
-        @for (error of expenseForm.amount().errors(); track error) {
+        @for (error of expenseForm.amount().errors(); track $index) {
           <span>{{ error.message }}</span>
         }
       </mat-error>

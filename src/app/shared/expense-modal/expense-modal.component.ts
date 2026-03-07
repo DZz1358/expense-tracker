@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
-import { form, min, minLength, required, FormField } from '@angular/forms/signals';
+import { form, min, minLength, required, FormField, pattern } from '@angular/forms/signals';
 
 import { ButtonComponent } from '../button/button.component';
 import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
@@ -33,6 +33,7 @@ export class ExpenseModalComponent {
   expenseForm = form(this.expenseModel, (expense) => {
     required(expense.amount, { message: 'Amount is required' });
     min(expense.amount, 0.01, { message: 'Amount must be greater than 0' });
+    pattern(expense.amount, /^\d+(\.\d+)?$/, { message: 'Only numbers are allowed' });
 
     required(expense.category, { message: 'Category is required' });
 
