@@ -29,6 +29,18 @@
       <p>Here's your expense overview:</p>
     </div>
 
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Choose category</mat-label>
+      <mat-select
+        [formField]="tableForm.category"
+        placeholder="Select category"
+      >
+        @for (category of categories(); track category.id) {
+          <mat-option [value]="category.id">{{ category.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <app-button
       label="Add Expense"
       buttonClass="add-expense-button"
@@ -114,6 +126,22 @@
 }
 @if (viewportServiceService.isMobile()) {
   <section class="expense-cards-wrapper">
+    <mat-form-field
+      class="mobile-filter"
+      appearance="outline"
+      subscriptSizing="dynamic"
+    >
+      <mat-label>Choose category</mat-label>
+      <mat-select
+        [formField]="tableForm.category"
+        placeholder="Select category"
+      >
+        @for (category of categories(); track category.id) {
+          <mat-option [value]="category.id">{{ category.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     @for (expense of paginatedCards(); track $index) {
       <mat-card class="expense-card-item">
         <div class="expense-card-item-info">
@@ -121,7 +149,10 @@
             {{ expense.description ? expense.description : "No description" }}
           </p>
           <p>{{ expense.amount }}</p>
-          <span class="category-cell">
+          <span
+            class="category-cell"
+            [style.color]="expense.category | categoryColor"
+          >
             <mat-icon>{{ expense.category | categoryIcon }}</mat-icon>
             {{ expense.category | categoryLabel }}
           </span>
@@ -145,6 +176,7 @@
     [pageSize]="pageSize()"
     [pageIndex]="pageNumber()"
     [length]="length()"
+    class="mobile-paginator"
     aria-label="Select page of expenses"
     (page)="onPageChange($event)"
   >

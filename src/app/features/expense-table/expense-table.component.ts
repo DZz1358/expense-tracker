@@ -12,7 +12,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { form, FormField } from '@angular/forms/signals';
+import { MatSelectModule } from '@angular/material/select';
 
+import { ɵEmptyOutletComponent } from "@angular/router";
+
+import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 import { FireStoreService } from '../../services/fire-store.service';
 import { ViewportServiceService } from '../../services/viewport-service.service';
 import { ButtonComponent } from '../../shared/button/button.component';
@@ -25,12 +30,12 @@ import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExpenseTableComponent implements AfterViewInit, OnInit {
+export class ExpenseTableComponent implements OnInit {
   dialog = inject(MatDialog);
   destroyRef = inject(DestroyRef);
   fireStoreService = inject(FireStoreService);
@@ -58,9 +63,45 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
     maxWidth: '600px',
   };
 
+  categories = computed(() => {
+    return [{ id: '', label: 'All Categories', color: '', icon: '' }, ...EXPENSE_CATEGORY_LIST]
+  })
+
+  tableFormModel = signal({
+    category: '',
+  })
+
+  tableForm = form(this.tableFormModel);
+
   constructor() {
+    this.dataSource.filterPredicate = (data: any, filter: string) => {
+      if (!filter) return true;
+      return data.category === filter;
+    };
+
     effect(() => {
-    })
+      const selectedCategory = this.tableFormModel().category;
+      this.dataSource.filter = selectedCategory ?? '';
+    });
+
+    effect(() => {
+      const paginator = this.paginator();
+      if (paginator) {
+        this.dataSource.paginator = paginator;
+      }
+    });
+
+    effect(() => {
+      const sort = this.sort();
+      if (sort) {
+        this.dataSource.sort = sort;
+        sort.sort({
+          id: 'createdAt',
+          start: 'desc',
+          disableClear: true,
+        });
+      }
+    });
   }
 
   ngOnInit() {
@@ -69,27 +110,10 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
 
   getAll() {
     this.fireStoreService.getAll('expenses').then(data => {
-      console.log('data', data);
       this.allData.set(data);
       this.dataSource.data = data;
       this.length.set(data.length);
     })
-  }
-
-  ngAfterViewInit() {
-    const sort = this.sort();
-    if (sort) {
-      this.dataSource.sort = sort;
-      this.dataSource.sort.sort({
-        id: 'createdAt',
-        start: 'desc',
-        disableClear: true,
-      });
-    }
-    const paginator = this.paginator();
-    if (paginator) {
-      this.dataSource.paginator = paginator;
-    }
   }
 
   onPageChange(event: PageEvent) {

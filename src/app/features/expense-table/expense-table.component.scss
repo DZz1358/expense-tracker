@@ -35,7 +35,7 @@
 }
 
 .expense-cards-wrapper {
-  margin: 1rem 1rem 2rem;
+  margin: 1rem;
 }
 
 .expense-card-item {
@@ -91,4 +91,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.mobile-filter {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.mobile-paginator {
+  width: 100%;
+  padding-bottom: 5rem;
+  flex-wrap: nowrap;
 }

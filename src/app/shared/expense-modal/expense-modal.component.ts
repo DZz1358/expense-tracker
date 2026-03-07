@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -12,14 +11,13 @@ import { ButtonComponent } from '../button/button.component';
 import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 @Component({
   selector: 'app-expense-modal',
-  imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField],
+  imports: [MatIconModule, MatDialogModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField],
   templateUrl: './expense-modal.component.html',
   styleUrl: './expense-modal.component.scss'
 })
 export class ExpenseModalComponent {
   dialogData = inject(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
-  fb = inject(FormBuilder);
 
   categories = signal(EXPENSE_CATEGORY_LIST);
 
