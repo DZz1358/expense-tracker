@@ -29,10 +29,8 @@
         [formField]="expenseForm.category"
         placeholder="Select category"
       >
-        @for (category of categories; track category.value) {
-          <mat-option [value]="category.value">{{
-            category.viewValue
-          }}</mat-option>
+        @for (category of categories(); track category.id) {
+          <mat-option [value]="category.id">{{ category.label }}</mat-option>
         }
       </mat-select>
       <mat-error>

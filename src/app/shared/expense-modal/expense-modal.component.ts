@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { form, min, minLength, required, FormField } from '@angular/forms/signals';
 
 import { ButtonComponent } from '../button/button.component';
+import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 @Component({
   selector: 'app-expense-modal',
   imports: [MatIconModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField],
@@ -20,7 +21,7 @@ export class ExpenseModalComponent {
   dialogRef = inject(MatDialogRef);
   fb = inject(FormBuilder);
 
-  categories = [{ value: 'food', viewValue: 'Food' }, { value: 'health', viewValue: 'Health' }, { value: 'transport', viewValue: 'Transport' }];
+  categories = signal(EXPENSE_CATEGORY_LIST);
 
   expenseModel = signal({
     amount: '',

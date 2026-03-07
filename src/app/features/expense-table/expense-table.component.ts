@@ -18,11 +18,14 @@ import { ViewportServiceService } from '../../services/viewport-service.service'
 import { ButtonComponent } from '../../shared/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { ExpenseModalComponent } from '../../shared/expense-modal/expense-modal.component';
+import { CategoryColorPipe } from '../../shared/pipes/category-color.pipe';
+import { CategoryIconPipe } from '../../shared/pipes/category-icon.pipe';
+import { CategoryLabelPipe } from '../../shared/pipes/category-label.pipe';
 import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -32,11 +35,11 @@ export class ExpenseTableComponent implements AfterViewInit, OnInit {
   destroyRef = inject(DestroyRef);
   fireStoreService = inject(FireStoreService);
   viewportServiceService = inject(ViewportServiceService);
-  displayedColumns: string[] = ['description', 'category', 'paymentMethod', 'date', 'amount', 'createdAt', 'settings'];
+  displayedColumns: string[] = ['description', 'category', 'date', 'amount', 'createdAt', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
   length = signal<number>(0);
-  pageSize = signal<number>(5);
+  pageSize = signal<number>(10);
   pageNumber = signal<number>(0);
   readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
   allData = signal<any[]>([]);
