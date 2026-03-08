@@ -64,6 +64,12 @@
   }
 }
 
+.skeleton-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .add-expense-mobile {
   position: fixed;
   left: 0;

@@ -41,7 +41,6 @@ export class ExpenseModalComponent {
 
 
   constructor() {
-    console.log('this.dialogData :>> ', this.dialogData);
     if (this.dialogData.isEdit && this.dialogData.expense) {
       this.expenseModel.set({
         ...this.expenseModel(),

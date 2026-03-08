@@ -149,32 +149,47 @@
       </mat-select>
     </mat-form-field>
 
-    @for (expense of paginatedCards(); track $index) {
-      <mat-card class="expense-card-item">
-        <div class="expense-card-item-info">
-          <p>
-            {{ expense.description ? expense.description : "No description" }}
-          </p>
-          <p>{{ expense.amount }}</p>
-          <span
-            class="category-cell"
-            [style.color]="$any(expense.category) | categoryColor"
-          >
-            <mat-icon>{{ $any(expense.category) | categoryIcon }}</mat-icon>
-            {{ $any(expense.category) | categoryLabel }}
-          </span>
-          <p>{{ expense.paymentMethod }}</p>
-          <p>{{ $any(expense.date) | timestampToDate | date: "dd.MM.yyyy" }}</p>
-        </div>
-        <div class="expense-card-item-actions">
-          <button mat-icon-button (click)="openDeleteExpenseModal(expense.id)">
-            <mat-icon>delete</mat-icon>
-          </button>
-          <button mat-icon-button (click)="openEditExpenseModal(expense)">
-            <mat-icon>edit</mat-icon>
-          </button>
-        </div>
-      </mat-card>
+    @if (dataResource.isLoading()) {
+      <div class="skeleton-cards-list">
+        <app-skeleton width="100%" [height]="177"></app-skeleton>
+        <app-skeleton width="100%" [height]="177"></app-skeleton>
+        <app-skeleton width="100%" [height]="177"></app-skeleton>
+        <app-skeleton width="100%" [height]="177"></app-skeleton>
+        <app-skeleton width="100%" [height]="177"></app-skeleton>
+      </div>
+    } @else if (dataResource.hasValue()) {
+      @for (expense of paginatedCards(); track $index) {
+        <mat-card class="expense-card-item">
+          <div class="expense-card-item-info">
+            <p class="text-truncate">
+              {{ expense.description ? expense.description : "No description" }}
+            </p>
+            <p>{{ expense.amount }}</p>
+            <span
+              class="category-cell"
+              [style.color]="$any(expense.category) | categoryColor"
+            >
+              <mat-icon>{{ $any(expense.category) | categoryIcon }}</mat-icon>
+              {{ $any(expense.category) | categoryLabel }}
+            </span>
+            <p>{{ expense.paymentMethod }}</p>
+            <p>
+              {{ $any(expense.date) | timestampToDate | date: "dd.MM.yyyy" }}
+            </p>
+          </div>
+          <div class="expense-card-item-actions">
+            <button
+              mat-icon-button
+              (click)="openDeleteExpenseModal(expense.id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button (click)="openEditExpenseModal(expense)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+        </mat-card>
+      }
     }
   </section>
   <mat-paginator

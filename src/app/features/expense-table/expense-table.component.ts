@@ -113,18 +113,6 @@ export class ExpenseTableComponent {
     });
   }
 
-  // ngOnInit() {
-  //   this.getAll();
-  // }
-
-  // getAll() {
-  //   this.fireStoreService.getAll('expenses').then(data => {
-  //     this.allData.set(data);
-  //     this.dataSource.data = data;
-  //     this.length.set(data.length);
-  //   })
-  // }
-
   onPageChange(event: PageEvent) {
     this.pageSize.set(event.pageSize);
     this.pageNumber.set(event.pageIndex);
