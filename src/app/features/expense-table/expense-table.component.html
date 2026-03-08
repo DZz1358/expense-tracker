@@ -50,78 +50,85 @@
   </div>
 
   <section class="expense-table-wrapper">
-    <table
-      class="expense-table"
-      mat-table
-      [dataSource]="dataSource"
-      matSort
-      #sort="matSort"
-    >
-      <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
-        <td class="text-truncate" mat-cell *matCellDef="let element">
-          {{ element.description }}
-        </td>
-      </ng-container>
+    @if (dataResource.isLoading()) {
+      <app-skeleton width="100%" [height]="488"></app-skeleton>
+    } @else if (dataResource.hasValue()) {
+      <table
+        class="expense-table"
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        #sort="matSort"
+      >
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+          <td class="text-truncate" mat-cell *matCellDef="let element">
+            {{ element.description }}
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="category">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
-        <td mat-cell *matCellDef="let element">
-          <span
-            class="category-cell"
-            [style.color]="element.category | categoryColor"
-          >
-            <mat-icon>{{ element.category | categoryIcon }}</mat-icon>
-            {{ element.category | categoryLabel }}
-          </span>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+          <td mat-cell *matCellDef="let element">
+            <span
+              class="category-cell"
+              [style.color]="element.category | categoryColor"
+            >
+              <mat-icon>{{ element.category | categoryIcon }}</mat-icon>
+              {{ element.category | categoryLabel }}
+            </span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.date | timestampToDate | date: "dd.MM.yyyy" }}
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.date | timestampToDate | date: "dd.MM.yyyy" }}
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
-        <td mat-cell *matCellDef="let element">{{ element.amount }}</td>
-      </ng-container>
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
+          <td mat-cell *matCellDef="let element">{{ element.amount }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.createdAt | timestampToDate | date: "dd.MM.yyyy" }}
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.createdAt | timestampToDate | date: "dd.MM.yyyy" }}
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="settings">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Settings</th>
-        <td mat-cell *matCellDef="let element">
-          <button mat-icon-button (click)="openEditExpenseModal(element)">
-            <mat-icon>edit</mat-icon>
-          </button>
+        <ng-container matColumnDef="settings">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Settings</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="openEditExpenseModal(element)">
+              <mat-icon>edit</mat-icon>
+            </button>
 
-          <button mat-icon-button (click)="openDeleteExpenseModal(element.id)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </ng-container>
+            <button
+              mat-icon-button
+              (click)="openDeleteExpenseModal(element.id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-    <mat-paginator
-      #paginator
-      [length]="length()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="pageSizeOptions"
-      [pageIndex]="pageNumber()"
-      aria-label="Select page"
-      (page)="onPageChange($event)"
-    >
-    </mat-paginator>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <mat-paginator
+        #paginator
+        [length]="length()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageNumber()"
+        aria-label="Select page"
+        (page)="onPageChange($event)"
+      >
+      </mat-paginator>
+    }
   </section>
 }
 @if (viewportServiceService.isMobile()) {
@@ -151,13 +158,13 @@
           <p>{{ expense.amount }}</p>
           <span
             class="category-cell"
-            [style.color]="expense.category | categoryColor"
+            [style.color]="$any(expense.category) | categoryColor"
           >
-            <mat-icon>{{ expense.category | categoryIcon }}</mat-icon>
-            {{ expense.category | categoryLabel }}
+            <mat-icon>{{ $any(expense.category) | categoryIcon }}</mat-icon>
+            {{ $any(expense.category) | categoryLabel }}
           </span>
           <p>{{ expense.paymentMethod }}</p>
-          <p>{{ expense.date | timestampToDate | date: "dd.MM.yyyy" }}</p>
+          <p>{{ $any(expense.date) | timestampToDate | date: "dd.MM.yyyy" }}</p>
         </div>
         <div class="expense-card-item-actions">
           <button mat-icon-button (click)="openDeleteExpenseModal(expense.id)">

@@ -1,0 +1,7 @@
+<div
+  class="skeleton"
+  [class.skeleton--circle]="circle()"
+  [style.width]="normalizeSize(width())"
+  [style.height]="normalizeSize(height())"
+  [style.border-radius]="circle() ? '50%' : borderRadius()"
+></div>
