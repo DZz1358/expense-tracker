@@ -2,9 +2,9 @@ export interface IExpense {
   id: string;
   amount: number;
   category: string;
-  date: string;
+  expenseDate: string;
   description?: string;
-  paymentMethod?: 'cash' | 'card' | 'other';
+  // paymentMethod?: 'cash' | 'card' | 'other';
   createdAt: string;
   attachmentUrl?: string;
 }

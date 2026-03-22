@@ -43,7 +43,11 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Custom calendar header</mat-label>
-      <input [formField]="expenseForm.date" matInput [matDatepicker]="picker" />
+      <input
+        [formField]="expenseForm.expenseDate"
+        matInput
+        [matDatepicker]="picker"
+      />
       <mat-datepicker-toggle
         matIconSuffix
         [for]="picker"

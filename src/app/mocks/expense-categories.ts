@@ -11,6 +11,7 @@ export const EXPENSE_CATEGORY = {
   EDUCATION: 'education',
   TRAVEL: 'travel',
   FINANCE: 'finance',
+  OTHER: 'Other',
 } as const;
 
 export type ExpenseCategory =
@@ -82,6 +83,11 @@ export const EXPENSE_CATEGORY_META: Record<ExpenseCategory, ExpenseCategoryMeta>
     label: 'Finance',
     icon: 'account_balance_wallet',
     color: '#546E7A',
+  },
+  [EXPENSE_CATEGORY.OTHER]: {
+    label: 'Other',
+    icon: 'category',
+    color: '#9E9E9E',
   },
 };
 

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, DestroyRef, inject, OnInit, viewChild, signal, effect, ChangeDetectionStrategy, resource } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,23 +14,25 @@ import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { form, FormField } from '@angular/forms/signals';
 import { MatSelectModule } from '@angular/material/select';
+import { httpResource } from '@angular/common/http';
 
 import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 import { IExpense } from '../../models/expense.interface';
-import { FireStoreService } from '../../services/fire-store.service';
 import { ViewportServiceService } from '../../services/viewport-service.service';
+import { environment } from '../../../environments/environment';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { ExpenseModalComponent } from '../../shared/expense-modal/expense-modal.component';
 import { CategoryColorPipe } from '../../shared/pipes/category-color.pipe';
 import { CategoryIconPipe } from '../../shared/pipes/category-icon.pipe';
 import { CategoryLabelPipe } from '../../shared/pipes/category-label.pipe';
-import { TimestampToDatePipe } from '../../shared/pipes/timestampToDate.pipe';
 import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
+
+import { ExpenseTableService } from './expense-table.service';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, TimestampToDatePipe, DatePipe, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, DatePipe, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -38,31 +40,34 @@ import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
 export class ExpenseTableComponent {
   dialog = inject(MatDialog);
   destroyRef = inject(DestroyRef);
-  fireStoreService = inject(FireStoreService);
+  expenseTableService = inject(ExpenseTableService);
   viewportServiceService = inject(ViewportServiceService);
-  displayedColumns: string[] = ['description', 'category', 'date', 'amount', 'createdAt', 'settings'];
+  displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
-  length = computed(() => this.allData().length);
+  length = computed(() => this.filteredData().length);
   pageSize = signal<number>(10);
   pageNumber = signal<number>(0);
   readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
 
   allData = computed<IExpense[]>(() => this.dataResource.value() ?? []);
+  filteredData = computed<IExpense[]>(() => {
+    const selectedCategory = this.tableFormModel().category;
+
+    if (!selectedCategory) {
+      return this.allData();
+    }
+
+    return this.allData().filter((expense) => expense.category === selectedCategory);
+  });
 
   paginatedCards = computed<IExpense[]>(() => {
     const start = this.pageNumber() * this.pageSize();
     const end = start + this.pageSize();
-    return this.allData().slice(start, end);
+    return this.filteredData().slice(start, end);
   });
 
-  dataResource = resource<IExpense[], void>({
-    loader: async () => {
-      const data = await this.fireStoreService.getAll<IExpense>('expenses');
-      this.dataSource.data = data;
-      return data;
-    },
-  });
+  dataResource = httpResource<IExpense[]>(() => `${environment.apiUrl}/expenses`);
 
   readonly paginator = viewChild<MatPaginator>('paginator');
   readonly sort = viewChild<MatSort>('sort');
@@ -83,14 +88,9 @@ export class ExpenseTableComponent {
   tableForm = form(this.tableFormModel);
 
   constructor() {
-    this.dataSource.filterPredicate = (data: any, filter: string) => {
-      if (!filter) return true;
-      return data.category === filter;
-    };
-
     effect(() => {
-      const selectedCategory = this.tableFormModel().category;
-      this.dataSource.filter = selectedCategory ?? '';
+      this.tableFormModel().category;
+      this.pageNumber.set(0);
     });
 
     effect(() => {
@@ -105,11 +105,15 @@ export class ExpenseTableComponent {
       if (sort) {
         this.dataSource.sort = sort;
         sort.sort({
-          id: 'createdAt',
+          id: 'expenseDate',
           start: 'desc',
           disableClear: true,
         });
       }
+    });
+
+    effect(() => {
+      this.dataSource.data = this.filteredData();
     });
   }
 
@@ -131,8 +135,10 @@ export class ExpenseTableComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
-        this.fireStoreService.addItem('expenses', result);
-        this.dataResource.reload();
+        this.expenseTableService.addExpense(result)
+          .subscribe(() => {
+            this.dataResource.reload();
+          });
       });
   }
 
@@ -148,10 +154,12 @@ export class ExpenseTableComponent {
     })
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
+      .subscribe((result: IExpense) => {
         if (!result) return;
-        this.fireStoreService.updateItem('expenses', expense.id, result);
-        this.dataResource.reload();
+        this.expenseTableService.updateExpense(result)
+          .subscribe(() => {
+            this.dataResource.reload();
+          });
       });
   }
 
@@ -166,10 +174,12 @@ export class ExpenseTableComponent {
     })
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (!result.confirmed) return;
-        this.fireStoreService.deleteItem('expenses', result.expenseId);
-        this.dataResource.reload();
+      .subscribe(({ expenseId, confirmed }) => {
+        if (!confirmed) return;
+        this.expenseTableService.deleteExpense(expenseId)
+          .subscribe(() => {
+            this.dataResource.reload();
+          });
       });
   }
 

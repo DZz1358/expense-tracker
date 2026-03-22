@@ -25,7 +25,7 @@ export class ExpenseModalComponent {
     amount: '',
     category: '',
     description: '',
-    date: new Date(),
+    expenseDate: new Date(),
   })
 
   expenseForm = form(this.expenseModel, (expense) => {
@@ -45,7 +45,7 @@ export class ExpenseModalComponent {
       this.expenseModel.set({
         ...this.expenseModel(),
         ...this.dialogData.expense,
-        date: this.dialogData.expense.date.toDate()
+        expenseDate: this.dialogData.expense.expenseDate
       });
     }
   }
@@ -53,7 +53,7 @@ export class ExpenseModalComponent {
   addExpense() {
     const data = {
       ...this.expenseModel(),
-      createdAt: this.dialogData.isEdit ? this.dialogData.expense.createdAt : new Date(),
+      amount: Number(this.expenseModel().amount)
     };
     this.dialogRef.close(data);
   }
