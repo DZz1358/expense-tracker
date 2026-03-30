@@ -1,37 +1,38 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { Observable, tap } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
+import { SKIP_AUTH } from '../interceptors/auth.interceptor';
 import { LoginRequest, LoginResponse } from '../models/auth.models';
+import { environment } from '../../../environments/environment';
+
+import { AuthTokenStorageService } from './auth-token-storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly tokenKey = 'access_token';
+  private readonly tokenStorage = inject(AuthTokenStorageService);
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, payload)
+      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, payload, {
+        context: new HttpContext().set(SKIP_AUTH, true),
+      })
       .pipe(
         tap((response) => {
-          localStorage.setItem(this.tokenKey, response.accessToken);
+          this.tokenStorage.setToken(response.accessToken);
         }),
       );
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
+    this.tokenStorage.clearToken();
   }
 
   isAuthenticated(): boolean {
-    return this.getToken() !== null;
+    return this.tokenStorage.getToken() !== null;
   }
 }

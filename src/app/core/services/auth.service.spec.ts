@@ -57,6 +57,7 @@ describe('AuthService', () => {
 
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(payload);
+    expect(request.request.headers.has('Authorization')).toBeFalse();
 
     request.flush(response);
 
