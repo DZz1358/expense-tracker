@@ -18,7 +18,7 @@ import { httpResource } from '@angular/common/http';
 
 import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 import { IExpense } from '../../models/expense.interface';
-import { ViewportServiceService } from '../../services/viewport-service.service';
+import { ViewportServiceService } from '../../core/services/viewport-service.service';
 import { environment } from '../../../environments/environment';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
