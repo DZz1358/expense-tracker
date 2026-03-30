@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 
+import { AuthService } from '../../core/services/auth.service';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
 import { ThemeToggleComponent } from '../../shared/theme-toggle/theme-toggle.component';
 
@@ -14,7 +15,12 @@ import { ThemeToggleComponent } from '../../shared/theme-toggle/theme-toggle.com
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
+  private readonly authService = inject(AuthService);
   viewportServiceService = inject(ViewportServiceService);
   avatarUrl = signal('/cat.jpg');
   menuClick = output<void>();
+
+  logOut() {
+    this.authService.logout();
+  }
 }

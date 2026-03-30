@@ -70,32 +70,6 @@ label {
   font-weight: 600;
 }
 
-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border: 1px solid rgba(15, 23, 42, 0.16);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
-  color: inherit;
-  font: inherit;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
-}
-
-input:focus {
-  outline: none;
-  border-color: #0f766e;
-  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.16);
-}
-
-input:disabled {
-  cursor: progress;
-  opacity: 0.72;
-}
-
 small {
   color: #b91c1c;
   font-size: 0.8rem;

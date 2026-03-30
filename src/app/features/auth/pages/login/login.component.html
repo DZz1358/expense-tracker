@@ -9,50 +9,61 @@
       </p>
     </div>
 
-    <form class="login-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="form-field">
-        <label for="email">Email</label>
+    <form class="login-form" novalidate (submit)="onSubmit($event)">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
         <input
+          matInput
           id="email"
           type="email"
-          formControlName="email"
+          [formField]="loginForm.email"
           autocomplete="email"
           inputmode="email"
           placeholder="you@example.com"
-          [disabled]="isLoading()"
         />
 
-        @if (emailControl.touched && emailControl.hasError('required')) {
-          <small>Email is required.</small>
-        } @else if (emailControl.touched && emailControl.hasError('email')) {
-          <small>Enter a valid email address.</small>
+        @if (loginForm.email().touched() && loginForm.email().errors().length) {
+          <mat-error>
+            @for (error of loginForm.email().errors(); track error) {
+              <span>{{ error.message }}</span>
+            }
+          </mat-error>
         }
-      </div>
+      </mat-form-field>
 
-      <div class="form-field">
-        <label for="password">Password</label>
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
         <input
+          matInput
           id="password"
           type="password"
-          formControlName="password"
+          [formField]="loginForm.password"
           autocomplete="current-password"
           placeholder="Enter your password"
-          [disabled]="isLoading()"
         />
 
-        @if (passwordControl.touched && passwordControl.hasError('required')) {
-          <small>Password is required.</small>
-        } @else if (passwordControl.touched && passwordControl.hasError('minlength')) {
-          <small>Password must be at least 6 characters long.</small>
+        @if (
+          loginForm.password().touched() && loginForm.password().errors().length
+        ) {
+          <mat-error>
+            @for (error of loginForm.password().errors(); track error) {
+              <span>{{ error.message }}</span>
+            }
+          </mat-error>
         }
-      </div>
+      </mat-form-field>
 
       @if (errorMessage()) {
         <p class="error-message" role="alert">{{ errorMessage() }}</p>
       }
 
-      <button class="submit-button" type="submit" [disabled]="isLoading()">
-        {{ isLoading() ? 'Signing in...' : 'Sign in' }}
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="isLoading() || loginForm().invalid()"
+      >
+        {{ isLoading() ? "Signing in..." : "Sign in" }}
       </button>
     </form>
   </section>
