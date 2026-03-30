@@ -51,6 +51,7 @@ export class ExpenseTableComponent {
   readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
 
   allData = computed<IExpense[]>(() => this.dataResource.value() ?? []);
+  hasExpenses = computed(() => this.allData().length > 0);
   filteredData = computed<IExpense[]>(() => {
     const selectedCategory = this.tableFormModel().category;
 

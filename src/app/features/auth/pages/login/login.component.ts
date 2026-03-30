@@ -58,7 +58,7 @@ export class LoginComponent {
         this.router.navigate(['/expenses']);
       });
     } catch (err: any) {
-      this.errorMessage.set(err.message ?? 'Login failed');
+      this.errorMessage.set(err.error.message ?? 'Login failed');
     } finally {
       this.isLoading.set(false);
     }

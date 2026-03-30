@@ -19,14 +19,12 @@ export class AuthService {
   private readonly tokenStorage = inject(AuthTokenStorageService);
 
   login(payload: LoginRequest): Observable<LoginResponse> {
-    console.log('Attempting login with payload:', payload);
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, payload, {
         context: new HttpContext().set(SKIP_AUTH, true),
       })
       .pipe(
         tap((response) => {
-          console.log('Login response:', response);
           this.tokenStorage.setToken(response.accessToken);
         }),
       );

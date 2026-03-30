@@ -1,15 +1,3 @@
-<!-- @if (!viewportServiceService.isMobile()) {
-  <button
-    mat-fab
-    color="accent"
-    class="add-expense-button"
-    (click)="openAddExpenseModal()"
-    id="add"
-  >
-    <mat-icon>add</mat-icon>
-  </button>
-} -->
-
 @if (viewportServiceService.isMobile()) {
   <button
     mat-raised-button
@@ -29,29 +17,37 @@
       <p>Here's your expense overview:</p>
     </div>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Choose category</mat-label>
-      <mat-select
-        [formField]="tableForm.category"
-        placeholder="Select category"
-      >
-        @for (category of categories(); track category.id) {
-          <mat-option [value]="category.id">{{ category.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <div class="expense-table-header-actions">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Choose category</mat-label>
+        <mat-select
+          [formField]="tableForm.category"
+          placeholder="Select category"
+        >
+          @for (category of categories(); track category.id) {
+            <mat-option [value]="category.id">{{ category.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-    <app-button
-      label="Add Expense"
-      buttonClass="add-expense-button"
-      typeBtn="button"
-      (click)="openAddExpenseModal()"
-    ></app-button>
+      <app-button
+        label="Add Expense"
+        buttonClass="add-expense-button"
+        typeBtn="button"
+        (click)="openAddExpenseModal()"
+      ></app-button>
+    </div>
   </div>
 
   <section class="expense-table-wrapper">
     @if (dataResource.isLoading()) {
       <app-skeleton width="100%" [height]="488"></app-skeleton>
+    } @else if (dataResource.hasValue() && !hasExpenses()) {
+      <div class="empty-state">
+        <mat-icon>receipt_long</mat-icon>
+        <h3>No expenses yet</h3>
+        <p>Add your first expense to see it here.</p>
+      </div>
     } @else if (dataResource.hasValue()) {
       <table
         class="expense-table"
@@ -150,6 +146,12 @@
         <app-skeleton width="100%" [height]="177"></app-skeleton>
         <app-skeleton width="100%" [height]="177"></app-skeleton>
       </div>
+    } @else if (dataResource.hasValue() && !hasExpenses()) {
+      <div class="empty-state empty-state-mobile">
+        <mat-icon>receipt_long</mat-icon>
+        <h3>No expenses yet</h3>
+        <p>Add your first expense to get started.</p>
+      </div>
     } @else if (dataResource.hasValue()) {
       @for (expense of paginatedCards(); track $index) {
         <mat-card class="expense-card-item">
@@ -184,15 +186,17 @@
       }
     }
   </section>
-  <mat-paginator
-    #paginator
-    [pageSizeOptions]="pageSizeOptions"
-    [pageSize]="pageSize()"
-    [pageIndex]="pageNumber()"
-    [length]="length()"
-    class="mobile-paginator"
-    aria-label="Select page of expenses"
-    (page)="onPageChange($event)"
-  >
-  </mat-paginator>
+  @if (hasExpenses()) {
+    <mat-paginator
+      #paginator
+      [pageSizeOptions]="pageSizeOptions"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageNumber()"
+      [length]="length()"
+      class="mobile-paginator"
+      aria-label="Select page of expenses"
+      (page)="onPageChange($event)"
+    >
+    </mat-paginator>
+  }
 }
