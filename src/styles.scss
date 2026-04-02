@@ -1,6 +1,7 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use 'base/normalize';
 @use 'styles/theme/palettes' as palettes;
 @use 'styles/theme/function' as function;
 
@@ -22,14 +23,9 @@ aside {
   color: var(--mat-sys-on-surface);
 }
 
-
 html,
 body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
+  min-block-size: 100%;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
