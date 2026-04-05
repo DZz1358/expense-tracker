@@ -1,14 +1,16 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Observable, tap } from 'rxjs';
 
 import { SKIP_AUTH } from '../interceptors/auth.interceptor';
-import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from '../models/auth.models';
+import { AuthUser, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from '../models/auth.models';
 import { environment } from '../../../environments/environment';
 
 import { AuthTokenStorageService } from './auth-token-storage.service';
+import { LocalStorageService } from '../../shared/local-storage/local-storage.service';
+import { StorageKey } from '../../shared/local-storage/storage-key.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +19,11 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly tokenStorage = inject(AuthTokenStorageService);
+  private readonly localStorageService = inject(LocalStorageService);
+
+  readonly currentUser = signal<AuthUser | null>(
+    this.localStorageService.getItem<AuthUser>(StorageKey.User)
+  );
 
   register(payload: RegisterRequest): Observable<RegisterResponse> {
     return this.http
@@ -26,6 +33,8 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this.tokenStorage.setToken(response.accessToken);
+          this.currentUser.set(response.user);
+          this.localStorageService.setItem(StorageKey.User, response.user);
         }),
       );
   }
@@ -38,12 +47,16 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this.tokenStorage.setToken(response.accessToken);
+          this.currentUser.set(response.user);
+          this.localStorageService.setItem(StorageKey.User, response.user);
         }),
       );
   }
 
   logout(): void {
     this.tokenStorage.clearToken();
+    this.localStorageService.removeItem(StorageKey.User);
+    this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 

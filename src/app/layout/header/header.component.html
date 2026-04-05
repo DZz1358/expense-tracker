@@ -6,11 +6,10 @@
   }
 
   <span class="example-spacer"></span>
-  <app-theme-toggle />
   <img [matMenuTriggerFor]="menu" class="avatar" [src]="avatarUrl()" alt="qq" />
 
   <mat-menu #menu="matMenu">
-    <button mat-menu-item>
+    <button routerLink="/profile" mat-menu-item>
       <mat-icon>person</mat-icon>
       <span>Profile</span>
     </button>

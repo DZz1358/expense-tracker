@@ -1,0 +1,126 @@
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem 1.5rem;
+  gap: 0.5rem;
+}
+
+.profile-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--mat-sys-primary);
+  margin-bottom: 0.25rem;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.profile-email {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0 1rem 2rem;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section-title {
+  margin: 0.75rem 0 0.25rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.profile-card {
+  border-radius: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.profile-field {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+
+  &--between {
+    justify-content: space-between;
+  }
+}
+
+.field-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.field-icon {
+  color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
+
+  &--danger {
+    color: var(--mat-sys-error);
+  }
+}
+
+.field-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1;
+}
+
+.field-value {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.logout-button {
+  flex-shrink: 0;
+  color: var(--mat-sys-error);
+  border-color: var(--mat-sys-error);
+}
+
+mat-divider {
+  margin: 0 1rem;
+}

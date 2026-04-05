@@ -1,1 +1,73 @@
-<p>profile works!</p>
+<div class="profile-page">
+
+  <div class="profile-hero">
+    <div class="profile-avatar">
+      <img src="/cat.jpg" alt="User avatar" />
+    </div>
+    <h2 class="profile-name">{{ currentUser()?.name ?? 'User' }}</h2>
+    <p class="profile-email">{{ currentUser()?.email ?? '' }}</p>
+  </div>
+
+  <div class="profile-content">
+
+    <section class="profile-section">
+      <h3 class="section-title">Account</h3>
+      <div class="profile-card">
+        <div class="profile-field">
+          <mat-icon class="field-icon">person</mat-icon>
+          <div class="field-body">
+            <span class="field-label">Name</span>
+            <span class="field-value">{{ currentUser()?.name ?? '—' }}</span>
+          </div>
+        </div>
+        <mat-divider />
+        <div class="profile-field">
+          <mat-icon class="field-icon">mail</mat-icon>
+          <div class="field-body">
+            <span class="field-label">Email</span>
+            <span class="field-value">{{ currentUser()?.email ?? '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-section">
+      <h3 class="section-title">Appearance</h3>
+      <div class="profile-card">
+        <div class="profile-field profile-field--between">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">{{ activeTheme() }}</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Theme</span>
+              <span class="field-value">{{ activeTheme() === Theme.Dark ? 'Dark' : 'Light' }}</span>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="activeTheme() === Theme.Dark"
+            (change)="toggleTheme()"
+            aria-label="Toggle theme"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-section">
+      <h3 class="section-title">Session</h3>
+      <div class="profile-card">
+        <div class="profile-field profile-field--between">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon field-icon--danger">logout</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Sign out</span>
+              <span class="field-value">End your current session</span>
+            </div>
+          </div>
+          <button mat-stroked-button class="logout-button" (click)="logout()">
+            Sign out
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
