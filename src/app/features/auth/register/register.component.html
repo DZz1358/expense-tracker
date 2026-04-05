@@ -1,0 +1,115 @@
+<div class="register-page">
+  <section class="register-panel">
+    <div class="register-copy">
+      <p class="eyebrow">Expense Tracker</p>
+      <h1>Create account</h1>
+      <p class="description">
+        Sign up to start tracking your expenses, categories, and spending trends
+        in one place.
+      </p>
+    </div>
+
+    <form class="register-form" novalidate (submit)="onSubmit($event)">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input
+          matInput
+          id="name"
+          type="text"
+          [formField]="registerForm.name"
+          autocomplete="name"
+          placeholder="Your full name"
+        />
+
+        @if (registerForm.name().touched() && registerForm.name().errors().length) {
+          <mat-error>
+            @for (error of registerForm.name().errors(); track error) {
+              <span>{{ error.message }}</span>
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          id="email"
+          type="email"
+          [formField]="registerForm.email"
+          autocomplete="email"
+          inputmode="email"
+          placeholder="you@example.com"
+        />
+
+        @if (registerForm.email().touched() && registerForm.email().errors().length) {
+          <mat-error>
+            @for (error of registerForm.email().errors(); track error) {
+              <span>{{ error.message }}</span>
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          id="password"
+          type="password"
+          [formField]="registerForm.password"
+          autocomplete="new-password"
+          placeholder="At least 8 characters"
+        />
+
+        @if (registerForm.password().touched() && registerForm.password().errors().length) {
+          <mat-error>
+            @for (error of registerForm.password().errors(); track error) {
+              <span>{{ error.message }}</span>
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Confirm password</mat-label>
+        <input
+          matInput
+          id="confirmPassword"
+          type="password"
+          [formField]="registerForm.confirmPassword"
+          autocomplete="new-password"
+          placeholder="Repeat your password"
+        />
+
+        @if (passwordMismatch()) {
+          <mat-error>Passwords do not match</mat-error>
+        } @else if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().errors().length) {
+          <mat-error>
+            @for (error of registerForm.confirmPassword().errors(); track error) {
+              <span>{{ error.message }}</span>
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="isLoading() || registerForm().invalid() || passwordMismatch()"
+      >
+        {{ isLoading() ? "Creating account..." : "Create account" }}
+      </button>
+
+      @if (errorMessage()) {
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <p class="auth-link">
+        Already have an account?
+        <a routerLink="/login">Sign in</a>
+      </p>
+    </form>
+  </section>
+</div>

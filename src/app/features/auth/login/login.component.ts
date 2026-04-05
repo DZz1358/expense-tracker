@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { disabled, email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { firstValueFrom } from 'rxjs';
 
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface LoginData {
   email: string;
@@ -18,7 +19,7 @@ interface LoginData {
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField],
+  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

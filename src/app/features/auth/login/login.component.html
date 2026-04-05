@@ -65,6 +65,11 @@
       @if (errorMessage()) {
         <p class="error-message" role="alert">{{ errorMessage() }}</p>
       }
+
+      <p class="auth-link">
+        Don't have an account?
+        <a routerLink="/register">Sign up</a>
+      </p>
     </form>
   </section>
 </div>

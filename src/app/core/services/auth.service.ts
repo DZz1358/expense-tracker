@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { SKIP_AUTH } from '../interceptors/auth.interceptor';
-import { LoginRequest, LoginResponse } from '../models/auth.models';
+import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from '../models/auth.models';
 import { environment } from '../../../environments/environment';
 
 import { AuthTokenStorageService } from './auth-token-storage.service';
@@ -17,6 +17,18 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly tokenStorage = inject(AuthTokenStorageService);
+
+  register(payload: RegisterRequest): Observable<RegisterResponse> {
+    return this.http
+      .post<RegisterResponse>(`${environment.apiUrl}/auth/register`, payload, {
+        context: new HttpContext().set(SKIP_AUTH, true),
+      })
+      .pipe(
+        tap((response) => {
+          this.tokenStorage.setToken(response.accessToken);
+        }),
+      );
+  }
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http
