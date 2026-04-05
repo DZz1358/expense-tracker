@@ -53,6 +53,22 @@ export class AuthService {
       );
   }
 
+  updateCurrentUser(user: AuthUser): void {
+    this.currentUser.set(user);
+    this.localStorageService.setItem(StorageKey.User, user);
+  }
+
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/auth/account`).pipe(
+      tap(() => {
+        this.tokenStorage.clearToken();
+        this.localStorageService.removeItem(StorageKey.User);
+        this.currentUser.set(null);
+        this.router.navigate(['/login']);
+      }),
+    );
+  }
+
   logout(): void {
     this.tokenStorage.clearToken();
     this.localStorageService.removeItem(StorageKey.User);

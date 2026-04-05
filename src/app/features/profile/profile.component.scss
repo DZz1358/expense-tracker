@@ -81,6 +81,12 @@
   &--between {
     justify-content: space-between;
   }
+
+  &--end {
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
 }
 
 .field-with-icon {
@@ -115,12 +121,54 @@
   line-height: 1.4;
 }
 
-.logout-button {
+.action-button--danger {
   flex-shrink: 0;
   color: var(--mat-sys-error);
   border-color: var(--mat-sys-error);
 }
 
+.profile-section--danger {
+  margin-top: 1rem;
+}
+
+.section-title--danger {
+  color: var(--mat-sys-error);
+}
+
+.profile-card--danger {
+  border-color: var(--mat-sys-error-container);
+}
+
+.delete-account-button {
+  flex-shrink: 0;
+  background-color: var(--mat-sys-error);
+  color: var(--mat-sys-on-error);
+}
+
 mat-divider {
   margin: 0 1rem;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 0.25rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.form-error {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-error);
 }

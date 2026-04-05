@@ -13,6 +13,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name?: string;
+  dateOfBirth?: string | null;
 }
 
 export interface LoginResponse {
@@ -21,3 +22,13 @@ export interface LoginResponse {
 }
 
 export type RegisterResponse = LoginResponse;
+
+export interface UpdateProfileRequest {
+  name: string;
+  dateOfBirth?: string | null;
+}
+
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

@@ -10,27 +10,182 @@
 
   <div class="profile-content">
 
+    <!-- Account -->
     <section class="profile-section">
       <h3 class="section-title">Account</h3>
       <div class="profile-card">
-        <div class="profile-field">
-          <mat-icon class="field-icon">person</mat-icon>
-          <div class="field-body">
-            <span class="field-label">Name</span>
-            <span class="field-value">{{ currentUser()?.name ?? '—' }}</span>
+        @if (!isEditingProfile()) {
+          <div class="profile-field profile-field--between">
+            <div class="field-with-icon">
+              <mat-icon class="field-icon">person</mat-icon>
+              <div class="field-body">
+                <span class="field-label">Name</span>
+                <span class="field-value">{{ currentUser()?.name ?? '—' }}</span>
+              </div>
+            </div>
           </div>
-        </div>
-        <mat-divider />
-        <div class="profile-field">
-          <mat-icon class="field-icon">mail</mat-icon>
-          <div class="field-body">
-            <span class="field-label">Email</span>
-            <span class="field-value">{{ currentUser()?.email ?? '—' }}</span>
+          <mat-divider />
+          <div class="profile-field profile-field--between">
+            <div class="field-with-icon">
+              <mat-icon class="field-icon">mail</mat-icon>
+              <div class="field-body">
+                <span class="field-label">Email</span>
+                <span class="field-value">{{ currentUser()?.email ?? '—' }}</span>
+              </div>
+            </div>
           </div>
-        </div>
+          <mat-divider />
+          <div class="profile-field">
+            <div class="field-with-icon">
+              <mat-icon class="field-icon">cake</mat-icon>
+              <div class="field-body">
+                <span class="field-label">Date of birth</span>
+                <span class="field-value">
+                  {{ currentUser()?.dateOfBirth ? (currentUser()!.dateOfBirth! | date: 'dd MMM yyyy') : '—' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <mat-divider />
+          <div class="profile-field profile-field--end">
+            <button mat-stroked-button (click)="startEditProfile()">Edit</button>
+          </div>
+        } @else {
+          <form class="edit-form" novalidate (submit)="saveProfile($event)">
+            <mat-form-field appearance="outline">
+              <mat-label>Name</mat-label>
+              <input matInput [formField]="profileForm.name" placeholder="Your name" />
+              @if (profileForm.name().touched() && profileForm.name().errors().length) {
+                <mat-error>{{ profileForm.name().errors()[0].message }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of birth</mat-label>
+              <input
+                matInput
+                [matDatepicker]="picker"
+                [value]="datePickerValue()"
+                [max]="today"
+                (dateChange)="datePickerValue.set($event.value)"
+                placeholder="DD/MM/YYYY"
+              />
+              <mat-datepicker-toggle matIconSuffix [for]="picker" />
+              <mat-datepicker #picker [startAt]="datePickerValue()" />
+            </mat-form-field>
+
+            @if (profileError()) {
+              <p class="form-error" role="alert">{{ profileError() }}</p>
+            }
+
+            <div class="form-actions">
+              <button mat-button type="button" (click)="cancelEditProfile()">Cancel</button>
+              <button
+                mat-flat-button
+                type="submit"
+                [disabled]="isSavingProfile() || profileForm().invalid()"
+              >
+                {{ isSavingProfile() ? 'Saving...' : 'Save' }}
+              </button>
+            </div>
+          </form>
+        }
       </div>
     </section>
 
+    <!-- Security -->
+    <section class="profile-section">
+      <h3 class="section-title">Security</h3>
+      <div class="profile-card">
+        @if (!isChangingPassword()) {
+          <div class="profile-field profile-field--between">
+            <div class="field-with-icon">
+              <mat-icon class="field-icon">lock</mat-icon>
+              <div class="field-body">
+                <span class="field-label">Password</span>
+                <span class="field-value">••••••••</span>
+              </div>
+            </div>
+            <button mat-stroked-button (click)="startChangePassword()">Change</button>
+          </div>
+        } @else {
+          <form class="edit-form" novalidate (submit)="savePassword($event)">
+            <mat-form-field appearance="outline">
+              <mat-label>Current password</mat-label>
+              <input
+                matInput
+                [type]="showCurrentPassword() ? 'text' : 'password'"
+                [formField]="passwordForm.currentPassword"
+              />
+              <button
+                mat-icon-button matSuffix type="button"
+                (click)="showCurrentPassword.set(!showCurrentPassword())"
+              >
+                <mat-icon>{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (passwordForm.currentPassword().touched() && passwordForm.currentPassword().errors().length) {
+                <mat-error>{{ passwordForm.currentPassword().errors()[0].message }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>New password</mat-label>
+              <input
+                matInput
+                [type]="showNewPassword() ? 'text' : 'password'"
+                [formField]="passwordForm.newPassword"
+              />
+              <button
+                mat-icon-button matSuffix type="button"
+                (click)="showNewPassword.set(!showNewPassword())"
+              >
+                <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (passwordForm.newPassword().touched() && passwordForm.newPassword().errors().length) {
+                <mat-error>{{ passwordForm.newPassword().errors()[0].message }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm new password</mat-label>
+              <input
+                matInput
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                [formField]="passwordForm.confirmNewPassword"
+              />
+              <button
+                mat-icon-button matSuffix type="button"
+                (click)="showConfirmPassword.set(!showConfirmPassword())"
+              >
+                <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (passwordMismatch()) {
+                <mat-error>Passwords do not match</mat-error>
+              } @else if (passwordForm.confirmNewPassword().touched() && passwordForm.confirmNewPassword().errors().length) {
+                <mat-error>{{ passwordForm.confirmNewPassword().errors()[0].message }}</mat-error>
+              }
+            </mat-form-field>
+
+            @if (passwordError()) {
+              <p class="form-error" role="alert">{{ passwordError() }}</p>
+            }
+
+            <div class="form-actions">
+              <button mat-button type="button" (click)="cancelChangePassword()">Cancel</button>
+              <button
+                mat-flat-button
+                type="submit"
+                [disabled]="isSavingPassword() || passwordForm().invalid() || passwordMismatch()"
+              >
+                {{ isSavingPassword() ? 'Saving...' : 'Save' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </section>
+
+    <!-- Appearance -->
     <section class="profile-section">
       <h3 class="section-title">Appearance</h3>
       <div class="profile-card">
@@ -51,6 +206,7 @@
       </div>
     </section>
 
+    <!-- Session -->
     <section class="profile-section">
       <h3 class="section-title">Session</h3>
       <div class="profile-card">
@@ -62,8 +218,27 @@
               <span class="field-value">End your current session</span>
             </div>
           </div>
-          <button mat-stroked-button class="logout-button" (click)="logout()">
+          <button mat-stroked-button class="action-button--danger" (click)="logout()">
             Sign out
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Danger zone -->
+    <section class="profile-section profile-section--danger">
+      <h3 class="section-title section-title--danger">Danger zone</h3>
+      <div class="profile-card profile-card--danger">
+        <div class="profile-field profile-field--between">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon field-icon--danger">delete_forever</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Delete account</span>
+              <span class="field-value">Permanently remove your account and all data</span>
+            </div>
+          </div>
+          <button mat-flat-button class="delete-account-button" (click)="openDeleteAccountModal()">
+            Delete
           </button>
         </div>
       </div>
