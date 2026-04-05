@@ -20,6 +20,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { firstValueFrom } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
@@ -76,6 +77,23 @@ export class ProfileComponent {
   readonly showConfirmPassword = signal(false);
   readonly today = new Date();
 
+  readonly isUploadingAvatar = signal(false);
+  readonly avatarPreview = signal<string | null>(null);
+  readonly avatarError = signal<string | null>(null);
+
+  readonly avatarSrc = computed(() => {
+    const preview = this.avatarPreview();
+    if (preview) return preview;
+    const avatarUrl = this.currentUser()?.avatarUrl;
+    if (!avatarUrl) return '/cat.jpg';
+    return avatarUrl.startsWith('http') || avatarUrl.startsWith('data:')
+      ? avatarUrl
+      : `${environment.apiUrl}${avatarUrl}`;
+  });
+
+  private readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  private readonly MAX_SIZE = 5 * 1024 * 1024;
+
   // Datepicker uses Date object, stored separately from the signals form
   readonly datePickerValue = signal<Date | null>(null);
 
@@ -114,6 +132,44 @@ export class ProfileComponent {
       .pipe(takeUntilDestroyed())
       .subscribe((user) => {
         this.datePickerValue.set(user.dateOfBirth ? new Date(user.dateOfBirth) : null);
+      });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!this.ALLOWED_TYPES.includes(file.type)) {
+      this.avatarError.set('Only JPEG, PNG, WebP and GIF are allowed');
+      return;
+    }
+    if (file.size > this.MAX_SIZE) {
+      this.avatarError.set('File size must not exceed 5 MB');
+      return;
+    }
+
+    this.avatarError.set(null);
+
+    const reader = new FileReader();
+    reader.onload = () => this.avatarPreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+
+    this.isUploadingAvatar.set(true);
+    this.userService
+      .updateAvatar(file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.avatarPreview.set(null);
+          this.isUploadingAvatar.set(false);
+        },
+        error: (err: any) => {
+          this.avatarPreview.set(null);
+          this.isUploadingAvatar.set(false);
+          this.avatarError.set(err?.error?.message ?? 'Failed to upload avatar');
+        },
       });
   }
 

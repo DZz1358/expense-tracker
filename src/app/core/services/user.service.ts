@@ -27,6 +27,14 @@ export class UserService {
       .pipe(tap((user) => this.authService.updateCurrentUser(user)));
   }
 
+  updateAvatar(file: File): Observable<AuthUser> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.http
+      .patch<AuthUser>(`${environment.apiUrl}/users/me/avatar`, formData)
+      .pipe(tap((user) => this.authService.updateCurrentUser(user)));
+  }
+
   updatePassword(payload: UpdatePasswordRequest): Observable<{ message: string }> {
     return this.http.patch<{ message: string }>(
       `${environment.apiUrl}/users/me/password`,

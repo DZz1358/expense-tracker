@@ -1,9 +1,23 @@
 <div class="profile-page">
 
   <div class="profile-hero">
-    <div class="profile-avatar">
-      <img src="/cat.jpg" alt="User avatar" />
-    </div>
+    <label class="profile-avatar" [class.profile-avatar--loading]="isUploadingAvatar()">
+      <img [src]="avatarSrc()" alt="User avatar" />
+      <div class="avatar-overlay">
+        <mat-icon>{{ isUploadingAvatar() ? 'hourglass_top' : 'photo_camera' }}</mat-icon>
+      </div>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        (change)="onFileSelected($event)"
+        hidden
+      />
+    </label>
+
+    @if (avatarError()) {
+      <p class="avatar-error" role="alert">{{ avatarError() }}</p>
+    }
+
     <h2 class="profile-name">{{ currentUser()?.name ?? 'User' }}</h2>
     <p class="profile-email">{{ currentUser()?.email ?? '' }}</p>
   </div>

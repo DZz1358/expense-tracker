@@ -1,10 +1,11 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { RouterLink } from "@angular/router";
+import { RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
 
@@ -17,8 +18,15 @@ import { ViewportServiceService } from '../../core/services/viewport-service.ser
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
   viewportServiceService = inject(ViewportServiceService);
-  avatarUrl = signal('/cat.jpg');
   menuClick = output<void>();
+
+  readonly avatarSrc = computed(() => {
+    const avatarUrl = this.authService.currentUser()?.avatarUrl;
+    if (!avatarUrl) return '/cat.jpg';
+    return avatarUrl.startsWith('http') || avatarUrl.startsWith('data:')
+      ? avatarUrl
+      : `${environment.apiUrl}${avatarUrl}`;
+  });
 
   logOut() {
     this.authService.logout();

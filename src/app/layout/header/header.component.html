@@ -1,12 +1,12 @@
 <mat-toolbar>
   @if (viewportServiceService.isMobile()) {
     <div class="logo" (click)="menuClick.emit()">
-      <mat-icon>account_balance_wallet</mat-icon>
+      <mat-icon>menu</mat-icon>
     </div>
   }
 
   <span class="example-spacer"></span>
-  <img [matMenuTriggerFor]="menu" class="avatar" [src]="avatarUrl()" alt="qq" />
+  <img [matMenuTriggerFor]="menu" class="avatar" [src]="avatarSrc()" alt="User avatar" />
 
   <mat-menu #menu="matMenu">
     <button routerLink="/profile" mat-menu-item>

@@ -14,6 +14,7 @@ export interface AuthUser {
   email: string;
   name?: string;
   dateOfBirth?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface LoginResponse {
