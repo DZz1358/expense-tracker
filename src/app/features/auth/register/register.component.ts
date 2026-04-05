@@ -32,6 +32,8 @@ export class RegisterComponent {
 
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly showPassword = signal<boolean>(false);
+  readonly showConfirmPassword = signal<boolean>(false);
 
   registerModel = signal<RegisterData>({
     name: '',

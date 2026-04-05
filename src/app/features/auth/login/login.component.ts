@@ -30,6 +30,7 @@ export class LoginComponent {
 
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly showPassword = signal<boolean>(false);
 
   loginModel = signal<LoginData>({
     email: '',

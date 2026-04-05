@@ -56,11 +56,20 @@
         <input
           matInput
           id="password"
-          type="password"
+          [type]="showPassword() ? 'text' : 'password'"
           [formField]="registerForm.password"
           autocomplete="new-password"
           placeholder="At least 8 characters"
         />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="showPassword.set(!showPassword())"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
 
         @if (registerForm.password().touched() && registerForm.password().errors().length) {
           <mat-error>
@@ -76,11 +85,20 @@
         <input
           matInput
           id="confirmPassword"
-          type="password"
+          [type]="showConfirmPassword() ? 'text' : 'password'"
           [formField]="registerForm.confirmPassword"
           autocomplete="new-password"
           placeholder="Repeat your password"
         />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="showConfirmPassword.set(!showConfirmPassword())"
+          [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+        >
+          <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
 
         @if (passwordMismatch()) {
           <mat-error>Passwords do not match</mat-error>

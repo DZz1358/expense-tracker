@@ -36,11 +36,20 @@
         <input
           matInput
           id="password"
-          type="password"
+          [type]="showPassword() ? 'text' : 'password'"
           [formField]="loginForm.password"
           autocomplete="current-password"
           placeholder="Enter your password"
         />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="showPassword.set(!showPassword())"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
 
         @if (
           loginForm.password().touched() && loginForm.password().errors().length
