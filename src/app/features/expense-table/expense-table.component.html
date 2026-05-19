@@ -6,32 +6,34 @@
     (click)="openAddExpenseModal()"
   >
     <mat-icon>add</mat-icon>
-    Add expense
+    {{ 'expenses.add' | translate }}
   </button>
 }
 
 @if (!viewportServiceService.isMobile()) {
   <div class="expense-table-header">
     <div class="expense-table-header-info">
-      <h2>Expense Table</h2>
-      <p>Here's your expense overview:</p>
+      <h2>{{ 'expenses.title' | translate }}</h2>
+      <p>{{ 'expenses.subtitle' | translate }}</p>
     </div>
 
     <div class="expense-table-header-actions">
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Choose category</mat-label>
+        <mat-label>{{ 'expenses.chooseCategory' | translate }}</mat-label>
         <mat-select
           [formField]="tableForm.category"
-          placeholder="Select category"
+          [placeholder]="'expenses.selectCategory' | translate"
         >
           @for (category of categories(); track category.id) {
-            <mat-option [value]="category.id">{{ category.label }}</mat-option>
+            <mat-option [value]="category.id">
+              {{ category.id ? (category.id | categoryLabel) : category.label }}
+            </mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <app-button
-        label="Add Expense"
+        [label]="'expenses.add' | translate"
         buttonClass="add-expense-button"
         typeBtn="button"
         (click)="openAddExpenseModal()"
@@ -45,17 +47,17 @@
     } @else if (dataResource.error()) {
       <div class="empty-state error-state">
         <mat-icon>cloud_off</mat-icon>
-        <h3>Failed to load expenses</h3>
-        <p>Please check your connection and try again.</p>
+        <h3>{{ 'expenses.failedTitle' | translate }}</h3>
+        <p>{{ 'expenses.failedBody' | translate }}</p>
         <button mat-stroked-button type="button" (click)="dataResource.reload()">
-          Retry
+          {{ 'common.retry' | translate }}
         </button>
       </div>
     } @else if (dataResource.hasValue() && !hasExpenses()) {
       <div class="empty-state">
         <mat-icon>receipt_long</mat-icon>
-        <h3>No expenses yet</h3>
-        <p>Add your first expense to see it here.</p>
+        <h3>{{ 'expenses.emptyTitle' | translate }}</h3>
+        <p>{{ 'expenses.emptyDesktop' | translate }}</p>
       </div>
     } @else if (dataResource.hasValue()) {
       <table
@@ -66,14 +68,14 @@
         #sort="matSort"
       >
         <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'expenses.description' | translate }}</th>
           <td class="text-truncate" mat-cell *matCellDef="let element">
             {{ element.description }}
           </td>
         </ng-container>
 
         <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'expenses.category' | translate }}</th>
           <td mat-cell *matCellDef="let element">
             <span
               class="category-cell"
@@ -86,19 +88,19 @@
         </ng-container>
 
         <ng-container matColumnDef="expenseDate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'expenses.date' | translate }}</th>
           <td mat-cell *matCellDef="let element">
             {{ formatExpenseDate(element.expenseDate) }}
           </td>
         </ng-container>
 
         <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'expenses.amount' | translate }}</th>
           <td mat-cell *matCellDef="let element">{{ formatAmount(element.amount) }}</td>
         </ng-container>
 
         <ng-container matColumnDef="settings">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'expenses.actions' | translate }}</th>
           <td mat-cell *matCellDef="let element">
             <button mat-icon-button (click)="openEditExpenseModal(element)">
               <mat-icon>edit</mat-icon>
@@ -136,13 +138,15 @@
       appearance="outline"
       subscriptSizing="dynamic"
     >
-      <mat-label>Choose category</mat-label>
+      <mat-label>{{ 'expenses.chooseCategory' | translate }}</mat-label>
       <mat-select
         [formField]="tableForm.category"
-        placeholder="Select category"
+        [placeholder]="'expenses.selectCategory' | translate"
       >
         @for (category of categories(); track category.id) {
-          <mat-option [value]="category.id">{{ category.label }}</mat-option>
+          <mat-option [value]="category.id">
+            {{ category.id ? (category.id | categoryLabel) : category.label }}
+          </mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -158,24 +162,24 @@
     } @else if (dataResource.error()) {
       <div class="empty-state empty-state-mobile error-state">
         <mat-icon>cloud_off</mat-icon>
-        <h3>Failed to load expenses</h3>
-        <p>Please check your connection and try again.</p>
+        <h3>{{ 'expenses.failedTitle' | translate }}</h3>
+        <p>{{ 'expenses.failedBody' | translate }}</p>
         <button mat-stroked-button type="button" (click)="dataResource.reload()">
-          Retry
+          {{ 'common.retry' | translate }}
         </button>
       </div>
     } @else if (dataResource.hasValue() && !hasExpenses()) {
       <div class="empty-state empty-state-mobile">
         <mat-icon>receipt_long</mat-icon>
-        <h3>No expenses yet</h3>
-        <p>Add your first expense to get started.</p>
+        <h3>{{ 'expenses.emptyTitle' | translate }}</h3>
+        <p>{{ 'expenses.emptyMobile' | translate }}</p>
       </div>
     } @else if (dataResource.hasValue()) {
       @for (expense of paginatedCards(); track $index) {
         <mat-card class="expense-card-item">
           <div class="expense-card-item-info">
             <p class="text-truncate">
-              {{ expense.description ? expense.description : "No description" }}
+              {{ expense.description ? expense.description : ('expenses.noDescription' | translate) }}
             </p>
             <p>{{ formatAmount(expense.amount) }}</p>
             <span

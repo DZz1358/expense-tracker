@@ -8,10 +8,11 @@ import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, MatButtonModule, MatToolbarModule, MatMenuModule, RouterLink],
+  imports: [MatIconModule, MatButtonModule, MatToolbarModule, MatMenuModule, RouterLink, TranslatePipe],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

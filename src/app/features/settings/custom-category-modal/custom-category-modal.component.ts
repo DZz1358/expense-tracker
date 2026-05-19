@@ -9,6 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { ExpenseCategoryOption } from '../../../core/services/app-settings.service';
 import { CATEGORY_COLOR_OPTIONS, CATEGORY_ICON_OPTIONS } from '../custom-category-options';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { LanguageService } from '../../../core/i18n/language.service';
 
 export interface CustomCategoryModalData {
   mode: 'create' | 'edit';
@@ -25,6 +27,7 @@ export interface CustomCategoryModalData {
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    TranslatePipe,
   ],
   templateUrl: './custom-category-modal.component.html',
   styleUrl: './custom-category-modal.component.scss',
@@ -32,6 +35,7 @@ export interface CustomCategoryModalData {
 })
 export class CustomCategoryModalComponent {
   private readonly dialogRef = inject(MatDialogRef<CustomCategoryModalComponent>);
+  private readonly languageService = inject(LanguageService);
   readonly dialogData = inject<CustomCategoryModalData>(MAT_DIALOG_DATA);
 
   readonly label = signal(this.dialogData.category?.label ?? '');
@@ -46,7 +50,7 @@ export class CustomCategoryModalComponent {
   save(): void {
     const label = this.label().trim();
     if (label.length < 2) {
-      this.errorMessage.set('Category name must be at least 2 characters');
+      this.errorMessage.set(this.languageService.t('validation.categoryNameMin'));
       return;
     }
 

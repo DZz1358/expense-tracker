@@ -26,6 +26,8 @@ import { UserService } from '../../core/services/user.service';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { LanguageService } from '../../core/i18n/language.service';
 
 interface ProfileFormData {
   name: string;
@@ -49,6 +51,7 @@ interface PasswordFormData {
     MatInputModule,
     MatDatepickerModule,
     FormField,
+    TranslatePipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -58,6 +61,7 @@ export class ProfileComponent {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly themeService = inject(ThemeService);
+  private readonly languageService = inject(LanguageService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -100,8 +104,8 @@ export class ProfileComponent {
   profileModel = signal<ProfileFormData>({ name: '' });
 
   profileForm = form(this.profileModel, (p) => {
-    required(p.name, { message: 'Name is required' });
-    minLength(p.name, 2, { message: 'Name must be at least 2 characters' });
+    required(p.name, { message: this.languageService.t('validation.nameRequired') });
+    minLength(p.name, 2, { message: this.languageService.t('validation.nameMin') });
     disabled(p.name, () => this.isSavingProfile());
   });
 
@@ -112,10 +116,10 @@ export class ProfileComponent {
   });
 
   passwordForm = form(this.passwordModel, (p) => {
-    required(p.currentPassword, { message: 'Current password is required' });
-    required(p.newPassword, { message: 'New password is required' });
-    minLength(p.newPassword, 8, { message: 'At least 8 characters' });
-    required(p.confirmNewPassword, { message: 'Please confirm your password' });
+    required(p.currentPassword, { message: this.languageService.t('validation.currentPasswordRequired') });
+    required(p.newPassword, { message: this.languageService.t('validation.newPasswordRequired') });
+    minLength(p.newPassword, 8, { message: this.languageService.t('validation.passwordMin') });
+    required(p.confirmNewPassword, { message: this.languageService.t('validation.confirmPasswordRequired') });
     disabled(p.currentPassword, () => this.isSavingPassword());
     disabled(p.newPassword, () => this.isSavingPassword());
     disabled(p.confirmNewPassword, () => this.isSavingPassword());
@@ -142,11 +146,11 @@ export class ProfileComponent {
     if (!file) return;
 
     if (!this.ALLOWED_TYPES.includes(file.type)) {
-      this.avatarError.set('Only JPEG, PNG, WebP and GIF are allowed');
+      this.avatarError.set(this.languageService.t('profile.avatarTypeError'));
       return;
     }
     if (file.size > this.MAX_SIZE) {
-      this.avatarError.set('File size must not exceed 5 MB');
+      this.avatarError.set(this.languageService.t('profile.avatarSizeError'));
       return;
     }
 
@@ -168,7 +172,7 @@ export class ProfileComponent {
         error: (err: any) => {
           this.avatarPreview.set(null);
           this.isUploadingAvatar.set(false);
-          this.avatarError.set(err?.error?.message ?? 'Failed to upload avatar');
+          this.avatarError.set(err?.error?.message ?? this.languageService.t('profile.avatarUploadFailed'));
         },
       });
   }
@@ -201,7 +205,7 @@ export class ProfileComponent {
         this.isEditingProfile.set(false);
       });
     } catch (err: any) {
-      this.profileError.set(err?.error?.message ?? 'Failed to update profile');
+      this.profileError.set(err?.error?.message ?? this.languageService.t('profile.updateFailed'));
     } finally {
       this.isSavingProfile.set(false);
     }
@@ -233,7 +237,7 @@ export class ProfileComponent {
         this.isChangingPassword.set(false);
       });
     } catch (err: any) {
-      this.passwordError.set(err?.error?.message ?? 'Failed to update password');
+      this.passwordError.set(err?.error?.message ?? this.languageService.t('profile.passwordUpdateFailed'));
     } finally {
       this.isSavingPassword.set(false);
     }
@@ -251,8 +255,8 @@ export class ProfileComponent {
     this.dialog
       .open(ConfirmationModalComponent, {
         data: {
-          title: 'Delete account?',
-          message: 'This action is irreversible. All your data will be permanently deleted.',
+          title: this.languageService.t('profile.deleteAccountTitle'),
+          message: this.languageService.t('profile.deleteAccountMessage'),
         },
       })
       .afterClosed()

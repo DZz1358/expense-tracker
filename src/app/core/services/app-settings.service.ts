@@ -6,6 +6,7 @@ import { StorageKey } from '../../shared/local-storage/storage-key.enum';
 
 export type CurrencyCode = 'USD' | 'EUR' | 'NOK' | 'UAH' | 'GBP';
 export type ExpenseDateFormat = 'dd.MM.yyyy' | 'MMM d, y' | 'yyyy-MM-dd';
+export type AppLanguage = 'en' | 'ru';
 
 export interface ExpenseCategoryOption {
   id: string;
@@ -16,6 +17,7 @@ export interface ExpenseCategoryOption {
 }
 
 export interface AppSettings {
+  language: AppLanguage;
   currency: CurrencyCode;
   dateFormat: ExpenseDateFormat;
   defaultPageSize: number;
@@ -24,6 +26,7 @@ export interface AppSettings {
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
+  language: 'en',
   currency: 'EUR',
   dateFormat: 'dd.MM.yyyy',
   defaultPageSize: 10,

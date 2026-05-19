@@ -1,11 +1,11 @@
 <div class="custom-category-modal__header">
   <div>
-    <h3>{{ isEdit ? 'Edit category' : 'Add category' }}</h3>
+    <h3>{{ isEdit ? ('categoryModal.editTitle' | translate) : ('categoryModal.addTitle' | translate) }}</h3>
     <p>
       {{
         isEdit
-          ? 'Update how this category appears across the app.'
-          : 'Create a custom category for your own spending habits.'
+          ? ('categoryModal.editDescription' | translate)
+          : ('categoryModal.addDescription' | translate)
       }}
     </p>
   </div>
@@ -17,17 +17,17 @@
 <mat-dialog-content>
   <div class="custom-category-modal__content">
     <mat-form-field appearance="outline">
-      <mat-label>Name</mat-label>
+      <mat-label>{{ 'categoryModal.name' | translate }}</mat-label>
       <input
         matInput
         [ngModel]="label()"
         (ngModelChange)="label.set($event)"
-        placeholder="Coffee"
+        [placeholder]="'categoryModal.namePlaceholder' | translate"
       />
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Icon</mat-label>
+      <mat-label>{{ 'categoryModal.icon' | translate }}</mat-label>
       <mat-select
         [ngModel]="icon()"
         (ngModelChange)="icon.set($event)"
@@ -41,7 +41,7 @@
       </mat-select>
     </mat-form-field>
 
-    <div class="color-options" aria-label="Category color">
+    <div class="color-options" [attr.aria-label]="'categoryModal.color' | translate">
       @for (option of categoryColorOptions; track option) {
         <button
           type="button"
@@ -61,8 +61,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="close()">Cancel</button>
+  <button mat-button type="button" (click)="close()">{{ 'common.cancel' | translate }}</button>
   <button mat-flat-button type="button" (click)="save()">
-    {{ isEdit ? 'Save' : 'Add' }}
+    {{ isEdit ? ('common.save' | translate) : ('common.add' | translate) }}
   </button>
 </mat-dialog-actions>

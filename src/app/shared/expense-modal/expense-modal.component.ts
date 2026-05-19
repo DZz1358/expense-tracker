@@ -9,9 +9,12 @@ import { form, min, minLength, required, FormField, pattern } from '@angular/for
 
 import { ButtonComponent } from '../button/button.component';
 import { AppSettingsService } from '../../core/services/app-settings.service';
+import { LanguageService } from '../../core/i18n/language.service';
+import { TranslatePipe } from '../pipes/translate.pipe';
+import { CategoryLabelPipe } from '../pipes/category-label.pipe';
 @Component({
   selector: 'app-expense-modal',
-  imports: [MatIconModule, MatDialogModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField],
+  imports: [MatIconModule, MatDialogModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField, TranslatePipe, CategoryLabelPipe],
   templateUrl: './expense-modal.component.html',
   styleUrl: './expense-modal.component.scss'
 })
@@ -19,6 +22,7 @@ export class ExpenseModalComponent {
   dialogData = inject(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
   appSettingsService = inject(AppSettingsService);
+  languageService = inject(LanguageService);
 
   categories = computed(() => this.appSettingsService.categories());
 
@@ -30,14 +34,14 @@ export class ExpenseModalComponent {
   })
 
   expenseForm = form(this.expenseModel, (expense) => {
-    required(expense.amount, { message: 'Amount is required' });
-    min(expense.amount, 0.01, { message: 'Amount must be greater than 0' });
-    pattern(expense.amount, /^\d+(\.\d+)?$/, { message: 'Only numbers are allowed' });
+    required(expense.amount, { message: this.languageService.t('validation.amountRequired') });
+    min(expense.amount, 0.01, { message: this.languageService.t('validation.amountMin') });
+    pattern(expense.amount, /^\d+(\.\d+)?$/, { message: this.languageService.t('validation.onlyNumbers') });
 
-    required(expense.category, { message: 'Category is required' });
+    required(expense.category, { message: this.languageService.t('validation.categoryRequired') });
 
-    required(expense.description, { message: 'Description is required' });
-    minLength(expense.description, 2, { message: 'Description must be at least 2 characters long' });
+    required(expense.description, { message: this.languageService.t('validation.descriptionRequired') });
+    minLength(expense.description, 2, { message: this.languageService.t('validation.descriptionMin') });
   });
 
 

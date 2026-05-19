@@ -11,11 +11,11 @@
   <mat-menu #menu="matMenu">
     <button routerLink="/profile" mat-menu-item>
       <mat-icon>person</mat-icon>
-      <span>Profile</span>
+      <span>{{ 'nav.profile' | translate }}</span>
     </button>
     <button (click)="logOut()" mat-menu-item>
       <mat-icon>input</mat-icon>
-      <span>Log Out</span>
+      <span>{{ 'nav.logout' | translate }}</span>
     </button>
   </mat-menu>
 </mat-toolbar>

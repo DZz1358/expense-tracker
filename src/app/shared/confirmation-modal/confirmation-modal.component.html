@@ -16,6 +16,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="dialogRef.close(false)">Cancel</button>
-  <button mat-button color="warn" (click)="confirm()">Confirm</button>
+  <button mat-button (click)="dialogRef.close(false)">{{ 'common.cancel' | translate }}</button>
+  <button mat-button color="warn" (click)="confirm()">{{ 'common.confirm' | translate }}</button>
 </mat-dialog-actions>

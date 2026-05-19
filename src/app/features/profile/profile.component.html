@@ -2,7 +2,7 @@
 
   <div class="profile-hero">
     <label class="profile-avatar" [class.profile-avatar--loading]="isUploadingAvatar()">
-      <img [src]="avatarSrc()" alt="User avatar" />
+      <img [src]="avatarSrc()" [alt]="'profile.avatarAlt' | translate" />
       <div class="avatar-overlay">
         <mat-icon>{{ isUploadingAvatar() ? 'hourglass_top' : 'photo_camera' }}</mat-icon>
       </div>
@@ -18,7 +18,7 @@
       <p class="avatar-error" role="alert">{{ avatarError() }}</p>
     }
 
-    <h2 class="profile-name">{{ currentUser()?.name ?? 'User' }}</h2>
+    <h2 class="profile-name">{{ currentUser()?.name ?? ('profile.userFallback' | translate) }}</h2>
     <p class="profile-email">{{ currentUser()?.email ?? '' }}</p>
   </div>
 
@@ -26,14 +26,14 @@
 
     <!-- Account -->
     <section class="profile-section">
-      <h3 class="section-title">Account</h3>
+      <h3 class="section-title">{{ 'profile.account' | translate }}</h3>
       <div class="profile-card">
         @if (!isEditingProfile()) {
           <div class="profile-field profile-field--between">
             <div class="field-with-icon">
               <mat-icon class="field-icon">person</mat-icon>
               <div class="field-body">
-                <span class="field-label">Name</span>
+                <span class="field-label">{{ 'profile.name' | translate }}</span>
                 <span class="field-value">{{ currentUser()?.name ?? '—' }}</span>
               </div>
             </div>
@@ -43,7 +43,7 @@
             <div class="field-with-icon">
               <mat-icon class="field-icon">mail</mat-icon>
               <div class="field-body">
-                <span class="field-label">Email</span>
+                <span class="field-label">{{ 'profile.email' | translate }}</span>
                 <span class="field-value">{{ currentUser()?.email ?? '—' }}</span>
               </div>
             </div>
@@ -53,7 +53,7 @@
             <div class="field-with-icon">
               <mat-icon class="field-icon">cake</mat-icon>
               <div class="field-body">
-                <span class="field-label">Date of birth</span>
+                <span class="field-label">{{ 'profile.dateOfBirth' | translate }}</span>
                 <span class="field-value">
                   {{ currentUser()?.dateOfBirth ? (currentUser()!.dateOfBirth! | date: 'dd MMM yyyy') : '—' }}
                 </span>
@@ -62,20 +62,20 @@
           </div>
           <mat-divider />
           <div class="profile-field profile-field--end">
-            <button mat-stroked-button (click)="startEditProfile()">Edit</button>
+            <button mat-stroked-button (click)="startEditProfile()">{{ 'common.edit' | translate }}</button>
           </div>
         } @else {
           <form class="edit-form" novalidate (submit)="saveProfile($event)">
             <mat-form-field appearance="outline">
-              <mat-label>Name</mat-label>
-              <input matInput [formField]="profileForm.name" placeholder="Your name" />
+              <mat-label>{{ 'profile.name' | translate }}</mat-label>
+              <input matInput [formField]="profileForm.name" [placeholder]="'profile.yourName' | translate" />
               @if (profileForm.name().touched() && profileForm.name().errors().length) {
                 <mat-error>{{ profileForm.name().errors()[0].message }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Date of birth</mat-label>
+              <mat-label>{{ 'profile.dateOfBirth' | translate }}</mat-label>
               <input
                 matInput
                 [matDatepicker]="picker"
@@ -93,13 +93,13 @@
             }
 
             <div class="form-actions">
-              <button mat-button type="button" (click)="cancelEditProfile()">Cancel</button>
+              <button mat-button type="button" (click)="cancelEditProfile()">{{ 'common.cancel' | translate }}</button>
               <button
                 mat-flat-button
                 type="submit"
                 [disabled]="isSavingProfile() || profileForm().invalid()"
               >
-                {{ isSavingProfile() ? 'Saving...' : 'Save' }}
+                {{ isSavingProfile() ? ('profile.saving' | translate) : ('common.save' | translate) }}
               </button>
             </div>
           </form>
@@ -109,23 +109,23 @@
 
     <!-- Security -->
     <section class="profile-section">
-      <h3 class="section-title">Security</h3>
+      <h3 class="section-title">{{ 'profile.security' | translate }}</h3>
       <div class="profile-card">
         @if (!isChangingPassword()) {
           <div class="profile-field profile-field--between">
             <div class="field-with-icon">
               <mat-icon class="field-icon">lock</mat-icon>
               <div class="field-body">
-                <span class="field-label">Password</span>
+                <span class="field-label">{{ 'profile.password' | translate }}</span>
                 <span class="field-value">••••••••</span>
               </div>
             </div>
-            <button mat-stroked-button (click)="startChangePassword()">Change</button>
+            <button mat-stroked-button (click)="startChangePassword()">{{ 'profile.change' | translate }}</button>
           </div>
         } @else {
           <form class="edit-form" novalidate (submit)="savePassword($event)">
             <mat-form-field appearance="outline">
-              <mat-label>Current password</mat-label>
+              <mat-label>{{ 'profile.currentPassword' | translate }}</mat-label>
               <input
                 matInput
                 [type]="showCurrentPassword() ? 'text' : 'password'"
@@ -143,7 +143,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>New password</mat-label>
+              <mat-label>{{ 'profile.newPassword' | translate }}</mat-label>
               <input
                 matInput
                 [type]="showNewPassword() ? 'text' : 'password'"
@@ -161,7 +161,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Confirm new password</mat-label>
+              <mat-label>{{ 'profile.confirmNewPassword' | translate }}</mat-label>
               <input
                 matInput
                 [type]="showConfirmPassword() ? 'text' : 'password'"
@@ -174,7 +174,7 @@
                 <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
               @if (passwordMismatch()) {
-                <mat-error>Passwords do not match</mat-error>
+                <mat-error>{{ 'profile.passwordMismatch' | translate }}</mat-error>
               } @else if (passwordForm.confirmNewPassword().touched() && passwordForm.confirmNewPassword().errors().length) {
                 <mat-error>{{ passwordForm.confirmNewPassword().errors()[0].message }}</mat-error>
               }
@@ -185,13 +185,13 @@
             }
 
             <div class="form-actions">
-              <button mat-button type="button" (click)="cancelChangePassword()">Cancel</button>
+              <button mat-button type="button" (click)="cancelChangePassword()">{{ 'common.cancel' | translate }}</button>
               <button
                 mat-flat-button
                 type="submit"
                 [disabled]="isSavingPassword() || passwordForm().invalid() || passwordMismatch()"
               >
-                {{ isSavingPassword() ? 'Saving...' : 'Save' }}
+                {{ isSavingPassword() ? ('profile.saving' | translate) : ('common.save' | translate) }}
               </button>
             </div>
           </form>
@@ -201,20 +201,22 @@
 
     <!-- Appearance -->
     <section class="profile-section">
-      <h3 class="section-title">Appearance</h3>
+      <h3 class="section-title">{{ 'profile.appearance' | translate }}</h3>
       <div class="profile-card">
         <div class="profile-field profile-field--between">
           <div class="field-with-icon">
             <mat-icon class="field-icon">{{ activeTheme() }}</mat-icon>
             <div class="field-body">
-              <span class="field-label">Theme</span>
-              <span class="field-value">{{ activeTheme() === Theme.Dark ? 'Dark' : 'Light' }}</span>
+              <span class="field-label">{{ 'profile.theme' | translate }}</span>
+              <span class="field-value">
+                {{ activeTheme() === Theme.Dark ? ('profile.themeDark' | translate) : ('profile.themeLight' | translate) }}
+              </span>
             </div>
           </div>
           <mat-slide-toggle
             [checked]="activeTheme() === Theme.Dark"
             (change)="toggleTheme()"
-            aria-label="Toggle theme"
+            [attr.aria-label]="'profile.toggleTheme' | translate"
           />
         </div>
       </div>
@@ -222,18 +224,18 @@
 
     <!-- Session -->
     <section class="profile-section">
-      <h3 class="section-title">Session</h3>
+      <h3 class="section-title">{{ 'profile.session' | translate }}</h3>
       <div class="profile-card">
         <div class="profile-field profile-field--between">
           <div class="field-with-icon">
             <mat-icon class="field-icon field-icon--danger">logout</mat-icon>
             <div class="field-body">
-              <span class="field-label">Sign out</span>
-              <span class="field-value">End your current session</span>
+              <span class="field-label">{{ 'profile.signOut' | translate }}</span>
+              <span class="field-value">{{ 'profile.signOutDescription' | translate }}</span>
             </div>
           </div>
           <button mat-stroked-button class="action-button--danger" (click)="logout()">
-            Sign out
+            {{ 'profile.signOut' | translate }}
           </button>
         </div>
       </div>
@@ -241,18 +243,18 @@
 
     <!-- Danger zone -->
     <section class="profile-section profile-section--danger">
-      <h3 class="section-title section-title--danger">Danger zone</h3>
+      <h3 class="section-title section-title--danger">{{ 'profile.dangerZone' | translate }}</h3>
       <div class="profile-card profile-card--danger">
         <div class="profile-field profile-field--between">
           <div class="field-with-icon">
             <mat-icon class="field-icon field-icon--danger">delete_forever</mat-icon>
             <div class="field-body">
-              <span class="field-label">Delete account</span>
-              <span class="field-value">Permanently remove your account and all data</span>
+              <span class="field-label">{{ 'profile.deleteAccount' | translate }}</span>
+              <span class="field-value">{{ 'profile.deleteAccountDescription' | translate }}</span>
             </div>
           </div>
           <button mat-flat-button class="delete-account-button" (click)="openDeleteAccountModal()">
-            Delete
+            {{ 'common.delete' | translate }}
           </button>
         </div>
       </div>

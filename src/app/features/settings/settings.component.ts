@@ -12,13 +12,15 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { forkJoin } from 'rxjs';
 
-import { AppSettings, AppSettingsService, CurrencyCode, ExpenseDateFormat } from '../../core/services/app-settings.service';
+import { AppLanguage, AppSettings, AppSettingsService, CurrencyCode, ExpenseDateFormat } from '../../core/services/app-settings.service';
 import { IExpense } from '../../models/expense.interface';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
 import { ExpenseTableService } from '../expense-table/expense-table.service';
 import { CustomCategoryModalComponent } from './custom-category-modal/custom-category-modal.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { LanguageService } from '../../core/i18n/language.service';
 
 @Component({
   selector: 'app-settings',
@@ -31,6 +33,7 @@ import { CustomCategoryModalComponent } from './custom-category-modal/custom-cat
     MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
+    TranslatePipe,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -42,6 +45,7 @@ export class SettingsComponent {
   private readonly expenseTableService = inject(ExpenseTableService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly languageService = inject(LanguageService);
 
   readonly settings = this.appSettingsService.settings;
   readonly categories = this.appSettingsService.categories;
@@ -67,20 +71,24 @@ export class SettingsComponent {
   ];
 
   readonly pageSizeOptions = [5, 10, 25, 50];
+  readonly languageOptions: Array<{ value: AppLanguage; label: string }> = [
+    { value: 'en', label: 'English' },
+    { value: 'ru', label: 'Русский' },
+  ];
 
   updateSetting<TKey extends keyof AppSettings>(key: TKey, value: AppSettings[TKey]): void {
     this.appSettingsService.updateSetting(key, value);
-    this.setStatus('Settings saved');
+    this.setStatus(this.languageService.t('settings.saved'));
   }
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
-    this.setStatus('Theme updated');
+    this.setStatus(this.languageService.t('settings.themeUpdated'));
   }
 
   resetSettings(): void {
     this.appSettingsService.reset();
-    this.setStatus('Settings reset');
+    this.setStatus(this.languageService.t('settings.resetDone'));
   }
 
   openAddCustomCategoryModal(): void {
@@ -94,13 +102,13 @@ export class SettingsComponent {
       .subscribe((result) => {
         if (!result) return;
         this.appSettingsService.addCustomCategory(result);
-        this.setStatus('Custom category added');
+        this.setStatus(this.languageService.t('settings.categoryAdded'));
       });
   }
 
   removeCustomCategory(categoryId: string): void {
     this.appSettingsService.removeCustomCategory(categoryId);
-    this.setStatus('Custom category removed');
+    this.setStatus(this.languageService.t('settings.categoryRemoved'));
   }
 
   editCustomCategory(categoryId: string): void {
@@ -120,7 +128,7 @@ export class SettingsComponent {
       .subscribe((result) => {
         if (!result) return;
         this.appSettingsService.updateCustomCategory(category.id, result);
-        this.setStatus('Custom category updated');
+        this.setStatus(this.languageService.t('settings.categoryUpdated'));
       });
   }
 
@@ -144,9 +152,9 @@ export class SettingsComponent {
           anchor.download = `expense-tracker-${new Date().toISOString().slice(0, 10)}.json`;
           anchor.click();
           URL.revokeObjectURL(url);
-          this.finishWork('Expenses exported');
+          this.finishWork(this.languageService.t('settings.exported'));
         },
-        error: () => this.finishWork(null, 'Failed to export expenses'),
+        error: () => this.finishWork(null, this.languageService.t('settings.exportFailed')),
       });
   }
 
@@ -165,8 +173,8 @@ export class SettingsComponent {
         const expenses = this.extractExpenses(parsed);
         if (!expenses.length) {
           this.finishWork(
-            settingsImported ? 'Settings imported' : null,
-            settingsImported ? undefined : 'No expenses found in this file',
+            settingsImported ? this.languageService.t('settings.settingsImported') : null,
+            settingsImported ? undefined : this.languageService.t('settings.noExpensesInFile'),
           );
           return;
         }
@@ -174,14 +182,14 @@ export class SettingsComponent {
         forkJoin(expenses.map((expense) => this.expenseTableService.addExpense(expense)))
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
-            next: () => this.finishWork(`${expenses.length} expenses imported`),
-            error: () => this.finishWork(null, 'Failed to import expenses'),
+            next: () => this.finishWork(this.languageService.t('settings.importedCount', { count: expenses.length })),
+            error: () => this.finishWork(null, this.languageService.t('settings.importFailed')),
           });
       } catch {
-        this.finishWork(null, 'Invalid import file');
+        this.finishWork(null, this.languageService.t('settings.invalidFile'));
       }
     };
-    reader.onerror = () => this.finishWork(null, 'Failed to read import file');
+    reader.onerror = () => this.finishWork(null, this.languageService.t('settings.readFailed'));
     reader.readAsText(file);
   }
 
@@ -190,8 +198,8 @@ export class SettingsComponent {
       width: 'calc(100% - 30px)',
       maxWidth: '600px',
       data: {
-        title: 'Clear all expenses?',
-        message: 'This will permanently delete every expense in your account.',
+        title: this.languageService.t('settings.clearTitle'),
+        message: this.languageService.t('settings.clearMessage'),
       },
     })
       .afterClosed()
@@ -209,18 +217,18 @@ export class SettingsComponent {
       .subscribe({
         next: (expenses: IExpense[]) => {
           if (!expenses.length) {
-            this.finishWork('No expenses to clear');
+            this.finishWork(this.languageService.t('settings.noExpensesToClear'));
             return;
           }
 
           forkJoin(expenses.map((expense) => this.expenseTableService.deleteExpense(expense.id)))
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-              next: () => this.finishWork('All expenses cleared'),
-              error: () => this.finishWork(null, 'Failed to clear expenses'),
+              next: () => this.finishWork(this.languageService.t('settings.allCleared')),
+              error: () => this.finishWork(null, this.languageService.t('settings.clearFailed')),
             });
         },
-        error: () => this.finishWork(null, 'Failed to load expenses'),
+        error: () => this.finishWork(null, this.languageService.t('settings.loadFailed')),
       });
   }
 

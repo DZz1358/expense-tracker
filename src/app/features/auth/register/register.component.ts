@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { LanguageService } from '../../../core/i18n/language.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface RegisterData {
   name: string;
@@ -21,7 +23,7 @@ interface RegisterData {
 
 @Component({
   selector: 'app-register',
-  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField],
+  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +31,7 @@ interface RegisterData {
 export class RegisterComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly languageService = inject(LanguageService);
 
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -43,17 +46,17 @@ export class RegisterComponent {
   });
 
   registerForm = form(this.registerModel, (reg) => {
-    required(reg.name, { message: 'Name is required' });
-    minLength(reg.name, 2, { message: 'Name must be at least 2 characters' });
-    required(reg.email, { message: 'Email is required' });
-    email(reg.email, { message: 'Enter a valid email address' });
-    required(reg.password, { message: 'Password is required' });
-    minLength(reg.password, 8, { message: 'Password must be at least 8 characters' });
-    required(reg.confirmPassword, { message: 'Please confirm your password' });
+    required(reg.name, { message: this.languageService.t('validation.nameRequired') });
+    minLength(reg.name, 2, { message: this.languageService.t('validation.nameMin') });
+    required(reg.email, { message: this.languageService.t('validation.emailRequired') });
+    email(reg.email, { message: this.languageService.t('validation.emailInvalid') });
+    required(reg.password, { message: this.languageService.t('validation.passwordRequired') });
+    minLength(reg.password, 8, { message: this.languageService.t('validation.passwordMin') });
+    required(reg.confirmPassword, { message: this.languageService.t('validation.confirmPasswordRequired') });
     validate(reg.confirmPassword, ({ value, valueOf }) => {
       const confirmPassword = value();
       return confirmPassword && confirmPassword !== valueOf(reg.password)
-        ? { kind: 'passwordMismatch', message: 'Passwords do not match' }
+        ? { kind: 'passwordMismatch', message: this.languageService.t('validation.passwordMismatch') }
         : null;
     });
 
@@ -76,7 +79,7 @@ export class RegisterComponent {
         this.router.navigate(['/expenses']);
       });
     } catch (err: any) {
-      this.errorMessage.set(err.error?.message ?? 'Registration failed');
+      this.errorMessage.set(err.error?.message ?? this.languageService.t('auth.registrationFailed'));
     } finally {
       this.isLoading.set(false);
     }

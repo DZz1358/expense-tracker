@@ -1,5 +1,5 @@
 <div class="add-expense-modal__header">
-  <h3>{{ dialogData.isEdit ? "Edit expense" : "Add new expense" }}</h3>
+  <h3>{{ dialogData.isEdit ? ('expenseModal.editTitle' | translate) : ('expenseModal.addTitle' | translate) }}</h3>
   <button matIconButton (click)="dialogRef.close()">
     <mat-icon>close</mat-icon>
   </button>
@@ -9,12 +9,12 @@
   <form class="add-expense-modal__content">
     <mat-form-field appearance="outline" class="">
       <mat-label>
-        <span>Amount</span>
+        <span>{{ 'expenseModal.amount' | translate }}</span>
       </mat-label>
       <input
         matInput
         [formField]="expenseForm.amount"
-        placeholder="Enter amount"
+        [placeholder]="'expenseModal.amountPlaceholder' | translate"
         type="tel"
       />
       <mat-error>
@@ -25,13 +25,13 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Choose category</mat-label>
+      <mat-label>{{ 'expenseModal.category' | translate }}</mat-label>
       <mat-select
         [formField]="expenseForm.category"
-        placeholder="Select category"
+        [placeholder]="'expenseModal.selectCategory' | translate"
       >
         @for (category of categories(); track category.id) {
-          <mat-option [value]="category.id">{{ category.label }}</mat-option>
+          <mat-option [value]="category.id">{{ category.id | categoryLabel }}</mat-option>
         }
       </mat-select>
       <mat-error>
@@ -42,7 +42,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Expense date</mat-label>
+      <mat-label>{{ 'expenseModal.date' | translate }}</mat-label>
       <input
         [formField]="expenseForm.expenseDate"
         matInput
@@ -57,12 +57,12 @@
 
     <mat-form-field appearance="outline" class="">
       <mat-label>
-        <span>Description</span>
+        <span>{{ 'expenseModal.description' | translate }}</span>
       </mat-label>
       <textarea
         matInput
         [formField]="expenseForm.description"
-        placeholder="Enter description"
+        [placeholder]="'expenseModal.descriptionPlaceholder' | translate"
       ></textarea>
 
       <mat-error>
@@ -75,7 +75,7 @@
     <div class="add-expense-modal__actions">
       <app-button
         [appearance]="'tonal'"
-        [label]="dialogData.isEdit ? 'Save' : 'Add'"
+        [label]="dialogData.isEdit ? ('common.save' | translate) : ('common.add' | translate)"
         typeBtn="button"
         (clicked)="addExpense()"
         id="save"

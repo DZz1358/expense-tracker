@@ -11,6 +11,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { LanguageService } from '../../../core/i18n/language.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface LoginData {
   email: string;
@@ -19,7 +21,7 @@ interface LoginData {
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField],
+  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +29,7 @@ interface LoginData {
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly languageService = inject(LanguageService);
 
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -38,10 +41,10 @@ export class LoginComponent {
   })
 
   loginForm = form(this.loginModel, (login) => {
-    required(login.email, { message: 'Email is required' });
-    email(login.email, { message: 'Enter a valid email address' });
-    required(login.password, { message: 'Password is required' });
-    minLength(login.password, 8, { message: 'Password must be at least 8 characters' });
+    required(login.email, { message: this.languageService.t('validation.emailRequired') });
+    email(login.email, { message: this.languageService.t('validation.emailInvalid') });
+    required(login.password, { message: this.languageService.t('validation.passwordRequired') });
+    minLength(login.password, 8, { message: this.languageService.t('validation.passwordMin') });
 
     disabled(login.email, () => this.isLoading());
     disabled(login.password, () => this.isLoading());
@@ -60,7 +63,7 @@ export class LoginComponent {
         this.router.navigate(['/expenses']);
       });
     } catch (err: any) {
-      this.errorMessage.set(err.error?.message ?? 'Login failed');
+      this.errorMessage.set(err.error?.message ?? this.languageService.t('auth.loginFailed'));
     } finally {
       this.isLoading.set(false);
     }

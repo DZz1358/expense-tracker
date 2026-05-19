@@ -27,12 +27,14 @@ import { CategoryIconPipe } from '../../shared/pipes/category-icon.pipe';
 import { CategoryLabelPipe } from '../../shared/pipes/category-label.pipe';
 import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
 import { AppSettingsService } from '../../core/services/app-settings.service';
+import { LanguageService } from '../../core/i18n/language.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 import { ExpenseTableService } from './expense-table.service';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent, TranslatePipe],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,6 +45,7 @@ export class ExpenseTableComponent {
   expenseTableService = inject(ExpenseTableService);
   viewportServiceService = inject(ViewportServiceService);
   appSettingsService = inject(AppSettingsService);
+  languageService = inject(LanguageService);
   displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
@@ -81,7 +84,10 @@ export class ExpenseTableComponent {
   };
 
   categories = computed(() => {
-    return [{ id: '', label: 'All Categories', color: '', icon: '' }, ...this.appSettingsService.categories()]
+    return [
+      { id: '', label: this.languageService.t('category.all'), color: '', icon: '' },
+      ...this.appSettingsService.categories(),
+    ]
   })
 
   tableFormModel = signal({
@@ -167,14 +173,17 @@ export class ExpenseTableComponent {
   }
 
   public openDeleteExpenseModal(expense: IExpense): void {
-    const expenseName = expense.description?.trim() || 'Expense';
+    const expenseName = expense.description?.trim() || this.languageService.t('expenses.fallbackName');
     const amount = this.formatAmount(expense.amount);
 
     this.dialog.open(ConfirmationModalComponent, {
       ...this.dialogConfig,
       data: {
-        title: 'Delete Expense',
-        message: `Delete ${expenseName} - ${amount}? This action cannot be undone.`,
+        title: this.languageService.t('expenses.deleteTitle'),
+        message: this.languageService.t('expenses.deleteMessage', {
+          name: expenseName,
+          amount,
+        }),
         expenseId: expense.id
       },
     })
