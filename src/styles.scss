@@ -1,16 +1,19 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
-@use 'base/normalize';
-@use 'styles/theme/palettes' as palettes;
-@use 'styles/theme/function' as function;
+@use "@angular/material" as mat;
+@use "base/normalize";
+@use "styles/theme/palettes" as palettes;
+@use "styles/theme/function" as function;
 
 html {
   color-scheme: light;
-  @include mat.theme((color: palettes.$primary-palette,
+  @include mat.theme(
+    (
+      color: palettes.$primary-palette,
       typography: Roboto Mono,
       density: -2,
-    ));
+    )
+  );
 }
 
 body.dark_mode {
@@ -52,7 +55,6 @@ body {
   }
 }
 
-
 .mobile-drawer {
   position: fixed;
   top: 0;
@@ -89,7 +91,10 @@ body {
   pointer-events: auto;
 }
 
-
 [matSuffix] {
   margin-right: 8px;
+}
+
+.error-message {
+  color: #ee4c4c;
 }

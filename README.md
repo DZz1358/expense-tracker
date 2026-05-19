@@ -1,59 +1,130 @@
-# ExpenseTracker
+# Expense Tracker
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.2.
+Expense Tracker is an Angular application for tracking personal expenses. The app includes authentication, a protected dashboard layout, expense management, profile settings, theme switching, and integration with a remote REST API.
 
-## Development server
+## What the app does
 
-To start a local development server, run:
+- Register a new account and log in with email and password.
+- Store the access token locally and attach it to protected API requests.
+- Protect application routes from unauthenticated users.
+- View expenses in a responsive table/card layout.
+- Add, edit, and delete expenses through modal dialogs.
+- Filter expenses by category.
+- Sort and paginate the expenses list.
+- Manage expense categories with labels, icons, and colors.
+- Update user profile data.
+- Upload a user avatar.
+- Change account password.
+- Switch between light and dark themes.
+- Log out or delete the account.
 
-```bash
-ng serve
+`Analytics` and `Settings` routes already exist in the navigation, but their screens are currently placeholders.
+
+## Tech stack
+
+- Angular 21
+- Angular Material
+- Angular Router
+- Angular Signals and signal forms
+- RxJS
+- TypeScript
+- SCSS
+- Karma and Jasmine for unit tests
+
+## API
+
+The frontend uses the API URL from [src/environments/environment.ts](/home/denys/expense-tracker/src/environments/environment.ts):
+
+```ts
+https://test-backend-rho-seven.vercel.app
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Main API areas used by the app:
 
-## Code scaffolding
+- `/auth/register`
+- `/auth/login`
+- `/auth/account`
+- `/users/me`
+- `/users/me/avatar`
+- `/users/me/password`
+- `/expenses`
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Project structure
 
-```bash
-ng generate component component-name
+```text
+src/app
+├── core
+│   ├── guards
+│   ├── interceptors
+│   ├── models
+│   └── services
+├── features
+│   ├── analytics
+│   ├── auth
+│   ├── expense-table
+│   ├── profile
+│   └── settings
+├── layout
+├── models
+├── mocks
+└── shared
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Getting started
+
+Install dependencies:
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+Start the development server:
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open the app in your browser:
 
-## Running unit tests
+```text
+http://localhost:4200
+```
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+The app reloads automatically when source files change.
+
+## Available scripts
 
 ```bash
-ng test
+npm start
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Runs the local Angular development server.
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Builds the production version of the app into the `dist/` directory.
 
-## Additional Resources
+```bash
+npm run watch
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Builds the app in watch mode with the development configuration.
+
+```bash
+npm test
+```
+
+Runs unit tests with Karma and Jasmine.
+
+## Main routes
+
+- `/login` - sign in page.
+- `/register` - create account page.
+- `/expenses` - main expense list.
+- `/analytics` - analytics placeholder.
+- `/profile` - user profile and account settings.
+- `/settings` - settings placeholder.
+
+Unknown routes redirect back into the application shell.
