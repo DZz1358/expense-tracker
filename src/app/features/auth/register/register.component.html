@@ -100,9 +100,7 @@
           <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
 
-        @if (passwordMismatch()) {
-          <mat-error>Passwords do not match</mat-error>
-        } @else if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().errors().length) {
+        @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().errors().length) {
           <mat-error>
             @for (error of registerForm.confirmPassword().errors(); track error) {
               <span>{{ error.message }}</span>
@@ -115,7 +113,7 @@
         mat-flat-button
         color="primary"
         type="submit"
-        [disabled]="isLoading() || registerForm().invalid() || passwordMismatch()"
+        [disabled]="isLoading() || registerForm().invalid()"
       >
         {{ isLoading() ? "Creating account..." : "Create account" }}
       </button>

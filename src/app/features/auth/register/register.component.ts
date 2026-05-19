@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
-import { disabled, email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
+import { disabled, email, form, FormField, minLength, required, submit, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -50,6 +50,12 @@ export class RegisterComponent {
     required(reg.password, { message: 'Password is required' });
     minLength(reg.password, 8, { message: 'Password must be at least 8 characters' });
     required(reg.confirmPassword, { message: 'Please confirm your password' });
+    validate(reg.confirmPassword, ({ value, valueOf }) => {
+      const confirmPassword = value();
+      return confirmPassword && confirmPassword !== valueOf(reg.password)
+        ? { kind: 'passwordMismatch', message: 'Passwords do not match' }
+        : null;
+    });
 
     disabled(reg.name, () => this.isLoading());
     disabled(reg.email, () => this.isLoading());
@@ -57,14 +63,8 @@ export class RegisterComponent {
     disabled(reg.confirmPassword, () => this.isLoading());
   });
 
-  readonly passwordMismatch = computed(() => {
-    const { password, confirmPassword } = this.registerModel();
-    return confirmPassword.length > 0 && password !== confirmPassword;
-  });
-
   async onSubmit(event: Event) {
     event.preventDefault();
-    if (this.passwordMismatch()) return;
     this.isLoading.set(true);
     this.errorMessage.set(null);
     try {

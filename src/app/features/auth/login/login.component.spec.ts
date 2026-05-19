@@ -41,10 +41,10 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('marks fields as touched when the form is submitted while invalid', () => {
-    component.submit();
+  it('marks fields as touched when the form is submitted while invalid', async () => {
+    await component.onSubmit(new SubmitEvent('submit'));
 
-    expect(component.form.touched).toBeTrue();
+    expect(component.loginForm().touched()).toBeTrue();
     expect(authServiceSpy.login).not.toHaveBeenCalled();
   });
 });

@@ -77,6 +77,9 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/styles"]
+            },
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",

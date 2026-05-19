@@ -8,9 +8,11 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
 import { LoginResponse } from '../models/auth.models';
 import { AuthService } from './auth.service';
+import { AuthTokenStorageService } from './auth-token-storage.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let tokenStorage: AuthTokenStorageService;
   let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
@@ -21,6 +23,7 @@ describe('AuthService', () => {
     });
 
     service = TestBed.inject(AuthService);
+    tokenStorage = TestBed.inject(AuthTokenStorageService);
     httpTestingController = TestBed.inject(HttpTestingController);
   });
 
@@ -61,7 +64,7 @@ describe('AuthService', () => {
 
     request.flush(response);
 
-    expect(service.getToken()).toBe('token-123');
+    expect(tokenStorage.getToken()).toBe('token-123');
     expect(service.isAuthenticated()).toBeTrue();
   });
 
@@ -70,7 +73,7 @@ describe('AuthService', () => {
 
     service.logout();
 
-    expect(service.getToken()).toBeNull();
+    expect(tokenStorage.getToken()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
   });
 });
