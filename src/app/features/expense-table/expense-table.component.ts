@@ -10,13 +10,12 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
-import { DatePipe } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { form, FormField } from '@angular/forms/signals';
 import { MatSelectModule } from '@angular/material/select';
 import { httpResource } from '@angular/common/http';
 
-import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 import { IExpense } from '../../models/expense.interface';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
 import { environment } from '../../../environments/environment';
@@ -27,12 +26,13 @@ import { CategoryColorPipe } from '../../shared/pipes/category-color.pipe';
 import { CategoryIconPipe } from '../../shared/pipes/category-icon.pipe';
 import { CategoryLabelPipe } from '../../shared/pipes/category-label.pipe';
 import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
+import { AppSettingsService } from '../../core/services/app-settings.service';
 
 import { ExpenseTableService } from './expense-table.service';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, DatePipe, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -42,13 +42,15 @@ export class ExpenseTableComponent {
   destroyRef = inject(DestroyRef);
   expenseTableService = inject(ExpenseTableService);
   viewportServiceService = inject(ViewportServiceService);
+  appSettingsService = inject(AppSettingsService);
   displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
   dataSource = new MatTableDataSource<any>([]);
 
   length = computed(() => this.filteredData().length);
-  pageSize = signal<number>(10);
+  pageSize = signal<number>(this.appSettingsService.settings().defaultPageSize);
   pageNumber = signal<number>(0);
   readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
+  readonly settings = this.appSettingsService.settings;
 
   allData = computed<IExpense[]>(() => this.dataResource.value() ?? []);
   hasExpenses = computed(() => this.allData().length > 0);
@@ -79,7 +81,7 @@ export class ExpenseTableComponent {
   };
 
   categories = computed(() => {
-    return [{ id: '', label: 'All Categories', color: '', icon: '' }, ...EXPENSE_CATEGORY_LIST]
+    return [{ id: '', label: 'All Categories', color: '', icon: '' }, ...this.appSettingsService.categories()]
   })
 
   tableFormModel = signal({
@@ -164,24 +166,37 @@ export class ExpenseTableComponent {
       });
   }
 
-  public openDeleteExpenseModal(expenseId: string): void {
+  public openDeleteExpenseModal(expense: IExpense): void {
+    const expenseName = expense.description?.trim() || 'Expense';
+    const amount = this.formatAmount(expense.amount);
+
     this.dialog.open(ConfirmationModalComponent, {
       ...this.dialogConfig,
       data: {
         title: 'Delete Expense',
-        message: 'Are you sure you want to delete this expense?',
-        expenseId: expenseId
+        message: `Delete ${expenseName} - ${amount}? This action cannot be undone.`,
+        expenseId: expense.id
       },
     })
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ expenseId, confirmed }) => {
-        if (!confirmed) return;
-        this.expenseTableService.deleteExpense(expenseId)
+      .subscribe((result) => {
+        if (!result?.confirmed) return;
+        this.expenseTableService.deleteExpense(result.expenseId)
           .subscribe(() => {
             this.dataResource.reload();
           });
       });
   }
 
+  public formatAmount(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: this.settings().currency,
+    }).format(amount);
+  }
+
+  public formatExpenseDate(date: string): string {
+    return formatDate(date, this.settings().dateFormat, 'en-GB');
+  }
 }

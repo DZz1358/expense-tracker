@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { form, min, minLength, required, FormField, pattern } from '@angular/forms/signals';
 
 import { ButtonComponent } from '../button/button.component';
-import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
+import { AppSettingsService } from '../../core/services/app-settings.service';
 @Component({
   selector: 'app-expense-modal',
   imports: [MatIconModule, MatDialogModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatButtonModule, ButtonComponent, FormField],
@@ -18,8 +18,9 @@ import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 export class ExpenseModalComponent {
   dialogData = inject(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
+  appSettingsService = inject(AppSettingsService);
 
-  categories = signal(EXPENSE_CATEGORY_LIST);
+  categories = computed(() => this.appSettingsService.categories());
 
   expenseModel = signal({
     amount: '',

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ExpenseModalComponent } from './expense-modal.component';
 
@@ -8,7 +9,11 @@ describe('ExpenseModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ExpenseModalComponent]
+      imports: [ExpenseModalComponent],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: { isEdit: false, expense: null } },
+        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
+      ],
     })
     .compileComponents();
 

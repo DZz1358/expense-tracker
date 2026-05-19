@@ -1,1 +1,252 @@
-<p>settings works!</p>
+<div class="settings-page">
+  <header class="settings-header">
+    <h2>Settings</h2>
+    <p>Control how expenses are displayed, imported, exported, and cleared.</p>
+  </header>
+
+  <div class="settings-content">
+    <section class="settings-section">
+      <h3 class="section-title">Preferences</h3>
+      <div class="settings-card">
+        <div class="settings-field">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">payments</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Currency</span>
+              <span class="field-value">Used when displaying expense amounts</span>
+            </div>
+          </div>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Currency</mat-label>
+            <mat-select
+              [ngModel]="settings().currency"
+              (ngModelChange)="updateSetting('currency', $event)"
+            >
+              @for (currency of currencyOptions; track currency.value) {
+                <mat-option [value]="currency.value">{{ currency.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider />
+
+        <div class="settings-field">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">event</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Date format</span>
+              <span class="field-value">Used in expense lists</span>
+            </div>
+          </div>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Date format</mat-label>
+            <mat-select
+              [ngModel]="settings().dateFormat"
+              (ngModelChange)="updateSetting('dateFormat', $event)"
+            >
+              @for (format of dateFormatOptions; track format.value) {
+                <mat-option [value]="format.value">{{ format.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="settings-field">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">view_list</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Default page size</span>
+              <span class="field-value">Initial number of expenses per page</span>
+            </div>
+          </div>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Rows</mat-label>
+            <mat-select
+              [ngModel]="settings().defaultPageSize"
+              (ngModelChange)="updateSetting('defaultPageSize', $event)"
+            >
+              @for (pageSize of pageSizeOptions; track pageSize) {
+                <mat-option [value]="pageSize">{{ pageSize }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h3 class="section-title">Premium</h3>
+      <div class="settings-card">
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">new_label</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Custom categories</span>
+              <span class="field-value">Create categories for your own spending habits</span>
+            </div>
+          </div>
+          <button mat-flat-button type="button" (click)="openAddCustomCategoryModal()">
+            Add category
+          </button>
+        </div>
+
+        @if (settings().customCategories.length) {
+          <mat-divider />
+          <div class="custom-category-list">
+            @for (category of settings().customCategories; track category.id) {
+              <div class="custom-category-item">
+                <span class="category-preview" [style.color]="category.color">
+                  <mat-icon>{{ category.icon }}</mat-icon>
+                  {{ category.label }}
+                </span>
+                <div class="custom-category-actions">
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="category-action-button"
+                    (click)="editCustomCategory(category.id)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    (click)="removeCustomCategory(category.id)"
+                    [attr.aria-label]="'Remove ' + category.label"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h3 class="section-title">Experience</h3>
+      <div class="settings-card">
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">{{ activeTheme() }}</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Theme</span>
+              <span class="field-value">{{ activeTheme() === Theme.Dark ? 'Dark' : 'Light' }}</span>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="activeTheme() === Theme.Dark"
+            (change)="toggleTheme()"
+            aria-label="Toggle theme"
+          />
+        </div>
+
+        <mat-divider />
+
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">notifications</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Notifications</span>
+              <span class="field-value">Preference saved for future reminders</span>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="settings().notificationsEnabled"
+            (change)="updateSetting('notificationsEnabled', $event.checked)"
+            aria-label="Toggle notifications"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h3 class="section-title">Data</h3>
+      <div class="settings-card">
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">download</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Export data</span>
+              <span class="field-value">Save expenses and current settings as JSON</span>
+            </div>
+          </div>
+          <button mat-stroked-button type="button" [disabled]="isWorking()" (click)="exportExpenses()">
+            Export
+          </button>
+        </div>
+
+        <mat-divider />
+
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">upload_file</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Import data</span>
+              <span class="field-value">Import expenses from a JSON export</span>
+            </div>
+          </div>
+          <input
+            #importInput
+            type="file"
+            accept="application/json,.json"
+            hidden
+            (change)="importExpenses($event)"
+          />
+          <button mat-stroked-button type="button" [disabled]="isWorking()" (click)="importInput.click()">
+            Import
+          </button>
+        </div>
+
+        <mat-divider />
+
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon">restart_alt</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Reset settings</span>
+              <span class="field-value">Restore display and preference defaults</span>
+            </div>
+          </div>
+          <button mat-stroked-button type="button" [disabled]="isWorking()" (click)="resetSettings()">
+            Reset
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section settings-section--danger">
+      <h3 class="section-title section-title--danger">Danger zone</h3>
+      <div class="settings-card settings-card--danger">
+        <div class="settings-field settings-field--compact">
+          <div class="field-with-icon">
+            <mat-icon class="field-icon field-icon--danger">delete_sweep</mat-icon>
+            <div class="field-body">
+              <span class="field-label">Clear all expenses</span>
+              <span class="field-value">Permanently delete every expense</span>
+            </div>
+          </div>
+          <button
+            mat-flat-button
+            class="danger-button"
+            type="button"
+            [disabled]="isWorking()"
+            (click)="openClearExpensesModal()"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    </section>
+
+    @if (statusMessage()) {
+      <p class="settings-message">{{ statusMessage() }}</p>
+    }
+
+    @if (errorMessage()) {
+      <p class="settings-message settings-message--error" role="alert">{{ errorMessage() }}</p>
+    }
+  </div>
+</div>

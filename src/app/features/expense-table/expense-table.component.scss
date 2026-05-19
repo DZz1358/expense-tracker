@@ -73,6 +73,19 @@
   }
 }
 
+.error-state {
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon,
+  h3 {
+    color: var(--mat-sys-error);
+  }
+
+  button {
+    margin-top: 1rem;
+  }
+}
+
 .empty-state-mobile {
   min-height: 240px;
   border-radius: 12px;
