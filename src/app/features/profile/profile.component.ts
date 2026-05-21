@@ -76,6 +76,7 @@ export class ProfileComponent {
   readonly profileError = signal<string | null>(null);
   readonly passwordError = signal<string | null>(null);
   readonly passwordSuccess = signal(false);
+  readonly accountDeletionError = signal<string | null>(null);
   readonly showCurrentPassword = signal(false);
   readonly showNewPassword = signal(false);
   readonly showConfirmPassword = signal(false);
@@ -252,18 +253,35 @@ export class ProfileComponent {
   }
 
   openDeleteAccountModal(): void {
+    this.accountDeletionError.set(null);
+
     this.dialog
       .open(ConfirmationModalComponent, {
+        width: 'calc(100% - 30px)',
+        maxWidth: '600px',
         data: {
           title: this.languageService.t('profile.deleteAccountTitle'),
           message: this.languageService.t('profile.deleteAccountMessage'),
+          confirmationText: 'DELETE',
+          passwordRequired: true,
+          passwordLabel: this.languageService.t('profile.currentPassword'),
+          passwordPlaceholder: this.languageService.t('auth.passwordPlaceholder'),
+          confirmButtonLabel: this.languageService.t('profile.deleteAccount'),
         },
       })
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result?.confirmed) return;
-        this.authService.deleteAccount().subscribe();
+        this.authService.deleteAccount(result.password ?? '')
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            error: (err: any) => {
+              this.accountDeletionError.set(
+                err?.error?.message ?? this.languageService.t('profile.deleteAccountFailed'),
+              );
+            },
+          });
       });
   }
 }

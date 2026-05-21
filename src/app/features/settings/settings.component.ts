@@ -194,41 +194,48 @@ export class SettingsComponent {
   }
 
   openClearExpensesModal(): void {
-    this.dialog.open(ConfirmationModalComponent, {
-      width: 'calc(100% - 30px)',
-      maxWidth: '600px',
-      data: {
-        title: this.languageService.t('settings.clearTitle'),
-        message: this.languageService.t('settings.clearMessage'),
-      },
-    })
-      .afterClosed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (!result?.confirmed) return;
-        this.clearAllExpenses();
-      });
-  }
-
-  private clearAllExpenses(): void {
     this.startWork();
     this.expenseTableService.getAllExpenses()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (expenses: IExpense[]) => {
+          this.finishWork(null);
+
           if (!expenses.length) {
-            this.finishWork(this.languageService.t('settings.noExpensesToClear'));
+            this.setStatus(this.languageService.t('settings.noExpensesToClear'));
             return;
           }
 
-          forkJoin(expenses.map((expense) => this.expenseTableService.deleteExpense(expense.id)))
+          this.dialog.open(ConfirmationModalComponent, {
+            width: 'calc(100% - 30px)',
+            maxWidth: '600px',
+            data: {
+              title: this.languageService.t('settings.clearTitle'),
+              message: this.languageService.t('settings.clearMessageWithCount', {
+                count: expenses.length,
+              }),
+              confirmationText: 'DELETE',
+              confirmButtonLabel: this.languageService.t('common.delete'),
+            },
+          })
+            .afterClosed()
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: () => this.finishWork(this.languageService.t('settings.allCleared')),
-              error: () => this.finishWork(null, this.languageService.t('settings.clearFailed')),
+            .subscribe((result) => {
+              if (!result?.confirmed) return;
+              this.clearExpenses(expenses);
             });
         },
         error: () => this.finishWork(null, this.languageService.t('settings.loadFailed')),
+      });
+  }
+
+  private clearExpenses(expenses: IExpense[]): void {
+    this.startWork();
+    forkJoin(expenses.map((expense) => this.expenseTableService.deleteExpense(expense.id)))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.finishWork(this.languageService.t('settings.allCleared')),
+        error: () => this.finishWork(null, this.languageService.t('settings.clearFailed')),
       });
   }
 

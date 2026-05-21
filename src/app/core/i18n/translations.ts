@@ -13,6 +13,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.reset': 'Reset',
     'common.retry': 'Retry',
     'common.save': 'Save',
+    'common.confirmationText': 'Confirmation text',
+    'common.typeToConfirm': 'Type {value} to confirm.',
 
     'nav.analytics': 'Analytics',
     'nav.expenses': 'Expenses',
@@ -161,6 +163,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.clearTitle': 'Clear all expenses?',
     'settings.clearMessage':
       'This will permanently delete every expense in your account.',
+    'settings.clearMessageWithCount':
+      'This will permanently delete {count} expenses in your account.',
     'settings.saved': 'Settings saved',
     'settings.themeUpdated': 'Theme updated',
     'settings.resetDone': 'Settings reset',
@@ -208,6 +212,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'profile.deleteAccountTitle': 'Delete account?',
     'profile.deleteAccountMessage':
       'This action is irreversible. All your data will be permanently deleted.',
+    'profile.deleteAccountFailed': 'Failed to delete account',
     'profile.change': 'Change',
     'profile.saving': 'Saving...',
     'profile.avatarTypeError': 'Only JPEG, PNG, WebP and GIF are allowed',
@@ -230,6 +235,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.reset': 'Сбросить',
     'common.retry': 'Повторить',
     'common.save': 'Сохранить',
+    'common.confirmationText': 'Текст подтверждения',
+    'common.typeToConfirm': 'Введи {value}, чтобы подтвердить.',
 
     'nav.analytics': 'Аналитика',
     'nav.expenses': 'Расходы',
@@ -376,6 +383,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.clearTitle': 'Очистить все расходы?',
     'settings.clearMessage':
       'Это навсегда удалит все расходы в твоём аккаунте.',
+    'settings.clearMessageWithCount':
+      'Это навсегда удалит расходы в твоём аккаунте: {count}.',
     'settings.saved': 'Настройки сохранены',
     'settings.themeUpdated': 'Тема обновлена',
     'settings.resetDone': 'Настройки сброшены',
@@ -422,6 +431,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'profile.deleteAccountTitle': 'Удалить аккаунт?',
     'profile.deleteAccountMessage':
       'Это действие необратимо. Все твои данные будут удалены навсегда.',
+    'profile.deleteAccountFailed': 'Не удалось удалить аккаунт',
     'profile.change': 'Изменить',
     'profile.saving': 'Сохраняем...',
     'profile.avatarTypeError': 'Разрешены только JPEG, PNG, WebP и GIF',

@@ -13,9 +13,50 @@
         : "Are you sure you want to delete this item?"
     }}
   </p>
+
+  @if (dialogData.confirmationText) {
+    <p class="confirmation-modal__hint">
+      {{ 'common.typeToConfirm' | translate: { value: dialogData.confirmationText } }}
+    </p>
+
+    <mat-form-field appearance="outline" class="confirmation-modal__field">
+      <mat-label>{{ dialogData.confirmationLabel ?? ('common.confirmationText' | translate) }}</mat-label>
+      <input
+        matInput
+        autocomplete="off"
+        [ngModel]="confirmationInput()"
+        (ngModelChange)="confirmationInput.set($event)"
+      />
+    </mat-form-field>
+  }
+
+  @if (dialogData.passwordRequired) {
+    <mat-form-field appearance="outline" class="confirmation-modal__field">
+      <mat-label>{{ dialogData.passwordLabel ?? ('auth.password' | translate) }}</mat-label>
+      <input
+        matInput
+        autocomplete="current-password"
+        [type]="showPassword() ? 'text' : 'password'"
+        [placeholder]="dialogData.passwordPlaceholder ?? ''"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="showPassword.set(!showPassword())"
+        [attr.aria-label]="showPassword() ? ('auth.hidePassword' | translate) : ('auth.showPassword' | translate)"
+      >
+        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="dialogRef.close(false)">{{ 'common.cancel' | translate }}</button>
-  <button mat-button color="warn" (click)="confirm()">{{ 'common.confirm' | translate }}</button>
+  <button mat-button color="warn" (click)="confirm()" [disabled]="!canConfirm()">
+    {{ dialogData.confirmButtonLabel ?? ('common.confirm' | translate) }}
+  </button>
 </mat-dialog-actions>

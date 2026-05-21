@@ -257,6 +257,9 @@
             {{ 'common.delete' | translate }}
           </button>
         </div>
+        @if (accountDeletionError()) {
+          <p class="form-error" role="alert">{{ accountDeletionError() }}</p>
+        }
       </div>
     </section>
 

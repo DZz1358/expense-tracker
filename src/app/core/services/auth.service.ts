@@ -58,8 +58,10 @@ export class AuthService {
     this.localStorageService.setItem(StorageKey.User, user);
   }
 
-  deleteAccount(): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/auth/account`).pipe(
+  deleteAccount(password: string): Observable<void> {
+    return this.http.request<void>('DELETE', `${environment.apiUrl}/auth/account`, {
+      body: { password },
+    }).pipe(
       tap(() => {
         this.tokenStorage.clearToken();
         this.localStorageService.removeItem(StorageKey.User);

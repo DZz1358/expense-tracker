@@ -4,6 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 import { LoginResponse } from '../models/auth.models';
@@ -14,17 +15,24 @@ describe('AuthService', () => {
   let service: AuthService;
   let tokenStorage: AuthTokenStorageService;
   let httpTestingController: HttpTestingController;
+  let router: Router;
 
   beforeEach(() => {
     localStorage.clear();
 
     TestBed.configureTestingModule({
-      providers: [AuthService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        AuthService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
     });
 
     service = TestBed.inject(AuthService);
     tokenStorage = TestBed.inject(AuthTokenStorageService);
     httpTestingController = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
   });
 
   afterEach(() => {
@@ -69,11 +77,13 @@ describe('AuthService', () => {
   });
 
   it('removes the token on logout', () => {
+    spyOn(router, 'navigate').and.resolveTo(true);
     localStorage.setItem('access_token', 'token-123');
 
     service.logout();
 
     expect(tokenStorage.getToken()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
 });

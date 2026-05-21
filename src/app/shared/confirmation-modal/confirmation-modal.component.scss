@@ -13,6 +13,16 @@
   flex-direction: column;
 }
 
+.confirmation-modal__hint {
+  margin: 1rem 0 0.75rem;
+  font-weight: 600;
+}
+
+.confirmation-modal__field {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
 .add-expense-modal__actions {
   display: flex;
   justify-content: flex-end;
