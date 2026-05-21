@@ -1,1 +1,147 @@
-<p>analytics works!</p>
+<div class="analytics-page">
+  <header class="analytics-header">
+    <div>
+      <h2>{{ 'analytics.title' | translate }}</h2>
+      <p>{{ 'analytics.subtitle' | translate }}</p>
+    </div>
+
+    <mat-button-toggle-group
+      class="period-toggle"
+      [value]="period()"
+      (change)="setPeriod($event.value)"
+      [attr.aria-label]="'analytics.period' | translate"
+    >
+      @for (option of periodOptions; track option.value) {
+        <mat-button-toggle [value]="option.value">
+          {{ option.labelKey | translate }}
+        </mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </header>
+
+  @if (dataResource.isLoading()) {
+    <section class="analytics-state">
+      <mat-icon>hourglass_top</mat-icon>
+      <h3>{{ 'analytics.loadingTitle' | translate }}</h3>
+      <p>{{ 'analytics.loadingBody' | translate }}</p>
+    </section>
+  } @else if (dataResource.error()) {
+    <section class="analytics-state analytics-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <h3>{{ 'analytics.failedTitle' | translate }}</h3>
+      <p>{{ 'analytics.failedBody' | translate }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </section>
+  } @else if (!hasExpenses()) {
+    <section class="analytics-state">
+      <mat-icon>query_stats</mat-icon>
+      <h3>{{ 'analytics.emptyTitle' | translate }}</h3>
+      <p>{{ 'analytics.emptyBody' | translate }}</p>
+    </section>
+  } @else {
+    <section class="summary-grid" [attr.aria-label]="'analytics.summary' | translate">
+      <article class="summary-card">
+        <span class="summary-icon summary-icon--primary">
+          <mat-icon>payments</mat-icon>
+        </span>
+        <div>
+          <span class="summary-label">{{ 'analytics.totalSpent' | translate }}</span>
+          <strong>{{ totalAmount() }}</strong>
+          <small>{{ previousChange() }}</small>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon summary-icon--success">
+          <mat-icon>calendar_month</mat-icon>
+        </span>
+        <div>
+          <span class="summary-label">{{ 'analytics.averagePerDay' | translate }}</span>
+          <strong>{{ averagePerDay() }}</strong>
+          <small>{{ 'analytics.activeDayAverage' | translate }}</small>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon summary-icon--warning">
+          <mat-icon>trending_up</mat-icon>
+        </span>
+        <div>
+          <span class="summary-label">{{ 'analytics.biggestExpense' | translate }}</span>
+          <strong>{{ biggestExpenseAmount() }}</strong>
+          <small>{{ viewModel().biggestExpense?.description || ('expenses.noDescription' | translate) }}</small>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon summary-icon--accent">
+          <mat-icon>category</mat-icon>
+        </span>
+        <div>
+          <span class="summary-label">{{ 'analytics.topCategory' | translate }}</span>
+          <strong>{{ viewModel().topCategory?.label }}</strong>
+          <small>{{ topCategoryAmount() }}</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="analytics-grid">
+      <article class="analytics-panel analytics-panel--large">
+        <div class="panel-header">
+          <div>
+            <h3>{{ 'analytics.spendingTimeline' | translate }}</h3>
+            <p>{{ 'analytics.timelineDescription' | translate }}</p>
+          </div>
+        </div>
+        <div
+          echarts
+          class="analytics-chart analytics-chart--timeline"
+          [options]="timelineChartOptions()"
+          [initOpts]="chartInitOptions"
+        ></div>
+      </article>
+
+      <article class="analytics-panel">
+        <div class="panel-header">
+          <div>
+            <h3>{{ 'analytics.categoryBreakdown' | translate }}</h3>
+            <p>{{ 'analytics.categoryDescription' | translate }}</p>
+          </div>
+        </div>
+        <div
+          echarts
+          class="analytics-chart analytics-chart--donut"
+          [options]="categoryChartOptions()"
+          [initOpts]="chartInitOptions"
+        ></div>
+      </article>
+    </section>
+
+    <section class="analytics-panel category-table">
+      <div class="panel-header">
+        <div>
+          <h3>{{ 'analytics.categoryDetails' | translate }}</h3>
+          <p>{{ 'analytics.categoryDetailsDescription' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="category-list">
+        @for (category of viewModel().categoryTotals; track category.id) {
+          <div class="category-row">
+            <div class="category-main">
+              <span class="category-dot" [style.background]="category.color"></span>
+              <span>{{ category.label }}</span>
+            </div>
+            <div class="category-meta">
+              <span>{{ category.count }} {{ 'analytics.expensesCount' | translate }}</span>
+              <strong>{{ formatAmount(category.total) }}</strong>
+              <span>{{ category.percentage | number: '1.0-1' }}%</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
