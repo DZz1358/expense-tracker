@@ -74,7 +74,6 @@ export class SettingsComponent {
     label: formatDate('2026-12-31T12:00:00', value, this.languageService.dateLocale()),
   })));
 
-  readonly pageSizeOptions = [5, 10, 25, 50];
   readonly languageOptions: Array<{ value: AppLanguage; label: string }> = [
     { value: 'en', label: 'English' },
     { value: 'ru', label: 'Русский' },
@@ -277,10 +276,6 @@ export class SettingsComponent {
     const dateFormat = settings.dateFormat;
     if (dateFormat && this.dateFormatOptions().some((option) => option.value === dateFormat)) {
       this.appSettingsService.updateSetting('dateFormat', dateFormat);
-      imported = true;
-    }
-    if (this.pageSizeOptions.includes(Number(settings.defaultPageSize))) {
-      this.appSettingsService.updateSetting('defaultPageSize', Number(settings.defaultPageSize));
       imported = true;
     }
     if (typeof settings.notificationsEnabled === 'boolean') {

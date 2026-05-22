@@ -20,7 +20,6 @@ export interface AppSettings {
   language: AppLanguage;
   currency: CurrencyCode;
   dateFormat: ExpenseDateFormat;
-  defaultPageSize: number;
   notificationsEnabled: boolean;
   customCategories: ExpenseCategoryOption[];
 }
@@ -29,7 +28,6 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   language: 'en',
   currency: 'EUR',
   dateFormat: 'dd.MM.yyyy',
-  defaultPageSize: 10,
   notificationsEnabled: false,
   customCategories: [],
 };

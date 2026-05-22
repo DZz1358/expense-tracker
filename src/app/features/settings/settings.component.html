@@ -75,26 +75,6 @@
           </mat-form-field>
         </div>
 
-        <div class="settings-field">
-          <div class="field-with-icon">
-            <mat-icon class="field-icon">view_list</mat-icon>
-            <div class="field-body">
-              <span class="field-label">{{ 'settings.defaultPageSize' | translate }}</span>
-              <span class="field-value">{{ 'settings.defaultPageSizeDescription' | translate }}</span>
-            </div>
-          </div>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>{{ 'settings.rows' | translate }}</mat-label>
-            <mat-select
-              [ngModel]="settings().defaultPageSize"
-              (ngModelChange)="updateSetting('defaultPageSize', $event)"
-            >
-              @for (pageSize of pageSizeOptions; track pageSize) {
-                <mat-option [value]="pageSize">{{ pageSize }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
       </div>
     </section>
 

@@ -173,10 +173,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.currencyDescription': 'Used when displaying expense amounts',
     'settings.dateFormat': 'Date format',
     'settings.dateFormatDescription': 'Used in expense lists',
-    'settings.defaultPageSize': 'Default page size',
-    'settings.defaultPageSizeDescription':
-      'Initial number of expenses per page',
-    'settings.rows': 'Rows',
     'settings.premium': 'Premium',
     'settings.customCategories': 'Custom categories',
     'settings.customCategoriesDescription':
@@ -434,10 +430,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.currencyDescription': 'Используется при отображении сумм',
     'settings.dateFormat': 'Формат даты',
     'settings.dateFormatDescription': 'Используется в списках расходов',
-    'settings.defaultPageSize': 'Размер страницы',
-    'settings.defaultPageSizeDescription':
-      'Начальное количество расходов на странице',
-    'settings.rows': 'Строки',
     'settings.premium': 'Премиум',
     'settings.customCategories': 'Кастомные категории',
     'settings.customCategoriesDescription':
@@ -691,10 +683,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.currencyDescription': 'Використовується для відображення сум',
     'settings.dateFormat': 'Формат дати',
     'settings.dateFormatDescription': 'Використовується у списках витрат',
-    'settings.defaultPageSize': 'Розмір сторінки',
-    'settings.defaultPageSizeDescription':
-      'Початкова кількість витрат на сторінці',
-    'settings.rows': 'Рядки',
     'settings.premium': 'Преміум',
     'settings.customCategories': 'Кастомні категорії',
     'settings.customCategoriesDescription':

@@ -50,7 +50,7 @@ export class ExpenseTableComponent {
   dataSource = new MatTableDataSource<any>([]);
 
   length = computed(() => this.filteredData().length);
-  pageSize = signal<number>(this.appSettingsService.settings().defaultPageSize);
+  pageSize = signal<number>(10);
   pageNumber = signal<number>(0);
   readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
   readonly settings = this.appSettingsService.settings;
