@@ -36,7 +36,7 @@
   margin: 1rem;
   overflow: auto;
   border-radius: 12px;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--mat-sys-outline-variant);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
 }
 
@@ -52,13 +52,13 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #5f6368;
+  color: var(--mat-sys-on-surface-variant);
 
   mat-icon {
     width: 48px;
     height: 48px;
     font-size: 48px;
-    color: #9aa0a6;
+    color: var(--mat-sys-outline);
     margin-bottom: 1rem;
   }
 
@@ -68,8 +68,12 @@
   }
 
   h3 {
-    color: #202124;
+    color: var(--mat-sys-on-surface);
     margin-bottom: 0.5rem;
+  }
+
+  button {
+    margin-top: 1rem;
   }
 }
 
@@ -89,7 +93,7 @@
 .empty-state-mobile {
   min-height: 240px;
   border-radius: 12px;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--mat-sys-outline-variant);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
 }
 

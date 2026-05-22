@@ -74,6 +74,7 @@ export class SettingsComponent {
   readonly languageOptions: Array<{ value: AppLanguage; label: string }> = [
     { value: 'en', label: 'English' },
     { value: 'ru', label: 'Русский' },
+    { value: 'uk', label: 'Українська' },
   ];
 
   updateSetting<TKey extends keyof AppSettings>(key: TKey, value: AppSettings[TKey]): void {

@@ -6,7 +6,7 @@ import { StorageKey } from '../../shared/local-storage/storage-key.enum';
 
 export type CurrencyCode = 'USD' | 'EUR' | 'NOK' | 'UAH' | 'GBP';
 export type ExpenseDateFormat = 'dd.MM.yyyy' | 'MMM d, y' | 'yyyy-MM-dd';
-export type AppLanguage = 'en' | 'ru';
+export type AppLanguage = 'en' | 'ru' | 'uk';
 
 export interface ExpenseCategoryOption {
   id: string;

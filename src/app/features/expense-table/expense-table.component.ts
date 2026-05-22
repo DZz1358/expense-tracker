@@ -57,6 +57,18 @@ export class ExpenseTableComponent {
 
   allData = computed<IExpense[]>(() => this.dataResource.value() ?? []);
   hasExpenses = computed(() => this.allData().length > 0);
+  hasFilteredExpenses = computed(() => this.filteredData().length > 0);
+  selectedCategoryLabel = computed(() => {
+    const selectedCategory = this.tableFormModel().category;
+    const category = this.appSettingsService.getCategory(selectedCategory);
+
+    if (!category) {
+      return this.languageService.t('category.all');
+    }
+
+    return category.custom ? category.label : this.languageService.t(`category.${category.id}`);
+  });
+
   filteredData = computed<IExpense[]>(() => {
     const selectedCategory = this.tableFormModel().category;
 
@@ -129,6 +141,13 @@ export class ExpenseTableComponent {
   onPageChange(event: PageEvent) {
     this.pageSize.set(event.pageSize);
     this.pageNumber.set(event.pageIndex);
+  }
+
+  clearCategoryFilter(): void {
+    this.tableFormModel.update((value) => ({
+      ...value,
+      category: '',
+    }));
   }
 
   public openAddExpenseModal(): void {

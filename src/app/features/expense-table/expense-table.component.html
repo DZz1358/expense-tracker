@@ -59,6 +59,17 @@
         <h3>{{ 'expenses.emptyTitle' | translate }}</h3>
         <p>{{ 'expenses.emptyDesktop' | translate }}</p>
       </div>
+    } @else if (dataResource.hasValue() && hasExpenses() && !hasFilteredExpenses()) {
+      <div class="empty-state">
+        <mat-icon>filter_list_off</mat-icon>
+        <h3>{{ 'expenses.emptyCategoryTitle' | translate }}</h3>
+        <p>
+          {{ 'expenses.emptyCategoryBody' | translate: { category: selectedCategoryLabel() } }}
+        </p>
+        <button mat-stroked-button type="button" (click)="clearCategoryFilter()">
+          {{ 'expenses.clearCategoryFilter' | translate }}
+        </button>
+      </div>
     } @else if (dataResource.hasValue()) {
       <table
         class="expense-table"
@@ -174,6 +185,17 @@
         <h3>{{ 'expenses.emptyTitle' | translate }}</h3>
         <p>{{ 'expenses.emptyMobile' | translate }}</p>
       </div>
+    } @else if (dataResource.hasValue() && hasExpenses() && !hasFilteredExpenses()) {
+      <div class="empty-state empty-state-mobile">
+        <mat-icon>filter_list_off</mat-icon>
+        <h3>{{ 'expenses.emptyCategoryTitle' | translate }}</h3>
+        <p>
+          {{ 'expenses.emptyCategoryBody' | translate: { category: selectedCategoryLabel() } }}
+        </p>
+        <button mat-stroked-button type="button" (click)="clearCategoryFilter()">
+          {{ 'expenses.clearCategoryFilter' | translate }}
+        </button>
+      </div>
     } @else if (dataResource.hasValue()) {
       @for (expense of paginatedCards(); track $index) {
         <mat-card class="expense-card-item">
@@ -208,7 +230,7 @@
       }
     }
   </section>
-  @if (hasExpenses()) {
+  @if (hasFilteredExpenses()) {
     <mat-paginator
       #paginator
       [pageSizeOptions]="pageSizeOptions"
