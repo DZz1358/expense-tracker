@@ -16,6 +16,9 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.confirmationText': 'Confirmation text',
     'common.typeToConfirm': 'Type {value} to confirm.',
 
+    'appUpdate.updateAvailable':
+      'A new version is available. Update now?',
+
     'nav.analytics': 'Analytics',
     'nav.expenses': 'Expenses',
     'nav.profile': 'Profile',
@@ -268,6 +271,9 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.save': 'Сохранить',
     'common.confirmationText': 'Текст подтверждения',
     'common.typeToConfirm': 'Введи {value}, чтобы подтвердить.',
+
+    'appUpdate.updateAvailable':
+      'Доступна новая версия приложения. Обновить сейчас?',
 
     'nav.analytics': 'Аналитика',
     'nav.expenses': 'Расходы',
