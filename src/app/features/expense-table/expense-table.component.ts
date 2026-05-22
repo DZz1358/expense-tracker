@@ -225,6 +225,6 @@ export class ExpenseTableComponent {
   }
 
   public formatExpenseDate(date: string): string {
-    return formatDate(date, this.settings().dateFormat, 'en-GB');
+    return formatDate(date, this.settings().dateFormat, this.languageService.dateLocale());
   }
 }

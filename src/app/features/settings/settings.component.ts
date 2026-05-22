@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -64,11 +65,14 @@ export class SettingsComponent {
     { value: 'GBP', label: 'British Pound (GBP)' },
   ];
 
-  readonly dateFormatOptions: Array<{ value: ExpenseDateFormat; label: string }> = [
-    { value: 'dd.MM.yyyy', label: '31.12.2026' },
-    { value: 'MMM d, y', label: 'Dec 31, 2026' },
-    { value: 'yyyy-MM-dd', label: '2026-12-31' },
-  ];
+  readonly dateFormatOptions = computed<Array<{ value: ExpenseDateFormat; label: string }>>(() => ([
+    'dd.MM.yyyy',
+    'MMM d, y',
+    'yyyy-MM-dd',
+  ] as const).map((value) => ({
+    value,
+    label: formatDate('2026-12-31T12:00:00', value, this.languageService.dateLocale()),
+  })));
 
   readonly pageSizeOptions = [5, 10, 25, 50];
   readonly languageOptions: Array<{ value: AppLanguage; label: string }> = [
@@ -271,7 +275,7 @@ export class SettingsComponent {
       imported = true;
     }
     const dateFormat = settings.dateFormat;
-    if (dateFormat && this.dateFormatOptions.some((option) => option.value === dateFormat)) {
+    if (dateFormat && this.dateFormatOptions().some((option) => option.value === dateFormat)) {
       this.appSettingsService.updateSetting('dateFormat', dateFormat);
       imported = true;
     }

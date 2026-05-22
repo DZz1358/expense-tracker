@@ -68,7 +68,7 @@
               [ngModel]="settings().dateFormat"
               (ngModelChange)="updateSetting('dateFormat', $event)"
             >
-              @for (format of dateFormatOptions; track format.value) {
+              @for (format of dateFormatOptions(); track format.value) {
                 <mat-option [value]="format.value">{{ format.label }}</mat-option>
               }
             </mat-select>

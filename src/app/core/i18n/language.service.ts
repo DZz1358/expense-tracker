@@ -10,6 +10,16 @@ export class LanguageService {
   private readonly appSettingsService = inject(AppSettingsService);
 
   readonly activeLanguage = computed(() => this.appSettingsService.settings().language);
+  readonly dateLocale = computed(() => {
+    switch (this.activeLanguage()) {
+      case 'ru':
+        return 'ru';
+      case 'uk':
+        return 'uk';
+      default:
+        return 'en-GB';
+    }
+  });
 
   setLanguage(language: AppLanguage): void {
     this.appSettingsService.updateSetting('language', language);
