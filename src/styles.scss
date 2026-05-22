@@ -40,7 +40,7 @@ body {
 
 .logo {
   min-height: 56px;
-  border-bottom: 1px solid #d2e2f6;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
   display: flex;
   align-items: center;
   gap: 8px;
