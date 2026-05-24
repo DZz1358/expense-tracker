@@ -109,16 +109,16 @@ body {
 }
 
 .app-snackbar--success {
-  --mdc-snackbar-container-color: var(--mat-sys-primary-container);
-  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-primary-container);
+  --mdc-snackbar-container-color: #1b5e20;
+  --mdc-snackbar-supporting-text-color: #ffffff;
 }
 
 .app-snackbar--warning {
-  --mdc-snackbar-container-color: var(--mat-sys-tertiary-container);
-  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-tertiary-container);
+  --mdc-snackbar-container-color: #f57c00;
+  --mdc-snackbar-supporting-text-color: #ffffff;
 }
 
 .app-snackbar--error {
-  --mdc-snackbar-container-color: var(--mat-sys-error-container);
-  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-error-container);
+  --mdc-snackbar-container-color: #b3261e;
+  --mdc-snackbar-supporting-text-color: #ffffff;
 }
