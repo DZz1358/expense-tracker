@@ -26,20 +26,24 @@
       />
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>{{ 'categoryModal.icon' | translate }}</mat-label>
-      <mat-select
-        [ngModel]="icon()"
-        (ngModelChange)="icon.set($event)"
-      >
+    <div class="icon-picker">
+      <span class="picker-label">{{ 'categoryModal.icon' | translate }}</span>
+      <div class="icon-options" role="radiogroup" [attr.aria-label]="'categoryModal.icon' | translate">
         @for (option of categoryIconOptions; track option) {
-          <mat-option [value]="option">
+          <button
+            type="button"
+            class="icon-option"
+            role="radio"
+            [class.icon-option--active]="icon() === option"
+            [attr.aria-checked]="icon() === option"
+            [attr.aria-label]="option"
+            (click)="icon.set(option)"
+          >
             <mat-icon>{{ option }}</mat-icon>
-            {{ option }}
-          </mat-option>
+          </button>
         }
-      </mat-select>
-    </mat-form-field>
+      </div>
+    </div>
 
     <div class="color-options" [attr.aria-label]="'categoryModal.color' | translate">
       @for (option of categoryColorOptions; track option) {

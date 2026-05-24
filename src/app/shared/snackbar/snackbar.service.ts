@@ -28,7 +28,6 @@ export class SnackbarService {
       duration: options.duration ?? DEFAULT_DURATION[variant],
       horizontalPosition: 'end',
       verticalPosition: 'bottom',
-      panelClass: ['app-snackbar', `app-snackbar--${variant}`],
     };
 
     this.snackBar.open(message, options.action, config);

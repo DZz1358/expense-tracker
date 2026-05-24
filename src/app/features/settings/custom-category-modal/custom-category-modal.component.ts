@@ -5,7 +5,6 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 
 import { ExpenseCategoryOption } from '../../../core/services/app-settings.service';
 import { CATEGORY_COLOR_OPTIONS, CATEGORY_ICON_OPTIONS } from '../custom-category-options';
@@ -26,7 +25,6 @@ export interface CustomCategoryModalData {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatSelectModule,
     TranslatePipe,
   ],
   templateUrl: './custom-category-modal.component.html',

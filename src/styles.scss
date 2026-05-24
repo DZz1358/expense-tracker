@@ -98,27 +98,3 @@ body {
 .error-message {
   color: #ee4c4c;
 }
-
-.app-snackbar {
-  --mat-snack-bar-button-color: currentColor;
-}
-
-.app-snackbar--info {
-  --mdc-snackbar-container-color: var(--mat-sys-inverse-surface);
-  --mdc-snackbar-supporting-text-color: var(--mat-sys-inverse-on-surface);
-}
-
-.app-snackbar--success {
-  --mdc-snackbar-container-color: #1b5e20;
-  --mdc-snackbar-supporting-text-color: #ffffff;
-}
-
-.app-snackbar--warning {
-  --mdc-snackbar-container-color: #f57c00;
-  --mdc-snackbar-supporting-text-color: #ffffff;
-}
-
-.app-snackbar--error {
-  --mdc-snackbar-container-color: #b3261e;
-  --mdc-snackbar-supporting-text-color: #ffffff;
-}
