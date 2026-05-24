@@ -2,6 +2,16 @@
   <header class="settings-header">
     <h2>{{ 'settings.title' | translate }}</h2>
     <p>{{ 'settings.subtitle' | translate }}</p>
+    <button
+      mat-flat-button
+      type="button"
+      class="settings-save-button"
+      [disabled]="isWorking() || isSavingSettings() || !hasUnsavedChanges()"
+      (click)="saveSettings()"
+    >
+      <mat-icon>save</mat-icon>
+      {{ isSavingSettings() ? ('profile.saving' | translate) : ('common.save' | translate) }}
+    </button>
   </header>
 
   <div class="settings-content">

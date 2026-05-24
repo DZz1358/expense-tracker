@@ -3,7 +3,12 @@ import { inject, Injectable } from '@angular/core';
 
 import { Observable, tap } from 'rxjs';
 
-import { AuthUser, UpdatePasswordRequest, UpdateProfileRequest } from '../models/auth.models';
+import {
+  AuthUser,
+  UpdatePasswordRequest,
+  UpdateProfileRequest,
+  UpdateUserSettingsRequest,
+} from '../models/auth.models';
 import { environment } from '../../../environments/environment';
 
 import { AuthService } from './auth.service';
@@ -32,6 +37,12 @@ export class UserService {
     formData.append('avatar', file);
     return this.http
       .patch<AuthUser>(`${environment.apiUrl}/users/me/avatar`, formData)
+      .pipe(tap((user) => this.authService.updateCurrentUser(user)));
+  }
+
+  updateUserSettings(payload: UpdateUserSettingsRequest): Observable<AuthUser> {
+    return this.http
+      .patch<AuthUser>(`${environment.apiUrl}/users/me`, payload)
       .pipe(tap((user) => this.authService.updateCurrentUser(user)));
   }
 

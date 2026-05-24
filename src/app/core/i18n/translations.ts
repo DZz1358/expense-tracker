@@ -220,6 +220,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.allCleared': 'All expenses cleared',
     'settings.clearFailed': 'Failed to clear expenses',
     'settings.loadFailed': 'Failed to load expenses',
+    'settings.saveFailed': 'Failed to save settings',
 
     'profile.userFallback': 'User',
     'profile.avatarAlt': 'User avatar',

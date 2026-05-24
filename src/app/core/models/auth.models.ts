@@ -15,6 +15,8 @@ export interface AuthUser {
   name?: string;
   dateOfBirth?: string | null;
   avatarUrl?: string | null;
+  category?: string[];
+  settings?: Record<string, unknown>;
 }
 
 export interface LoginResponse {
@@ -27,6 +29,11 @@ export type RegisterResponse = LoginResponse;
 export interface UpdateProfileRequest {
   name: string;
   dateOfBirth?: string | null;
+}
+
+export interface UpdateUserSettingsRequest {
+  category: string[];
+  settings: Record<string, unknown>;
 }
 
 export interface UpdatePasswordRequest {

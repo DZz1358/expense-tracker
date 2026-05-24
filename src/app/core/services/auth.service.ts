@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 import { AuthTokenStorageService } from './auth-token-storage.service';
 import { LocalStorageService } from '../../shared/local-storage/local-storage.service';
 import { StorageKey } from '../../shared/local-storage/storage-key.enum';
+import { AppSettingsService } from './app-settings.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +21,7 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly tokenStorage = inject(AuthTokenStorageService);
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly appSettingsService = inject(AppSettingsService);
 
   readonly currentUser = signal<AuthUser | null>(
     this.localStorageService.getItem<AuthUser>(StorageKey.User)
@@ -33,8 +35,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this.tokenStorage.setToken(response.accessToken);
-          this.currentUser.set(response.user);
-          this.localStorageService.setItem(StorageKey.User, response.user);
+          this.updateCurrentUser(response.user);
         }),
       );
   }
@@ -47,8 +48,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this.tokenStorage.setToken(response.accessToken);
-          this.currentUser.set(response.user);
-          this.localStorageService.setItem(StorageKey.User, response.user);
+          this.updateCurrentUser(response.user);
         }),
       );
   }
@@ -56,6 +56,7 @@ export class AuthService {
   updateCurrentUser(user: AuthUser): void {
     this.currentUser.set(user);
     this.localStorageService.setItem(StorageKey.User, user);
+    this.appSettingsService.syncWithUser(user);
   }
 
   deleteAccount(password: string): Observable<void> {
@@ -66,6 +67,7 @@ export class AuthService {
         this.tokenStorage.clearToken();
         this.localStorageService.removeItem(StorageKey.User);
         this.currentUser.set(null);
+        this.appSettingsService.syncWithUser(null);
         this.router.navigate(['/login']);
       }),
     );
@@ -75,6 +77,7 @@ export class AuthService {
     this.tokenStorage.clearToken();
     this.localStorageService.removeItem(StorageKey.User);
     this.currentUser.set(null);
+    this.appSettingsService.syncWithUser(null);
     this.router.navigate(['/login']);
   }
 

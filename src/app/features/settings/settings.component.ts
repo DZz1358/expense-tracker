@@ -15,6 +15,7 @@ import { forkJoin } from 'rxjs';
 
 import { AppLanguage, AppSettings, AppSettingsService, CurrencyCode, ExpenseDateFormat } from '../../core/services/app-settings.service';
 import { IExpense } from '../../models/expense.interface';
+import { UserService } from '../../core/services/user.service';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
 import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
@@ -42,6 +43,7 @@ import { LanguageService } from '../../core/i18n/language.service';
 })
 export class SettingsComponent {
   private readonly appSettingsService = inject(AppSettingsService);
+  private readonly userService = inject(UserService);
   private readonly themeService = inject(ThemeService);
   private readonly expenseTableService = inject(ExpenseTableService);
   private readonly dialog = inject(MatDialog);
@@ -56,6 +58,8 @@ export class SettingsComponent {
   readonly statusMessage = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly isWorking = signal(false);
+  readonly isSavingSettings = signal(false);
+  readonly hasUnsavedChanges = signal(false);
 
   readonly currencyOptions: Array<{ value: CurrencyCode; label: string }> = [
     { value: 'EUR', label: 'Euro (EUR)' },
@@ -80,19 +84,59 @@ export class SettingsComponent {
     { value: 'uk', label: 'Українська' },
   ];
 
+  constructor() {
+    this.userService.getMe()
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (user) => {
+          this.syncThemeFromSettings(user.settings);
+          this.hasUnsavedChanges.set(false);
+        },
+        error: () => {
+          this.errorMessage.set(this.languageService.t('settings.loadFailed'));
+        },
+      });
+  }
+
   updateSetting<TKey extends keyof AppSettings>(key: TKey, value: AppSettings[TKey]): void {
     this.appSettingsService.updateSetting(key, value);
-    this.setStatus(this.languageService.t('settings.saved'));
+    this.markUnsaved();
   }
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
-    this.setStatus(this.languageService.t('settings.themeUpdated'));
+    this.markUnsaved();
   }
 
   resetSettings(): void {
     this.appSettingsService.reset();
+    this.markUnsaved();
     this.setStatus(this.languageService.t('settings.resetDone'));
+  }
+
+  saveSettings(): void {
+    if (this.isSavingSettings()) return;
+
+    this.isSavingSettings.set(true);
+    this.statusMessage.set(null);
+    this.errorMessage.set(null);
+
+    this.userService.updateUserSettings(
+      this.appSettingsService.toUserSettingsRequest({ theme: this.activeTheme() }),
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (user) => {
+          this.syncThemeFromSettings(user.settings);
+          this.hasUnsavedChanges.set(false);
+          this.isSavingSettings.set(false);
+          this.setStatus(this.languageService.t('settings.saved'));
+        },
+        error: (err: any) => {
+          this.isSavingSettings.set(false);
+          this.errorMessage.set(err?.error?.message ?? this.languageService.t('settings.saveFailed'));
+        },
+      });
   }
 
   openAddCustomCategoryModal(): void {
@@ -106,12 +150,14 @@ export class SettingsComponent {
       .subscribe((result) => {
         if (!result) return;
         this.appSettingsService.addCustomCategory(result);
+        this.markUnsaved();
         this.setStatus(this.languageService.t('settings.categoryAdded'));
       });
   }
 
   removeCustomCategory(categoryId: string): void {
     this.appSettingsService.removeCustomCategory(categoryId);
+    this.markUnsaved();
     this.setStatus(this.languageService.t('settings.categoryRemoved'));
   }
 
@@ -132,6 +178,7 @@ export class SettingsComponent {
       .subscribe((result) => {
         if (!result) return;
         this.appSettingsService.updateCustomCategory(category.id, result);
+        this.markUnsaved();
         this.setStatus(this.languageService.t('settings.categoryUpdated'));
       });
   }
@@ -294,6 +341,9 @@ export class SettingsComponent {
       );
       imported = true;
     }
+    if (imported) {
+      this.markUnsaved();
+    }
     return imported;
   }
 
@@ -312,5 +362,18 @@ export class SettingsComponent {
   private setStatus(message: string): void {
     this.statusMessage.set(message);
     this.errorMessage.set(null);
+  }
+
+  private markUnsaved(): void {
+    this.hasUnsavedChanges.set(true);
+    this.statusMessage.set(null);
+    this.errorMessage.set(null);
+  }
+
+  private syncThemeFromSettings(settings: Record<string, unknown> | undefined): void {
+    const theme = settings?.['theme'];
+    if (theme === Theme.Dark || theme === Theme.Light) {
+      this.themeService.setTheme(theme);
+    }
   }
 }

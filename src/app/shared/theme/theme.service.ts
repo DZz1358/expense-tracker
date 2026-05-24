@@ -17,8 +17,12 @@ export class ThemeService {
   themeIcon = computed(() => this.activeTheme());
 
   toggleTheme(): void {
-    this.#activeThemeSignal.update((theme) => theme === Theme.Dark ? Theme.Light : Theme.Dark);
-    this.#localStorageService.setItem(StorageKey.Theme, this.#activeThemeSignal());
+    this.setTheme(this.#activeThemeSignal() === Theme.Dark ? Theme.Light : Theme.Dark);
+  }
+
+  setTheme(theme: Theme): void {
+    this.#activeThemeSignal.set(theme);
+    this.#localStorageService.setItem(StorageKey.Theme, theme);
   }
 
   syncThemeWithDOM = effect(() => {
