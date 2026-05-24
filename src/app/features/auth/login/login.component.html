@@ -70,10 +70,6 @@
         {{ isLoading() ? ('auth.signingIn' | translate) : ('auth.signIn' | translate) }}
       </button>
 
-      @if (errorMessage()) {
-        <p class="error-message" role="alert">{{ errorMessage() }}</p>
-      }
-
       <p class="auth-link">
         {{ 'auth.noAccount' | translate }}
         <a routerLink="/register">{{ 'auth.signUp' | translate }}</a>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, computed, inject, signal } from '@angular/core';
 import { formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,12 +11,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-import { forkJoin } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 
 import { AppLanguage, AppSettings, AppSettingsService, CurrencyCode, ExpenseDateFormat } from '../../core/services/app-settings.service';
+import { UnsavedChangesComponent } from '../../core/guards/unsaved-changes.guard';
 import { IExpense } from '../../models/expense.interface';
 import { UserService } from '../../core/services/user.service';
 import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
+import { SnackbarService } from '../../shared/snackbar/snackbar.service';
 import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
 import { ExpenseTableService } from '../expense-table/expense-table.service';
@@ -41,7 +43,7 @@ import { LanguageService } from '../../core/i18n/language.service';
   styleUrl: './settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsComponent {
+export class SettingsComponent implements UnsavedChangesComponent {
   private readonly appSettingsService = inject(AppSettingsService);
   private readonly userService = inject(UserService);
   private readonly themeService = inject(ThemeService);
@@ -49,14 +51,13 @@ export class SettingsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly languageService = inject(LanguageService);
+  private readonly snackbarService = inject(SnackbarService);
 
   readonly settings = this.appSettingsService.settings;
   readonly categories = this.appSettingsService.categories;
   readonly activeTheme = this.themeService.activeTheme;
   readonly Theme = Theme;
 
-  readonly statusMessage = signal<string | null>(null);
-  readonly errorMessage = signal<string | null>(null);
   readonly isWorking = signal(false);
   readonly isSavingSettings = signal(false);
   readonly hasUnsavedChanges = signal(false);
@@ -93,7 +94,7 @@ export class SettingsComponent {
           this.hasUnsavedChanges.set(false);
         },
         error: () => {
-          this.errorMessage.set(this.languageService.t('settings.loadFailed'));
+          this.showError(this.languageService.t('settings.loadFailed'));
         },
       });
   }
@@ -118,8 +119,6 @@ export class SettingsComponent {
     if (this.isSavingSettings()) return;
 
     this.isSavingSettings.set(true);
-    this.statusMessage.set(null);
-    this.errorMessage.set(null);
 
     this.userService.updateUserSettings(
       this.appSettingsService.toUserSettingsRequest({ theme: this.activeTheme() }),
@@ -134,9 +133,41 @@ export class SettingsComponent {
         },
         error: (err: any) => {
           this.isSavingSettings.set(false);
-          this.errorMessage.set(err?.error?.message ?? this.languageService.t('settings.saveFailed'));
+          this.showError(err?.error?.message ?? this.languageService.t('settings.saveFailed'));
         },
       });
+  }
+
+  canDeactivate(): boolean | Observable<boolean> {
+    if (this.isSavingSettings()) {
+      return false;
+    }
+
+    if (!this.hasUnsavedChanges()) {
+      return true;
+    }
+
+    return this.dialog.open(ConfirmationModalComponent, {
+      width: 'calc(100% - 30px)',
+      maxWidth: '520px',
+      data: {
+        title: this.languageService.t('settings.unsavedTitle'),
+        message: this.languageService.t('settings.unsavedMessage'),
+        confirmButtonLabel: this.languageService.t('settings.discardChanges'),
+      },
+    })
+      .afterClosed()
+      .pipe(map((result) => Boolean(result?.confirmed)));
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.hasUnsavedChanges() && !this.isSavingSettings()) {
+      return;
+    }
+
+    event.preventDefault();
+    event.returnValue = '';
   }
 
   openAddCustomCategoryModal(): void {
@@ -349,25 +380,31 @@ export class SettingsComponent {
 
   private startWork(): void {
     this.isWorking.set(true);
-    this.statusMessage.set(null);
-    this.errorMessage.set(null);
   }
 
   private finishWork(status: string | null, error?: string): void {
     this.isWorking.set(false);
-    this.statusMessage.set(status);
-    this.errorMessage.set(error ?? null);
+
+    if (error) {
+      this.showError(error);
+      return;
+    }
+
+    if (status) {
+      this.setStatus(status);
+    }
   }
 
   private setStatus(message: string): void {
-    this.statusMessage.set(message);
-    this.errorMessage.set(null);
+    this.snackbarService.success(message);
+  }
+
+  private showError(message: string): void {
+    this.snackbarService.error(message);
   }
 
   private markUnsaved(): void {
     this.hasUnsavedChanges.set(true);
-    this.statusMessage.set(null);
-    this.errorMessage.set(null);
   }
 
   private syncThemeFromSettings(settings: Record<string, unknown> | undefined): void {

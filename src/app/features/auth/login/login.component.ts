@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/i18n/language.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { SnackbarService } from '../../../shared/snackbar/snackbar.service';
 
 interface LoginData {
   email: string;
@@ -30,9 +31,9 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly languageService = inject(LanguageService);
+  private readonly snackbarService = inject(SnackbarService);
 
   readonly isLoading = signal<boolean>(false);
-  readonly errorMessage = signal<string | null>(null);
   readonly showPassword = signal<boolean>(false);
 
   loginModel = signal<LoginData>({
@@ -53,17 +54,17 @@ export class LoginComponent {
   async onSubmit(event: Event) {
     event.preventDefault();
     this.isLoading.set(true);
-    this.errorMessage.set(null);
     try {
       await submit(this.loginForm, async () => {
         const credentials = this.loginModel();
         await firstValueFrom(
           this.authService.login({ email: credentials.email, password: credentials.password })
         );
+        this.snackbarService.success(this.languageService.t('auth.loginSuccess'));
         this.router.navigate(['/expenses']);
       });
     } catch (err: any) {
-      this.errorMessage.set(err.error?.message ?? this.languageService.t('auth.loginFailed'));
+      this.snackbarService.error(err.error?.message ?? this.languageService.t('auth.loginFailed'));
     } finally {
       this.isLoading.set(false);
     }

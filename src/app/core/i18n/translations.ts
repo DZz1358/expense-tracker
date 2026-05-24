@@ -48,6 +48,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'auth.hidePassword': 'Hide password',
     'auth.showPassword': 'Show password',
     'auth.loginFailed': 'Login failed',
+    'auth.loginSuccess': 'Signed in successfully',
     'auth.registrationFailed': 'Registration failed',
 
     'category.housing': 'Housing',
@@ -221,6 +222,10 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.clearFailed': 'Failed to clear expenses',
     'settings.loadFailed': 'Failed to load expenses',
     'settings.saveFailed': 'Failed to save settings',
+    'settings.unsavedTitle': 'Leave without saving?',
+    'settings.unsavedMessage':
+      'You have unsaved settings changes. Save them before leaving, or discard the changes.',
+    'settings.discardChanges': 'Discard changes',
 
     'profile.userFallback': 'User',
     'profile.avatarAlt': 'User avatar',
@@ -309,6 +314,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'auth.hidePassword': 'Скрыть пароль',
     'auth.showPassword': 'Показать пароль',
     'auth.loginFailed': 'Не удалось войти',
+    'auth.loginSuccess': 'Вход выполнен',
     'auth.registrationFailed': 'Не удалось зарегистрироваться',
 
     'category.housing': 'Жильё',
@@ -477,6 +483,11 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.allCleared': 'Все расходы очищены',
     'settings.clearFailed': 'Не удалось очистить расходы',
     'settings.loadFailed': 'Не удалось загрузить расходы',
+    'settings.saveFailed': 'Не удалось сохранить настройки',
+    'settings.unsavedTitle': 'Уйти без сохранения?',
+    'settings.unsavedMessage':
+      'У вас есть несохраненные изменения настроек. Сохраните их перед выходом или сбросьте изменения.',
+    'settings.discardChanges': 'Сбросить изменения',
 
     'profile.userFallback': 'Пользователь',
     'profile.avatarAlt': 'Аватар пользователя',
@@ -564,6 +575,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'auth.hidePassword': 'Сховати пароль',
     'auth.showPassword': 'Показати пароль',
     'auth.loginFailed': 'Не вдалося увійти',
+    'auth.loginSuccess': 'Вхід виконано',
     'auth.registrationFailed': 'Не вдалося зареєструватися',
 
     'category.housing': 'Житло',
@@ -730,6 +742,11 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.allCleared': 'Усі витрати очищено',
     'settings.clearFailed': 'Не вдалося очистити витрати',
     'settings.loadFailed': 'Не вдалося завантажити витрати',
+    'settings.saveFailed': 'Не вдалося зберегти налаштування',
+    'settings.unsavedTitle': 'Вийти без збереження?',
+    'settings.unsavedMessage':
+      'У вас є незбережені зміни налаштувань. Збережіть їх перед виходом або скиньте зміни.',
+    'settings.discardChanges': 'Скинути зміни',
 
     'profile.userFallback': 'Користувач',
     'profile.avatarAlt': 'Аватар користувача',

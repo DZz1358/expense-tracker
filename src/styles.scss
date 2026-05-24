@@ -98,3 +98,27 @@ body {
 .error-message {
   color: #ee4c4c;
 }
+
+.app-snackbar {
+  --mat-snack-bar-button-color: currentColor;
+}
+
+.app-snackbar--info {
+  --mdc-snackbar-container-color: var(--mat-sys-inverse-surface);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-inverse-on-surface);
+}
+
+.app-snackbar--success {
+  --mdc-snackbar-container-color: var(--mat-sys-primary-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-primary-container);
+}
+
+.app-snackbar--warning {
+  --mdc-snackbar-container-color: var(--mat-sys-tertiary-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-tertiary-container);
+}
+
+.app-snackbar--error {
+  --mdc-snackbar-container-color: var(--mat-sys-error-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-error-container);
+}
