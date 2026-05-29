@@ -197,7 +197,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.clearMessageWithCount':
       'This will permanently delete {count} expenses in your account.',
     'settings.saved': 'Settings saved',
-    'settings.themeUpdated': 'Theme updated',
     'settings.resetDone': 'Settings reset',
     'settings.categoryAdded': 'Custom category added',
     'settings.categoryUpdated': 'Custom category updated',
@@ -445,7 +444,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.clearMessageWithCount':
       'Это навсегда удалит расходы в твоём аккаунте: {count}.',
     'settings.saved': 'Настройки сохранены',
-    'settings.themeUpdated': 'Тема обновлена',
     'settings.resetDone': 'Настройки сброшены',
     'settings.categoryAdded': 'Кастомная категория добавлена',
     'settings.categoryUpdated': 'Кастомная категория обновлена',
@@ -690,7 +688,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.clearMessageWithCount':
       'Це назавжди видалить витрати у твоєму акаунті: {count}.',
     'settings.saved': 'Налаштування збережено',
-    'settings.themeUpdated': 'Тему оновлено',
     'settings.resetDone': 'Налаштування скинуто',
     'settings.categoryAdded': 'Кастомну категорію додано',
     'settings.categoryUpdated': 'Кастомну категорію оновлено',
