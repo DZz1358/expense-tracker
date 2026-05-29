@@ -8,8 +8,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.confirm': 'Confirm',
     'common.delete': 'Delete',
     'common.edit': 'Edit',
-    'common.import': 'Import',
-    'common.export': 'Export',
     'common.reset': 'Reset',
     'common.retry': 'Retry',
     'common.save': 'Save',
@@ -165,7 +163,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
 
     'settings.title': 'Settings',
     'settings.subtitle':
-      'Control how expenses are displayed, imported, exported, and cleared.',
+      'Control how expenses are displayed and cleared.',
     'settings.preferences': 'Preferences',
     'settings.language': 'Language',
     'settings.languageDescription':
@@ -187,11 +185,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.notificationsDescription':
       'Preference saved for future reminders',
     'settings.data': 'Data',
-    'settings.exportData': 'Export data',
-    'settings.exportDataDescription':
-      'Save expenses and current settings as JSON',
-    'settings.importData': 'Import data',
-    'settings.importDataDescription': 'Import expenses from a JSON export',
     'settings.resetSettings': 'Reset settings',
     'settings.resetSettingsDescription':
       'Restore display and preference defaults',
@@ -209,14 +202,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.categoryAdded': 'Custom category added',
     'settings.categoryUpdated': 'Custom category updated',
     'settings.categoryRemoved': 'Custom category removed',
-    'settings.exported': 'Expenses exported',
-    'settings.exportFailed': 'Failed to export expenses',
-    'settings.noExpensesInFile': 'No expenses found in this file',
-    'settings.settingsImported': 'Settings imported',
-    'settings.importedCount': '{count} expenses imported',
-    'settings.importFailed': 'Failed to import expenses',
-    'settings.invalidFile': 'Invalid import file',
-    'settings.readFailed': 'Failed to read import file',
     'settings.noExpensesToClear': 'No expenses to clear',
     'settings.allCleared': 'All expenses cleared',
     'settings.clearFailed': 'Failed to clear expenses',
@@ -273,8 +258,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.confirm': 'Подтвердить',
     'common.delete': 'Удалить',
     'common.edit': 'Редактировать',
-    'common.import': 'Импорт',
-    'common.export': 'Экспорт',
     'common.reset': 'Сбросить',
     'common.retry': 'Повторить',
     'common.save': 'Сохранить',
@@ -429,7 +412,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
 
     'settings.title': 'Настройки',
     'settings.subtitle':
-      'Управляй отображением, импортом, экспортом и очисткой расходов.',
+      'Управляй отображением и очисткой расходов.',
     'settings.preferences': 'Предпочтения',
     'settings.language': 'Язык',
     'settings.languageDescription': 'Меняет текст приложения без пересборки',
@@ -450,10 +433,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.notificationsDescription':
       'Настройка сохранена для будущих напоминаний',
     'settings.data': 'Данные',
-    'settings.exportData': 'Экспорт данных',
-    'settings.exportDataDescription': 'Сохранить расходы и настройки в JSON',
-    'settings.importData': 'Импорт данных',
-    'settings.importDataDescription': 'Импортировать расходы из JSON-экспорта',
     'settings.resetSettings': 'Сброс настроек',
     'settings.resetSettingsDescription':
       'Вернуть настройки отображения по умолчанию',
@@ -471,14 +450,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.categoryAdded': 'Кастомная категория добавлена',
     'settings.categoryUpdated': 'Кастомная категория обновлена',
     'settings.categoryRemoved': 'Кастомная категория удалена',
-    'settings.exported': 'Расходы экспортированы',
-    'settings.exportFailed': 'Не удалось экспортировать расходы',
-    'settings.noExpensesInFile': 'В файле не найдены расходы',
-    'settings.settingsImported': 'Настройки импортированы',
-    'settings.importedCount': 'Импортировано расходов: {count}',
-    'settings.importFailed': 'Не удалось импортировать расходы',
-    'settings.invalidFile': 'Некорректный файл импорта',
-    'settings.readFailed': 'Не удалось прочитать файл',
     'settings.noExpensesToClear': 'Нет расходов для очистки',
     'settings.allCleared': 'Все расходы очищены',
     'settings.clearFailed': 'Не удалось очистить расходы',
@@ -534,8 +505,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'common.confirm': 'Підтвердити',
     'common.delete': 'Видалити',
     'common.edit': 'Редагувати',
-    'common.import': 'Імпорт',
-    'common.export': 'Експорт',
     'common.reset': 'Скинути',
     'common.retry': 'Повторити',
     'common.save': 'Зберегти',
@@ -688,7 +657,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
 
     'settings.title': 'Налаштування',
     'settings.subtitle':
-      'Керуй відображенням, імпортом, експортом і очищенням витрат.',
+      'Керуй відображенням і очищенням витрат.',
     'settings.preferences': 'Уподобання',
     'settings.language': 'Мова',
     'settings.languageDescription': 'Змінює текст застосунку без перескладання',
@@ -709,10 +678,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.notificationsDescription':
       'Налаштування збережене для майбутніх нагадувань',
     'settings.data': 'Дані',
-    'settings.exportData': 'Експорт даних',
-    'settings.exportDataDescription': 'Зберегти витрати й налаштування в JSON',
-    'settings.importData': 'Імпорт даних',
-    'settings.importDataDescription': 'Імпортувати витрати з JSON-експорту',
     'settings.resetSettings': 'Скинути налаштування',
     'settings.resetSettingsDescription':
       'Повернути налаштування відображення за замовчуванням',
@@ -730,14 +695,6 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'settings.categoryAdded': 'Кастомну категорію додано',
     'settings.categoryUpdated': 'Кастомну категорію оновлено',
     'settings.categoryRemoved': 'Кастомну категорію видалено',
-    'settings.exported': 'Витрати експортовано',
-    'settings.exportFailed': 'Не вдалося експортувати витрати',
-    'settings.noExpensesInFile': 'У файлі не знайдено витрат',
-    'settings.settingsImported': 'Налаштування імпортовано',
-    'settings.importedCount': 'Імпортовано витрат: {count}',
-    'settings.importFailed': 'Не вдалося імпортувати витрати',
-    'settings.invalidFile': 'Некоректний файл імпорту',
-    'settings.readFailed': 'Не вдалося прочитати файл',
     'settings.noExpensesToClear': 'Немає витрат для очищення',
     'settings.allCleared': 'Усі витрати очищено',
     'settings.clearFailed': 'Не вдалося очистити витрати',

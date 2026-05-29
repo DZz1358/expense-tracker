@@ -7,24 +7,65 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { Observable, forkJoin, map } from 'rxjs';
 
-import { AppLanguage, AppSettings, AppSettingsService, CurrencyCode, ExpenseDateFormat } from '../../core/services/app-settings.service';
+import {
+  AppLanguage,
+  AppSettings,
+  AppSettingsService,
+  CurrencyCode,
+  ExpenseCategoryOption,
+  ExpenseDateFormat,
+} from '../../core/services/app-settings.service';
 import { UnsavedChangesComponent } from '../../core/guards/unsaved-changes.guard';
 import { IExpense } from '../../models/expense.interface';
 import { UserService } from '../../core/services/user.service';
-import { ConfirmationModalComponent } from '../../shared/confirmation-modal/confirmation-modal.component';
+import {
+  ConfirmationModalComponent,
+  ConfirmationModalData,
+  ConfirmationModalResult,
+} from '../../shared/confirmation-modal/confirmation-modal.component';
 import { SnackbarService } from '../../shared/snackbar/snackbar.service';
 import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
 import { ExpenseTableService } from '../expense-table/expense-table.service';
-import { CustomCategoryModalComponent } from './custom-category-modal/custom-category-modal.component';
+import {
+  CustomCategoryModalComponent,
+  CustomCategoryModalData,
+} from './custom-category-modal/custom-category-modal.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { LanguageService } from '../../core/i18n/language.service';
+
+type SelectOption<TValue extends string> = { value: TValue; label: string };
+type CustomCategoryChanges = Omit<ExpenseCategoryOption, 'id' | 'custom'>;
+
+const DIALOG_WIDTH = 'calc(100% - 30px)';
+const DEFAULT_DIALOG_MAX_WIDTH = '520px';
+const CLEAR_DIALOG_MAX_WIDTH = '600px';
+const DATE_FORMAT_PREVIEW_DATE = '2026-12-31T12:00:00';
+
+const CURRENCY_OPTIONS: Array<SelectOption<CurrencyCode>> = [
+  { value: 'EUR', label: 'Euro (EUR)' },
+  { value: 'USD', label: 'US Dollar (USD)' },
+  { value: 'NOK', label: 'Norwegian Krone (NOK)' },
+  { value: 'UAH', label: 'Ukrainian Hryvnia (UAH)' },
+  { value: 'GBP', label: 'British Pound (GBP)' },
+];
+
+const DATE_FORMAT_VALUES: readonly ExpenseDateFormat[] = [
+  'dd.MM.yyyy',
+  'MMM d, y',
+  'yyyy-MM-dd',
+];
+
+const LANGUAGE_OPTIONS: Array<SelectOption<AppLanguage>> = [
+  { value: 'en', label: 'English' },
+  { value: 'ru', label: 'Русский' },
+  { value: 'uk', label: 'Українська' },
+];
 
 @Component({
   selector: 'app-settings',
@@ -34,7 +75,6 @@ import { LanguageService } from '../../core/i18n/language.service';
     MatDividerModule,
     MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
     TranslatePipe,
@@ -62,28 +102,14 @@ export class SettingsComponent implements UnsavedChangesComponent {
   readonly isSavingSettings = signal(false);
   readonly hasUnsavedChanges = signal(false);
 
-  readonly currencyOptions: Array<{ value: CurrencyCode; label: string }> = [
-    { value: 'EUR', label: 'Euro (EUR)' },
-    { value: 'USD', label: 'US Dollar (USD)' },
-    { value: 'NOK', label: 'Norwegian Krone (NOK)' },
-    { value: 'UAH', label: 'Ukrainian Hryvnia (UAH)' },
-    { value: 'GBP', label: 'British Pound (GBP)' },
-  ];
+  readonly currencyOptions = CURRENCY_OPTIONS;
 
-  readonly dateFormatOptions = computed<Array<{ value: ExpenseDateFormat; label: string }>>(() => ([
-    'dd.MM.yyyy',
-    'MMM d, y',
-    'yyyy-MM-dd',
-  ] as const).map((value) => ({
+  readonly dateFormatOptions = computed<Array<SelectOption<ExpenseDateFormat>>>(() => DATE_FORMAT_VALUES.map((value) => ({
     value,
-    label: formatDate('2026-12-31T12:00:00', value, this.languageService.dateLocale()),
+    label: formatDate(DATE_FORMAT_PREVIEW_DATE, value, this.languageService.dateLocale()),
   })));
 
-  readonly languageOptions: Array<{ value: AppLanguage; label: string }> = [
-    { value: 'en', label: 'English' },
-    { value: 'ru', label: 'Русский' },
-    { value: 'uk', label: 'Українська' },
-  ];
+  readonly languageOptions = LANGUAGE_OPTIONS;
 
   constructor() {
     this.userService.getMe()
@@ -147,17 +173,12 @@ export class SettingsComponent implements UnsavedChangesComponent {
       return true;
     }
 
-    return this.dialog.open(ConfirmationModalComponent, {
-      width: 'calc(100% - 30px)',
-      maxWidth: '520px',
-      data: {
-        title: this.languageService.t('settings.unsavedTitle'),
-        message: this.languageService.t('settings.unsavedMessage'),
-        confirmButtonLabel: this.languageService.t('settings.discardChanges'),
-      },
+    return this.openConfirmationDialog({
+      title: this.languageService.t('settings.unsavedTitle'),
+      message: this.languageService.t('settings.unsavedMessage'),
+      confirmButtonLabel: this.languageService.t('settings.discardChanges'),
     })
-      .afterClosed()
-      .pipe(map((result) => Boolean(result?.confirmed)));
+      .pipe(map((result) => this.isConfirmed(result)));
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -171,19 +192,9 @@ export class SettingsComponent implements UnsavedChangesComponent {
   }
 
   openAddCustomCategoryModal(): void {
-    this.dialog.open(CustomCategoryModalComponent, {
-      width: 'calc(100% - 30px)',
-      maxWidth: '520px',
-      data: { mode: 'create' },
-    })
-      .afterClosed()
+    this.openCustomCategoryDialog({ mode: 'create' })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (!result) return;
-        this.appSettingsService.addCustomCategory(result);
-        this.markUnsaved();
-        this.setStatus(this.languageService.t('settings.categoryAdded'));
-      });
+      .subscribe((result) => this.addCustomCategory(result));
   }
 
   removeCustomCategory(categoryId: string): void {
@@ -196,83 +207,9 @@ export class SettingsComponent implements UnsavedChangesComponent {
     const category = this.settings().customCategories.find((item) => item.id === categoryId);
     if (!category) return;
 
-    this.dialog.open(CustomCategoryModalComponent, {
-      width: 'calc(100% - 30px)',
-      maxWidth: '520px',
-      data: {
-        mode: 'edit',
-        category,
-      },
-    })
-      .afterClosed()
+    this.openCustomCategoryDialog({ mode: 'edit', category })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (!result) return;
-        this.appSettingsService.updateCustomCategory(category.id, result);
-        this.markUnsaved();
-        this.setStatus(this.languageService.t('settings.categoryUpdated'));
-      });
-  }
-
-  exportExpenses(): void {
-    this.startWork();
-    this.expenseTableService.getAllExpenses()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (expenses) => {
-          const payload = {
-            exportedAt: new Date().toISOString(),
-            settings: this.settings(),
-            expenses,
-          };
-          const blob = new Blob([JSON.stringify(payload, null, 2)], {
-            type: 'application/json',
-          });
-          const url = URL.createObjectURL(blob);
-          const anchor = document.createElement('a');
-          anchor.href = url;
-          anchor.download = `expense-tracker-${new Date().toISOString().slice(0, 10)}.json`;
-          anchor.click();
-          URL.revokeObjectURL(url);
-          this.finishWork(this.languageService.t('settings.exported'));
-        },
-        error: () => this.finishWork(null, this.languageService.t('settings.exportFailed')),
-      });
-  }
-
-  importExpenses(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-
-    this.startWork();
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result));
-        const settingsImported = this.applyImportedSettings(parsed);
-        const expenses = this.extractExpenses(parsed);
-        if (!expenses.length) {
-          this.finishWork(
-            settingsImported ? this.languageService.t('settings.settingsImported') : null,
-            settingsImported ? undefined : this.languageService.t('settings.noExpensesInFile'),
-          );
-          return;
-        }
-
-        forkJoin(expenses.map((expense) => this.expenseTableService.addExpense(expense)))
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: () => this.finishWork(this.languageService.t('settings.importedCount', { count: expenses.length })),
-            error: () => this.finishWork(null, this.languageService.t('settings.importFailed')),
-          });
-      } catch {
-        this.finishWork(null, this.languageService.t('settings.invalidFile'));
-      }
-    };
-    reader.onerror = () => this.finishWork(null, this.languageService.t('settings.readFailed'));
-    reader.readAsText(file);
+      .subscribe((result) => this.updateCustomCategory(category.id, result));
   }
 
   openClearExpensesModal(): void {
@@ -282,32 +219,79 @@ export class SettingsComponent implements UnsavedChangesComponent {
       .subscribe({
         next: (expenses: IExpense[]) => {
           this.finishWork(null);
-
-          if (!expenses.length) {
-            this.setStatus(this.languageService.t('settings.noExpensesToClear'));
-            return;
-          }
-
-          this.dialog.open(ConfirmationModalComponent, {
-            width: 'calc(100% - 30px)',
-            maxWidth: '600px',
-            data: {
-              title: this.languageService.t('settings.clearTitle'),
-              message: this.languageService.t('settings.clearMessageWithCount', {
-                count: expenses.length,
-              }),
-              confirmationText: 'DELETE',
-              confirmButtonLabel: this.languageService.t('common.delete'),
-            },
-          })
-            .afterClosed()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((result) => {
-              if (!result?.confirmed) return;
-              this.clearExpenses(expenses);
-            });
+          this.confirmClearExpenses(expenses);
         },
         error: () => this.finishWork(null, this.languageService.t('settings.loadFailed')),
+      });
+  }
+
+  private openConfirmationDialog(
+    data: ConfirmationModalData,
+    maxWidth = DEFAULT_DIALOG_MAX_WIDTH,
+  ): Observable<ConfirmationModalResult | false | undefined> {
+    return this.dialog.open<ConfirmationModalComponent, ConfirmationModalData, ConfirmationModalResult | false>(
+      ConfirmationModalComponent,
+      {
+        width: DIALOG_WIDTH,
+        maxWidth,
+        data,
+      },
+    ).afterClosed();
+  }
+
+  private openCustomCategoryDialog(
+    data: CustomCategoryModalData,
+  ): Observable<CustomCategoryChanges | null | undefined> {
+    return this.dialog.open<CustomCategoryModalComponent, CustomCategoryModalData, CustomCategoryChanges | null>(
+      CustomCategoryModalComponent,
+      {
+        width: DIALOG_WIDTH,
+        maxWidth: DEFAULT_DIALOG_MAX_WIDTH,
+        data,
+      },
+    ).afterClosed();
+  }
+
+  private addCustomCategory(category: CustomCategoryChanges | null | undefined): void {
+    if (!category) return;
+
+    this.appSettingsService.addCustomCategory(category);
+    this.markUnsaved();
+    this.setStatus(this.languageService.t('settings.categoryAdded'));
+  }
+
+  private updateCustomCategory(
+    categoryId: string,
+    category: CustomCategoryChanges | null | undefined,
+  ): void {
+    if (!category) return;
+
+    this.appSettingsService.updateCustomCategory(categoryId, category);
+    this.markUnsaved();
+    this.setStatus(this.languageService.t('settings.categoryUpdated'));
+  }
+
+  private confirmClearExpenses(expenses: IExpense[]): void {
+    if (!expenses.length) {
+      this.setStatus(this.languageService.t('settings.noExpensesToClear'));
+      return;
+    }
+
+    this.openConfirmationDialog(
+      {
+        title: this.languageService.t('settings.clearTitle'),
+        message: this.languageService.t('settings.clearMessageWithCount', {
+          count: expenses.length,
+        }),
+        confirmationText: 'DELETE',
+        confirmButtonLabel: this.languageService.t('common.delete'),
+      },
+      CLEAR_DIALOG_MAX_WIDTH,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (!this.isConfirmed(result)) return;
+        this.clearExpenses(expenses);
       });
   }
 
@@ -319,63 +303,6 @@ export class SettingsComponent implements UnsavedChangesComponent {
         next: () => this.finishWork(this.languageService.t('settings.allCleared')),
         error: () => this.finishWork(null, this.languageService.t('settings.clearFailed')),
       });
-  }
-
-  private extractExpenses(payload: unknown): Array<Omit<IExpense, 'id' | 'createdAt'>> {
-    const rawExpenses = Array.isArray(payload)
-      ? payload
-      : typeof payload === 'object' && payload !== null && Array.isArray((payload as { expenses?: unknown }).expenses)
-        ? (payload as { expenses: unknown[] }).expenses
-        : [];
-
-    return rawExpenses
-      .filter((item): item is Partial<IExpense> => typeof item === 'object' && item !== null)
-      .map((expense) => ({
-        amount: Number(expense.amount),
-        category: String(expense.category ?? ''),
-        description: expense.description ? String(expense.description) : '',
-        expenseDate: String(expense.expenseDate ?? new Date().toISOString()),
-        attachmentUrl: expense.attachmentUrl,
-      }))
-      .filter((expense) => Number.isFinite(expense.amount) && expense.amount > 0);
-  }
-
-  private applyImportedSettings(payload: unknown): boolean {
-    if (typeof payload !== 'object' || payload === null) return false;
-    const settings = (payload as { settings?: Partial<AppSettings> }).settings;
-    if (!settings) return false;
-
-    let imported = false;
-    const currency = settings.currency;
-    if (currency && this.currencyOptions.some((option) => option.value === currency)) {
-      this.appSettingsService.updateSetting('currency', currency);
-      imported = true;
-    }
-    const dateFormat = settings.dateFormat;
-    if (dateFormat && this.dateFormatOptions().some((option) => option.value === dateFormat)) {
-      this.appSettingsService.updateSetting('dateFormat', dateFormat);
-      imported = true;
-    }
-    if (typeof settings.notificationsEnabled === 'boolean') {
-      this.appSettingsService.updateSetting('notificationsEnabled', settings.notificationsEnabled);
-      imported = true;
-    }
-    if (Array.isArray(settings.customCategories)) {
-      this.appSettingsService.updateSetting(
-        'customCategories',
-        settings.customCategories.filter((category) => (
-          typeof category.id === 'string' &&
-          typeof category.label === 'string' &&
-          typeof category.icon === 'string' &&
-          typeof category.color === 'string'
-        )),
-      );
-      imported = true;
-    }
-    if (imported) {
-      this.markUnsaved();
-    }
-    return imported;
   }
 
   private startWork(): void {
@@ -401,6 +328,10 @@ export class SettingsComponent implements UnsavedChangesComponent {
 
   private showError(message: string): void {
     this.snackbarService.error(message);
+  }
+
+  private isConfirmed(result: ConfirmationModalResult | false | undefined): boolean {
+    return Boolean(result && result.confirmed);
   }
 
   private markUnsaved(): void {

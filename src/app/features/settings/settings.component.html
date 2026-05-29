@@ -182,43 +182,6 @@
       <div class="settings-card">
         <div class="settings-field settings-field--compact">
           <div class="field-with-icon">
-            <mat-icon class="field-icon">download</mat-icon>
-            <div class="field-body">
-              <span class="field-label">{{ 'settings.exportData' | translate }}</span>
-              <span class="field-value">{{ 'settings.exportDataDescription' | translate }}</span>
-            </div>
-          </div>
-          <button mat-stroked-button type="button" [disabled]="isWorking()" (click)="exportExpenses()">
-            {{ 'common.export' | translate }}
-          </button>
-        </div>
-
-        <mat-divider />
-
-        <div class="settings-field settings-field--compact">
-          <div class="field-with-icon">
-            <mat-icon class="field-icon">upload_file</mat-icon>
-            <div class="field-body">
-              <span class="field-label">{{ 'settings.importData' | translate }}</span>
-              <span class="field-value">{{ 'settings.importDataDescription' | translate }}</span>
-            </div>
-          </div>
-          <input
-            #importInput
-            type="file"
-            accept="application/json,.json"
-            hidden
-            (change)="importExpenses($event)"
-          />
-          <button mat-stroked-button type="button" [disabled]="isWorking()" (click)="importInput.click()">
-            {{ 'common.import' | translate }}
-          </button>
-        </div>
-
-        <mat-divider />
-
-        <div class="settings-field settings-field--compact">
-          <div class="field-with-icon">
             <mat-icon class="field-icon">restart_alt</mat-icon>
             <div class="field-body">
               <span class="field-label">{{ 'settings.resetSettings' | translate }}</span>
