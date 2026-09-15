@@ -2,6 +2,7 @@ import { computed, effect, inject, Injectable, signal } from '@angular/core';
 
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { StorageKey } from '../local-storage/storage-key.enum';
+import { AuthUser } from '../../core/models/auth.models';
 
 import { Theme } from './theme.enum';
 
@@ -15,6 +16,17 @@ export class ThemeService {
   activeTheme = this.#activeThemeSignal.asReadonly();
 
   themeIcon = computed(() => this.activeTheme());
+
+  constructor() {
+    this.syncFromSettings(this.#localStorageService.getItem<AuthUser>(StorageKey.User)?.settings);
+  }
+
+  syncFromSettings(settings: Record<string, unknown> | undefined): void {
+    const theme = settings?.['theme'];
+    if (theme === Theme.Dark || theme === Theme.Light) {
+      this.setTheme(theme);
+    }
+  }
 
   toggleTheme(): void {
     this.setTheme(this.#activeThemeSignal() === Theme.Dark ? Theme.Light : Theme.Dark);

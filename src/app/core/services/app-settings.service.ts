@@ -4,6 +4,7 @@ import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
 import { AuthUser, UpdateUserSettingsRequest } from '../models/auth.models';
 import { LocalStorageService } from '../../shared/local-storage/local-storage.service';
 import { StorageKey } from '../../shared/local-storage/storage-key.enum';
+import { ThemeService } from '../../shared/theme/theme.service';
 
 export type CurrencyCode = 'USD' | 'EUR' | 'NOK' | 'UAH' | 'GBP';
 export type ExpenseDateFormat = 'dd.MM.yyyy' | 'MMM d, y' | 'yyyy-MM-dd';
@@ -38,6 +39,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
 })
 export class AppSettingsService {
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly themeService = inject(ThemeService);
 
   private readonly settingsSignal = signal<AppSettings>(
     this.createSettingsFromUser(
@@ -128,6 +130,7 @@ export class AppSettingsService {
 
   syncWithUser(user: AuthUser | null): void {
     this.settingsSignal.set(this.createSettingsFromUser(user, this.settingsSignal()));
+    this.themeService.syncFromSettings(user?.settings);
   }
 
   private createSettingsFromUser(user: AuthUser | null, fallback: AppSettings): AppSettings {

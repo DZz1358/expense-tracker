@@ -16,7 +16,6 @@ import { LanguageService } from '../../core/i18n/language.service';
 import { UserService } from '../../core/services/user.service';
 import { IExpense } from '../../models/expense.interface';
 import { SnackbarService } from '../../shared/snackbar/snackbar.service';
-import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
 import { ExpenseTableService } from '../expense-table/expense-table.service';
 
@@ -80,8 +79,7 @@ export class SettingsFacade {
     this.userService.getMe()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (user) => {
-          this.syncThemeFromSettings(user.settings);
+        next: () => {
           this.hasUnsavedChanges.set(false);
         },
         error: () => this.snackbarService.error(this.languageService.t('settings.loadFailed')),
@@ -116,8 +114,7 @@ export class SettingsFacade {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (user) => {
-          this.syncThemeFromSettings(user.settings);
+        next: () => {
           this.hasUnsavedChanges.set(false);
           this.snackbarService.success(this.languageService.t('settings.saved'));
         },
@@ -196,10 +193,4 @@ export class SettingsFacade {
       });
   }
 
-  private syncThemeFromSettings(settings: Record<string, unknown> | undefined): void {
-    const theme = settings?.['theme'];
-    if (theme === Theme.Dark || theme === Theme.Light) {
-      this.themeService.setTheme(theme);
-    }
-  }
 }

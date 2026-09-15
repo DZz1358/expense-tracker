@@ -1,3 +1,72 @@
+<ng-template #expenseFilters>
+  <div class="expense-filters">
+    <mat-form-field class="category-filter" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ "expenses.chooseCategory" | translate }}</mat-label>
+      <mat-select
+        [formField]="tableForm.category"
+        [placeholder]="'expenses.selectCategory' | translate"
+      >
+        @for (category of categories(); track category.id) {
+          <mat-option [value]="category.id">
+            {{ category.id ? (category.id | categoryLabel) : category.label }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="description-filter" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ "expenses.searchDescription" | translate }}</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="search" [formField]="tableForm.q" />
+    </mat-form-field>
+
+    <mat-form-field class="date-filter" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ "expenses.dateRange" | translate }}</mat-label>
+      <mat-date-range-input [rangePicker]="dateRangePicker">
+        <input
+          matStartDate
+          readonly
+          [ngModel]="dateRange().start"
+          [placeholder]="'expenses.dateFrom' | translate"
+          [attr.aria-label]="'expenses.dateFrom' | translate"
+          [errorStateMatcher]="dateRangeErrorMatcher"
+          (ngModelChange)="onDateRangeChange('dateFrom', $event)"
+          (click)="dateRangePicker.open()"
+          (keydown.enter)="dateRangePicker.open()"
+        />
+        <input
+          matEndDate
+          readonly
+          [ngModel]="dateRange().end"
+          [placeholder]="'expenses.dateTo' | translate"
+          [attr.aria-label]="'expenses.dateTo' | translate"
+          [errorStateMatcher]="dateRangeErrorMatcher"
+          (ngModelChange)="onDateRangeChange('dateTo', $event)"
+          (click)="dateRangePicker.open()"
+          (keydown.enter)="dateRangePicker.open()"
+        />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="dateRangePicker"></mat-datepicker-toggle>
+      <mat-date-range-picker #dateRangePicker></mat-date-range-picker>
+      @if (tableForm.dateTo().invalid()) {
+        <mat-error>{{ "expenses.invalidDateRange" | translate }}</mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      mat-icon-button
+      type="button"
+      class="clear-filters"
+      [disabled]="!hasFilters()"
+      [attr.aria-label]="'expenses.clearFilters' | translate"
+      [title]="'expenses.clearFilters' | translate"
+      (click)="clearFilters()"
+    >
+      <mat-icon>filter_list_off</mat-icon>
+    </button>
+  </div>
+</ng-template>
+
 @if (viewportServiceService.isMobile()) {
   <button
     mat-raised-button
@@ -18,19 +87,7 @@
     </div>
 
     <div class="expense-table-header-actions">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>{{ "expenses.chooseCategory" | translate }}</mat-label>
-        <mat-select
-          [formField]="tableForm.category"
-          [placeholder]="'expenses.selectCategory' | translate"
-        >
-          @for (category of categories(); track category.id) {
-            <mat-option [value]="category.id">
-              {{ category.id ? (category.id | categoryLabel) : category.label }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <ng-container [ngTemplateOutlet]="expenseFilters"></ng-container>
 
       <app-button
         [label]="'expenses.add' | translate"
@@ -57,30 +114,33 @@
           {{ "common.retry" | translate }}
         </button>
       </div>
-    } @else if (dataResource.hasValue() && !hasExpenses() && !hasCategoryFilter()) {
+    } @else if (dataResource.hasValue() && !hasExpenses() && !hasFilters()) {
       <div class="empty-state">
         <mat-icon>receipt_long</mat-icon>
         <h3>{{ "expenses.emptyTitle" | translate }}</h3>
         <p>{{ "expenses.emptyDesktop" | translate }}</p>
       </div>
     } @else if (
-      dataResource.hasValue() && !hasExpenses() && hasCategoryFilter()
+      dataResource.hasValue() && !hasExpenses() && hasFilters()
     ) {
       <div class="empty-state">
         <mat-icon>filter_list_off</mat-icon>
-        <h3>{{ "expenses.emptyCategoryTitle" | translate }}</h3>
+        <h3>{{ (hasSearchOrDateFilter() ? "expenses.emptyFilterTitle" : "expenses.emptyCategoryTitle") | translate }}</h3>
         <p>
-          {{
-            "expenses.emptyCategoryBody"
-              | translate: { category: selectedCategoryLabel() }
-          }}
+          @if (hasSearchOrDateFilter()) {
+            {{ "expenses.emptyFilterBody" | translate }}
+          } @else {
+            {{ "expenses.emptyCategoryBody" | translate: { category: selectedCategoryLabel() } }}
+          }
         </p>
         <button
-          mat-stroked-button
+          mat-icon-button
           type="button"
-          (click)="clearCategoryFilter()"
+          [attr.aria-label]="'expenses.clearFilters' | translate"
+          [title]="'expenses.clearFilters' | translate"
+          (click)="clearFilters()"
         >
-          {{ "expenses.clearCategoryFilter" | translate }}
+          <mat-icon>filter_list_off</mat-icon>
         </button>
       </div>
     } @else if (dataResource.hasValue()) {
@@ -169,23 +229,7 @@
 }
 @if (viewportServiceService.isMobile()) {
   <section class="expense-cards-wrapper">
-    <mat-form-field
-      class="mobile-filter"
-      appearance="outline"
-      subscriptSizing="dynamic"
-    >
-      <mat-label>{{ "expenses.chooseCategory" | translate }}</mat-label>
-      <mat-select
-        [formField]="tableForm.category"
-        [placeholder]="'expenses.selectCategory' | translate"
-      >
-        @for (category of categories(); track category.id) {
-          <mat-option [value]="category.id">
-            {{ category.id ? (category.id | categoryLabel) : category.label }}
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <ng-container [ngTemplateOutlet]="expenseFilters"></ng-container>
 
     @if (dataResource.isLoading()) {
       <div class="skeleton-cards-list">
@@ -208,30 +252,33 @@
           {{ "common.retry" | translate }}
         </button>
       </div>
-    } @else if (dataResource.hasValue() && !hasExpenses() && !hasCategoryFilter()) {
+    } @else if (dataResource.hasValue() && !hasExpenses() && !hasFilters()) {
       <div class="empty-state empty-state-mobile">
         <mat-icon>receipt_long</mat-icon>
         <h3>{{ "expenses.emptyTitle" | translate }}</h3>
         <p>{{ "expenses.emptyMobile" | translate }}</p>
       </div>
     } @else if (
-      dataResource.hasValue() && !hasExpenses() && hasCategoryFilter()
+      dataResource.hasValue() && !hasExpenses() && hasFilters()
     ) {
       <div class="empty-state empty-state-mobile">
         <mat-icon>filter_list_off</mat-icon>
-        <h3>{{ "expenses.emptyCategoryTitle" | translate }}</h3>
+        <h3>{{ (hasSearchOrDateFilter() ? "expenses.emptyFilterTitle" : "expenses.emptyCategoryTitle") | translate }}</h3>
         <p>
-          {{
-            "expenses.emptyCategoryBody"
-              | translate: { category: selectedCategoryLabel() }
-          }}
+          @if (hasSearchOrDateFilter()) {
+            {{ "expenses.emptyFilterBody" | translate }}
+          } @else {
+            {{ "expenses.emptyCategoryBody" | translate: { category: selectedCategoryLabel() } }}
+          }
         </p>
         <button
-          mat-stroked-button
+          mat-icon-button
           type="button"
-          (click)="clearCategoryFilter()"
+          [attr.aria-label]="'expenses.clearFilters' | translate"
+          [title]="'expenses.clearFilters' | translate"
+          (click)="clearFilters()"
         >
-          {{ "expenses.clearCategoryFilter" | translate }}
+          <mat-icon>filter_list_off</mat-icon>
         </button>
       </div>
     } @else if (dataResource.hasValue()) {

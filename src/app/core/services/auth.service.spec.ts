@@ -11,6 +11,9 @@ import { authInterceptor, SKIP_AUTH } from '../interceptors/auth.interceptor';
 import { LoginResponse } from '../models/auth.models';
 import { AuthService } from './auth.service';
 import { AuthTokenStorageService } from './auth-token-storage.service';
+import { UserService } from './user.service';
+import { Theme } from '../../shared/theme/theme.enum';
+import { ThemeService } from '../../shared/theme/theme.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -20,6 +23,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    document.body.classList.remove(Theme.Dark);
 
     TestBed.configureTestingModule({
       providers: [
@@ -39,6 +43,7 @@ describe('AuthService', () => {
   afterEach(() => {
     httpTestingController.verify();
     localStorage.clear();
+    document.body.classList.remove(Theme.Dark);
   });
 
   it('creates the service', () => {
@@ -56,6 +61,7 @@ describe('AuthService', () => {
         id: 'user-1',
         email: 'john@example.com',
         name: 'John',
+        settings: { theme: Theme.Dark },
       },
     };
 
@@ -75,6 +81,21 @@ describe('AuthService', () => {
 
     expect(tokenStorage.getToken()).toBe('token-123');
     expect(service.isAuthenticated()).toBeTrue();
+    TestBed.tick();
+    expect(TestBed.inject(ThemeService).activeTheme()).toBe(Theme.Dark);
+    expect(document.body.classList.contains(Theme.Dark)).toBeTrue();
+  });
+
+  it('applies the refreshed account theme without opening settings', () => {
+    TestBed.inject(ThemeService).setTheme(Theme.Dark);
+    tokenStorage.setToken('token-123');
+    TestBed.inject(UserService).getMe().subscribe();
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/users/me`);
+    request.flush({ id: 'user-1', email: 'john@example.com', settings: { theme: Theme.Light } });
+    TestBed.tick();
+
+    expect(TestBed.inject(ThemeService).activeTheme()).toBe(Theme.Light);
+    expect(document.body.classList.contains(Theme.Dark)).toBeFalse();
   });
 
   it('requests a reset email without sending a stored access token or changing the session', () => {

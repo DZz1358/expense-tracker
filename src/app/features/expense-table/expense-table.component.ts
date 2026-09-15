@@ -10,10 +10,12 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
-import { formatDate } from '@angular/common';
+import { formatDate, NgTemplateOutlet } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { form, FormField } from '@angular/forms/signals';
+import { form, FormField, maxLength, validate } from '@angular/forms/signals';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { httpResource } from '@angular/common/http';
 
 import { IExpense } from '../../models/expense.interface';
@@ -35,7 +37,8 @@ import { ExpenseTableService } from './expense-table.service';
 
 @Component({
   selector: 'app-expense-table',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, FormField, SkeletonComponent, TranslatePipe],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSidenavModule, MatButtonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, MatCardModule, ButtonComponent, CategoryIconPipe, CategoryLabelPipe, CategoryColorPipe, MatSelectModule, MatDatepickerModule, FormField, SkeletonComponent, TranslatePipe, NgTemplateOutlet],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './expense-table.component.html',
   styleUrl: './expense-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -47,19 +50,44 @@ export class ExpenseTableComponent {
   viewportServiceService = inject(ViewportServiceService);
   appSettingsService = inject(AppSettingsService);
   languageService = inject(LanguageService);
+  private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
   readonly settings = this.appSettingsService.settings;
 
-  readonly tableFormModel = signal({ category: '' });
-  readonly tableForm = form(this.tableFormModel);
+  readonly tableFormModel = signal(this.defaultFilters());
+  readonly tableForm = form(this.tableFormModel, (filters) => {
+    maxLength(filters.q, 100);
+    validate(filters.dateTo, ({ value, valueOf }) => {
+      const dateFrom = valueOf(filters.dateFrom);
+      return dateFrom && value() && dateFrom > value()
+        ? { kind: 'dateRange', message: this.languageService.t('expenses.invalidDateRange') }
+        : null;
+    });
+  });
+  readonly dateRangeErrorMatcher = { isErrorState: () => this.tableForm.dateTo().invalid() };
+  readonly dateRange = computed(() => {
+    const dateFrom = this.tableForm.dateFrom().value();
+    const dateTo = this.tableForm.dateTo().value();
+    return {
+      start: dateFrom ? new Date(`${dateFrom}T00:00:00`) : null,
+      end: dateTo ? new Date(`${dateTo}T00:00:00`) : null,
+    };
+  });
+  private readonly searchText = computed(() => this.tableFormModel().q.trim());
+  private readonly debouncedSearch = signal('');
   readonly sortState = signal<{ sortBy: ExpenseSortBy; sortOrder: ExpenseSortOrder }>({
     sortBy: 'expenseDate', sortOrder: 'desc',
   });
   readonly filters = computed<ExpenseQuery>(() => {
-    const { category } = this.tableFormModel();
+    const category = this.tableForm.category().value();
+    const dateFrom = this.tableForm.dateFrom().value();
+    const dateTo = this.tableForm.dateTo().value();
     const { sortBy, sortOrder } = this.sortState();
     return expenseQueryBody({
       category,
+      dateFrom,
+      dateTo,
+      q: this.debouncedSearch(),
       sortBy: sortBy === 'expenseDate' ? undefined : sortBy,
       sortOrder: sortOrder === 'desc' ? undefined : sortOrder,
     });
@@ -72,7 +100,7 @@ export class ExpenseTableComponent {
     page: this.pageNumber() === 0 ? undefined : this.pageNumber() + 1,
     limit: this.pageSize() === 20 ? undefined : this.pageSize(),
   }));
-  readonly dataResource = httpResource<ExpensePage>(() => ({
+  readonly dataResource = httpResource<ExpensePage>(() => this.tableForm().invalid() ? undefined : ({
     url: `${environment.apiUrl}/expenses`,
     method: 'QUERY',
     body: this.query(),
@@ -82,6 +110,11 @@ export class ExpenseTableComponent {
   readonly length = computed(() => this.dataResource.value()?.pagination.total ?? 0);
   readonly hasExpenses = computed(() => this.expenses().length > 0);
   readonly hasCategoryFilter = computed(() => !!this.tableFormModel().category);
+  readonly hasSearchOrDateFilter = computed(() => {
+    const { dateFrom, dateTo } = this.tableFormModel();
+    return !!(dateFrom || dateTo || this.searchText());
+  });
+  readonly hasFilters = computed(() => this.hasCategoryFilter() || this.hasSearchOrDateFilter());
   selectedCategoryLabel = computed(() => {
     const selectedCategory = this.tableFormModel().category;
     const category = this.appSettingsService.getCategory(selectedCategory);
@@ -107,6 +140,18 @@ export class ExpenseTableComponent {
   })
 
   constructor() {
+    effect(() => this.dateAdapter.setLocale(this.languageService.dateLocale()));
+
+    effect((onCleanup) => {
+      const q = this.searchText();
+      if (!q) {
+        this.debouncedSearch.set('');
+        return;
+      }
+      const timeout = setTimeout(() => this.debouncedSearch.set(q), 300);
+      onCleanup(() => clearTimeout(timeout));
+    });
+
     effect(() => {
       if (!this.dataResource.hasValue()) return;
       const lastPage = Math.max(0, this.dataResource.value().pagination.totalPages - 1);
@@ -132,6 +177,29 @@ export class ExpenseTableComponent {
       ...value,
       category: '',
     }));
+  }
+
+  clearFilters(): void {
+    this.tableFormModel.set({ category: '', dateFrom: '', dateTo: '', q: '' });
+    this.debouncedSearch.set('');
+  }
+
+  onDateRangeChange(field: 'dateFrom' | 'dateTo', date: Date | null): void {
+    const value = date ? formatDate(date, 'yyyy-MM-dd', 'en') : '';
+    this.tableFormModel.update((filters) => ({ ...filters, [field]: value }));
+    this.tableForm[field]().markAsDirty();
+  }
+
+  private defaultFilters() {
+    const today = this.dateAdapter.today();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    return {
+      category: '',
+      dateFrom: formatDate(new Date(year, month, 1), 'yyyy-MM-dd', 'en'),
+      dateTo: formatDate(new Date(year, month + 1, 0), 'yyyy-MM-dd', 'en'),
+      q: '',
+    };
   }
 
   public openAddExpenseModal(): void {
