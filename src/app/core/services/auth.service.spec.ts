@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -7,6 +7,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
+import { authInterceptor, SKIP_AUTH } from '../interceptors/auth.interceptor';
 import { LoginResponse } from '../models/auth.models';
 import { AuthService } from './auth.service';
 import { AuthTokenStorageService } from './auth-token-storage.service';
@@ -23,7 +24,7 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthService,
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
         provideRouter([]),
       ],
@@ -74,6 +75,38 @@ describe('AuthService', () => {
 
     expect(tokenStorage.getToken()).toBe('token-123');
     expect(service.isAuthenticated()).toBeTrue();
+  });
+
+  it('requests a reset email without sending a stored access token or changing the session', () => {
+    tokenStorage.setToken('old-token');
+    const payload = { email: 'john@example.com' };
+    const response = { success: true, message: 'sent' };
+    service.forgotPassword(payload).subscribe((result) => expect(result).toEqual(response));
+
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/forgot-password`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    expect(request.request.context.get(SKIP_AUTH)).toBeTrue();
+    expect(request.request.headers.has('Authorization')).toBeFalse();
+    request.flush(response);
+    expect(tokenStorage.getToken()).toBe('old-token');
+  });
+
+  it('submits a reset token without bearer authentication and preserves the session on failure', () => {
+    tokenStorage.setToken('old-token');
+    const payload = { token: 'a'.repeat(64), newPassword: 'password123' };
+    service.resetPassword(payload).subscribe({
+      next: () => fail('Expected an invalid-link error'),
+      error: (error) => expect(error.status).toBe(400),
+    });
+
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/reset-password`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    expect(request.request.context.get(SKIP_AUTH)).toBeTrue();
+    expect(request.request.headers.has('Authorization')).toBeFalse();
+    request.flush({ message: 'Invalid link' }, { status: 400, statusText: 'Bad Request' });
+    expect(tokenStorage.getToken()).toBe('old-token');
   });
 
   it('removes the token on logout', () => {

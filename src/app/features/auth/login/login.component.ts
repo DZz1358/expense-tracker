@@ -53,9 +53,10 @@ export class LoginComponent {
 
   async onSubmit(event: Event) {
     event.preventDefault();
-    this.isLoading.set(true);
+    if (this.isLoading()) return;
     try {
       await submit(this.loginForm, async () => {
+        this.isLoading.set(true);
         const credentials = this.loginModel();
         await firstValueFrom(
           this.authService.login({ email: credentials.email, password: credentials.password })

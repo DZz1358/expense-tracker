@@ -2,7 +2,7 @@
   display: block;
 }
 
-.login-page {
+.auth-page {
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -10,14 +10,14 @@
   padding: clamp(24px, 4vw, 48px);
 }
 
-.login-panel {
+.auth-panel {
   width: min(100%, 440px);
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.login-copy {
+.auth-copy {
   text-align: center;
   color: var(--mat-sys-on-surface);
 }
@@ -34,38 +34,31 @@
 h1 {
   margin: 0 0 16px;
   font-size: 1.5em;
-  line-height: 0.96;
+  line-height: 1.2;
 }
 
 .description {
   margin: 0;
-  color: rgba(15, 23, 42, 0.72);
+  color: var(--mat-sys-on-surface-variant);
   font-size: 1rem;
 }
 
-.login-form {
+.auth-card {
   display: grid;
   gap: 10px;
   padding: clamp(24px, 3vw, 32px);
   border: 1px solid rgba(15, 118, 110, 0.16);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+  background: color-mix(in srgb, var(--mat-sys-surface-container-lowest) 88%, transparent);
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--mat-sys-shadow) 12%, transparent);
   backdrop-filter: blur(12px);
 }
-
-.form-field {
-  display: grid;
-  gap: 8px;
-}
-
-
 
 .auth-link {
   margin: 4px 0 0;
   text-align: center;
   font-size: 0.9rem;
-  color: rgba(15, 23, 42, 0.6);
+  color: var(--mat-sys-on-surface-variant);
 
   a {
     color: #0f766e;
@@ -78,36 +71,34 @@ h1 {
   }
 }
 
-:host-context(body.dark_mode) .auth-link {
-  color: rgba(226, 232, 240, 0.6);
+.status-message {
+  margin: 0 0 12px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-.forgot-password-link {
-  margin: -4px 0 8px;
-  text-align: right;
+.status-icon {
+  justify-self: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+  font-size: 48px;
+  color: var(--mat-sys-primary);
 }
 
-:host-context(body.dark_mode) .description {
-  color: rgba(226, 232, 240, 0.76);
-}
-
-:host-context(body.dark_mode) .login-form {
-  background: rgba(15, 23, 42, 0.82);
-  border-color: rgba(125, 211, 252, 0.16);
-  box-shadow: 0 20px 50px rgba(2, 8, 23, 0.34);
-}
-
-:host-context(body.dark_mode) input {
-  border-color: rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.54);
+:host-context(body.dark_mode) .auth-card {
+  background: color-mix(in srgb, var(--mat-sys-surface-container) 82%, transparent);
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--mat-sys-shadow) 34%, transparent);
 }
 
 @media (max-width: 640px) {
-  .login-page {
+  .auth-page {
     padding: 20px 16px 28px;
   }
 
-  .login-form {
+  .auth-card {
     padding: 20px;
     border-radius: 20px;
   }

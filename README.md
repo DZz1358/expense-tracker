@@ -5,6 +5,7 @@ Expense Tracker is an Angular application for tracking personal expenses. The ap
 ## What the app does
 
 - Register a new account and log in with email and password.
+- Recover an account password through an email reset link.
 - Store the access token locally and attach it to protected API requests.
 - Protect application routes from unauthenticated users.
 - View expenses in a responsive table/card layout.
@@ -43,11 +44,16 @@ Main API areas used by the app:
 
 - `/auth/register`
 - `/auth/login`
+- `/auth/forgot-password`
+- `/auth/reset-password`
 - `/auth/account`
 - `/users/me`
 - `/users/me/avatar`
 - `/users/me/password`
 - `/expenses`
+
+Password recovery requires SMTP configuration on the backend and
+`PASSWORD_RESET_URL` pointing to this frontend's `/reset-password` page.
 
 ## Project structure
 
@@ -122,6 +128,8 @@ Runs unit tests with Karma and Jasmine.
 
 - `/login` - sign in page.
 - `/register` - create account page.
+- `/forgot-password` - request a password reset email.
+- `/reset-password?token=...` - set a new password using the email link.
 - `/expenses` - main expense list.
 - `/analytics` - analytics placeholder.
 - `/profile` - user profile and account settings.

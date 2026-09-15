@@ -26,6 +26,20 @@ export interface LoginResponse {
 
 export type RegisterResponse = LoginResponse;
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+export interface PasswordRecoveryResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface UpdateProfileRequest {
   name: string;
   dateOfBirth?: string | null;

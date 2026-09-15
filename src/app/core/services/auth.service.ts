@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { SKIP_AUTH } from '../interceptors/auth.interceptor';
-import { AuthUser, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from '../models/auth.models';
+import { AuthUser, ForgotPasswordRequest, LoginRequest, LoginResponse, PasswordRecoveryResponse, RegisterRequest, RegisterResponse, ResetPasswordRequest } from '../models/auth.models';
 import { environment } from '../../../environments/environment';
 
 import { AuthTokenStorageService } from './auth-token-storage.service';
@@ -51,6 +51,22 @@ export class AuthService {
           this.updateCurrentUser(response.user);
         }),
       );
+  }
+
+  forgotPassword(payload: ForgotPasswordRequest): Observable<PasswordRecoveryResponse> {
+    return this.http.post<PasswordRecoveryResponse>(
+      `${environment.apiUrl}/auth/forgot-password`, payload, {
+        context: new HttpContext().set(SKIP_AUTH, true),
+      },
+    );
+  }
+
+  resetPassword(payload: ResetPasswordRequest): Observable<PasswordRecoveryResponse> {
+    return this.http.post<PasswordRecoveryResponse>(
+      `${environment.apiUrl}/auth/reset-password`, payload, {
+        context: new HttpContext().set(SKIP_AUTH, true),
+      },
+    );
   }
 
   updateCurrentUser(user: AuthUser): void {
