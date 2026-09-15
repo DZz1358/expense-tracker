@@ -19,7 +19,7 @@ import { SnackbarService } from '../../../shared/snackbar/snackbar.service';
   selector: 'app-reset-password',
   imports: [RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.scss',
+  styleUrl: '../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordComponent {

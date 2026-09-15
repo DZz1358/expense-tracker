@@ -18,7 +18,7 @@ import { SnackbarService } from '../../../shared/snackbar/snackbar.service';
   selector: 'app-forgot-password',
   imports: [RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.scss',
+  styleUrl: '../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordComponent {

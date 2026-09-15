@@ -25,7 +25,7 @@ interface RegisterData {
   selector: 'app-register',
   imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss',
+  styleUrl: '../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {

@@ -24,7 +24,7 @@ interface LoginData {
   selector: 'app-login',
   imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+  styleUrl: '../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {

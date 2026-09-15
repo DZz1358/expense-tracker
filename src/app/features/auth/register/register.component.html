@@ -1,6 +1,6 @@
-<div class="register-page">
-  <section class="register-panel">
-    <div class="register-copy">
+<div class="auth-page">
+  <section class="auth-panel">
+    <div class="auth-copy">
       <p class="eyebrow">Expense Tracker</p>
       <h1>{{ 'auth.createAccount' | translate }}</h1>
       <p class="description">
@@ -8,7 +8,7 @@
       </p>
     </div>
 
-    <form class="register-form" novalidate (submit)="onSubmit($event)">
+    <form class="auth-card" novalidate (submit)="onSubmit($event)">
       <mat-form-field appearance="outline">
         <mat-label>{{ 'auth.name' | translate }}</mat-label>
         <input
