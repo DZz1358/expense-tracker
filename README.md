@@ -11,15 +11,14 @@ Expense Tracker is an Angular application for tracking personal expenses. The ap
 - View expenses in a responsive table/card layout.
 - Add, edit, and delete expenses through modal dialogs.
 - Filter expenses by category.
-- Sort and paginate the expenses list.
+- Filter, sort, and paginate expenses through the API.
+- View spending totals, category breakdowns, and timelines for a selected period.
 - Manage expense categories with labels, icons, and colors.
 - Update user profile data.
 - Upload a user avatar.
 - Change account password.
 - Switch between light and dark themes.
 - Log out or delete the account.
-
-`Analytics` and `Settings` routes already exist in the navigation, but their screens are currently placeholders.
 
 ## Tech stack
 
@@ -51,6 +50,20 @@ Main API areas used by the app:
 - `/users/me/avatar`
 - `/users/me/password`
 - `/expenses`
+- `/expenses/summary`
+
+Expense lists use `QUERY /expenses` with JSON filters and return
+`{ items, pagination: { page, limit, total, totalPages } }`. The default body is
+`{}`: page 1, 20 items, sorted by expense date descending. Changing filters or
+sorting resets pagination to page 1. The frontend uses the returned items and
+total directly for both tables and mobile cards.
+
+Analytics uses `QUERY /expenses/summary` for current and previous period totals
+across the complete selection. In addition to `total`, `totalAmount`, and
+`byCategory`, the API must return `byDate` (UTC daily counts and amounts),
+`activeDays`, and `biggestExpense`. These fields power the timeline, average per
+active day, and largest expense card. Date-only filter boundaries are sent
+unchanged and interpreted in UTC; `dateTo` includes the final day.
 
 Password recovery requires SMTP configuration on the backend and
 `PASSWORD_RESET_URL` pointing to this frontend's `/reset-password` page.
@@ -131,7 +144,7 @@ Runs unit tests with Karma and Jasmine.
 - `/forgot-password` - request a password reset email.
 - `/reset-password?token=...` - set a new password using the email link.
 - `/expenses` - main expense list.
-- `/analytics` - analytics placeholder.
+- `/analytics` - spending summaries, category breakdowns, and timelines.
 - `/profile` - user profile and account settings.
 - `/settings` - settings placeholder.
 

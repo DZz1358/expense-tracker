@@ -14,11 +14,11 @@ import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { environment } from '../../../environments/environment';
 import { LanguageService } from '../../core/i18n/language.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
-import { IExpense } from '../../models/expense.interface';
+import { ExpenseSummary } from '../../models/expense-query.models';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../shared/theme/theme.service';
 
-import { AnalyticsPeriod, AnalyticsService } from './analytics.service';
+import { AnalyticsPeriod, AnalyticsService, EMPTY_EXPENSE_SUMMARY } from './analytics.service';
 
 echarts.use([
   BarChart,
@@ -66,14 +66,28 @@ export class AnalyticsComponent {
     renderer: 'canvas',
   };
 
-  readonly dataResource = httpResource<IExpense[]>(() => `${environment.apiUrl}/expenses`);
-
-  readonly expenses = computed(() => this.dataResource.value() ?? []);
+  readonly periodFilters = computed(() => this.analyticsService.getPeriodFilters(this.period()));
+  readonly dataResource = httpResource<ExpenseSummary>(() => ({
+    url: `${environment.apiUrl}/expenses/summary`,
+    method: 'QUERY',
+    body: this.periodFilters().current,
+    headers: { 'Content-Type': 'application/json' },
+  }));
+  readonly previousResource = httpResource<ExpenseSummary>(() => {
+    const filters = this.periodFilters().previous;
+    return filters ? {
+      url: `${environment.apiUrl}/expenses/summary`,
+      method: 'QUERY',
+      body: filters,
+      headers: { 'Content-Type': 'application/json' },
+    } : undefined;
+  });
   readonly viewModel = computed(() => this.analyticsService.buildViewModel(
-    this.expenses(),
+    this.dataResource.value() ?? EMPTY_EXPENSE_SUMMARY,
     this.period(),
+    this.previousResource.hasValue() ? this.previousResource.value() : null,
   ));
-  readonly hasExpenses = computed(() => this.viewModel().expenses.length > 0);
+  readonly hasExpenses = computed(() => this.viewModel().count > 0);
 
   readonly totalAmount = computed(() => this.formatAmount(this.viewModel().total));
   readonly averagePerDay = computed(() => this.formatAmount(this.viewModel().averagePerDay));
@@ -196,6 +210,7 @@ export class AnalyticsComponent {
 
   reload(): void {
     this.dataResource.reload();
+    this.previousResource.reload();
   }
 
   formatAmount(amount: number): string {

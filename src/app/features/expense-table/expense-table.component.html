@@ -57,14 +57,14 @@
           {{ "common.retry" | translate }}
         </button>
       </div>
-    } @else if (dataResource.hasValue() && !hasExpenses()) {
+    } @else if (dataResource.hasValue() && !hasExpenses() && !hasCategoryFilter()) {
       <div class="empty-state">
         <mat-icon>receipt_long</mat-icon>
         <h3>{{ "expenses.emptyTitle" | translate }}</h3>
         <p>{{ "expenses.emptyDesktop" | translate }}</p>
       </div>
     } @else if (
-      dataResource.hasValue() && hasExpenses() && !hasFilteredExpenses()
+      dataResource.hasValue() && !hasExpenses() && hasCategoryFilter()
     ) {
       <div class="empty-state">
         <mat-icon>filter_list_off</mat-icon>
@@ -87,12 +87,15 @@
       <table
         class="expense-table"
         mat-table
-        [dataSource]="dataSource"
+        [dataSource]="expenses()"
         matSort
-        #sort="matSort"
+        [matSortActive]="sortState().sortBy"
+        [matSortDirection]="sortState().sortOrder"
+        [matSortDisableClear]="true"
+        (matSortChange)="onSortChange($event)"
       >
         <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <th mat-header-cell *matHeaderCellDef>
             {{ "expenses.description" | translate }}
           </th>
           <td class="text-truncate" mat-cell *matCellDef="let element">
@@ -205,14 +208,14 @@
           {{ "common.retry" | translate }}
         </button>
       </div>
-    } @else if (dataResource.hasValue() && !hasExpenses()) {
+    } @else if (dataResource.hasValue() && !hasExpenses() && !hasCategoryFilter()) {
       <div class="empty-state empty-state-mobile">
         <mat-icon>receipt_long</mat-icon>
         <h3>{{ "expenses.emptyTitle" | translate }}</h3>
         <p>{{ "expenses.emptyMobile" | translate }}</p>
       </div>
     } @else if (
-      dataResource.hasValue() && hasExpenses() && !hasFilteredExpenses()
+      dataResource.hasValue() && !hasExpenses() && hasCategoryFilter()
     ) {
       <div class="empty-state empty-state-mobile">
         <mat-icon>filter_list_off</mat-icon>
@@ -232,7 +235,7 @@
         </button>
       </div>
     } @else if (dataResource.hasValue()) {
-      @for (expense of paginatedCards(); track $index) {
+      @for (expense of expenses(); track expense.id) {
         <mat-card class="expense-card-item">
           <div class="expense-card-item-info">
             <p class="text-truncate">
@@ -266,7 +269,7 @@
       }
     }
   </section>
-  @if (hasFilteredExpenses()) {
+  @if (dataResource.hasValue() && hasExpenses()) {
     <mat-paginator
       #paginator
       [pageSizeOptions]="pageSizeOptions"

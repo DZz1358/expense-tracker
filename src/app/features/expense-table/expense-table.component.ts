@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
@@ -17,6 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { httpResource } from '@angular/common/http';
 
 import { IExpense } from '../../models/expense.interface';
+import { ExpensePage, ExpenseQuery, ExpenseSortBy, ExpenseSortOrder, expenseQueryBody } from '../../models/expense-query.models';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
 import { environment } from '../../../environments/environment';
 import { ButtonComponent } from '../../shared/button/button.component';
@@ -47,17 +48,40 @@ export class ExpenseTableComponent {
   appSettingsService = inject(AppSettingsService);
   languageService = inject(LanguageService);
   displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
-  dataSource = new MatTableDataSource<any>([]);
-
-  length = computed(() => this.filteredData().length);
-  pageSize = signal<number>(10);
-  pageNumber = signal<number>(0);
-  readonly pageSizeOptions = [1, 3, 5, 10, 25, 50];
   readonly settings = this.appSettingsService.settings;
 
-  allData = computed<IExpense[]>(() => this.dataResource.value() ?? []);
-  hasExpenses = computed(() => this.allData().length > 0);
-  hasFilteredExpenses = computed(() => this.filteredData().length > 0);
+  readonly tableFormModel = signal({ category: '' });
+  readonly tableForm = form(this.tableFormModel);
+  readonly sortState = signal<{ sortBy: ExpenseSortBy; sortOrder: ExpenseSortOrder }>({
+    sortBy: 'expenseDate', sortOrder: 'desc',
+  });
+  readonly filters = computed<ExpenseQuery>(() => {
+    const { category } = this.tableFormModel();
+    const { sortBy, sortOrder } = this.sortState();
+    return expenseQueryBody({
+      category,
+      sortBy: sortBy === 'expenseDate' ? undefined : sortBy,
+      sortOrder: sortOrder === 'desc' ? undefined : sortOrder,
+    });
+  });
+  readonly pageSize = signal(20);
+  readonly pageNumber = linkedSignal({ source: this.filters, computation: () => 0 });
+  readonly pageSizeOptions = [5, 10, 20, 25, 50, 100];
+  readonly query = computed<ExpenseQuery>(() => expenseQueryBody({
+    ...this.filters(),
+    page: this.pageNumber() === 0 ? undefined : this.pageNumber() + 1,
+    limit: this.pageSize() === 20 ? undefined : this.pageSize(),
+  }));
+  readonly dataResource = httpResource<ExpensePage>(() => ({
+    url: `${environment.apiUrl}/expenses`,
+    method: 'QUERY',
+    body: this.query(),
+    headers: { 'Content-Type': 'application/json' },
+  }));
+  readonly expenses = computed(() => this.dataResource.value()?.items ?? []);
+  readonly length = computed(() => this.dataResource.value()?.pagination.total ?? 0);
+  readonly hasExpenses = computed(() => this.expenses().length > 0);
+  readonly hasCategoryFilter = computed(() => !!this.tableFormModel().category);
   selectedCategoryLabel = computed(() => {
     const selectedCategory = this.tableFormModel().category;
     const category = this.appSettingsService.getCategory(selectedCategory);
@@ -69,26 +93,6 @@ export class ExpenseTableComponent {
     return category.custom ? category.label : this.languageService.t(`category.${category.id}`);
   });
 
-  filteredData = computed<IExpense[]>(() => {
-    const selectedCategory = this.tableFormModel().category;
-
-    if (!selectedCategory) {
-      return this.allData();
-    }
-
-    return this.allData().filter((expense) => expense.category === selectedCategory);
-  });
-
-  paginatedCards = computed<IExpense[]>(() => {
-    const start = this.pageNumber() * this.pageSize();
-    const end = start + this.pageSize();
-    return this.filteredData().slice(start, end);
-  });
-
-  dataResource = httpResource<IExpense[]>(() => `${environment.apiUrl}/expenses`);
-
-  readonly paginator = viewChild<MatPaginator>('paginator');
-  readonly sort = viewChild<MatSort>('sort');
   private readonly dialogConfig = {
     disableClose: true,
     width: 'calc(100% - 30px)',
@@ -102,45 +106,25 @@ export class ExpenseTableComponent {
     ]
   })
 
-  tableFormModel = signal({
-    category: '',
-  })
-
-  tableForm = form(this.tableFormModel);
-
   constructor() {
     effect(() => {
-      this.tableFormModel().category;
-      this.pageNumber.set(0);
-    });
-
-    effect(() => {
-      const paginator = this.paginator();
-      if (paginator) {
-        this.dataSource.paginator = paginator;
-      }
-    });
-
-    effect(() => {
-      const sort = this.sort();
-      if (sort) {
-        this.dataSource.sort = sort;
-        sort.sort({
-          id: 'expenseDate',
-          start: 'desc',
-          disableClear: true,
-        });
-      }
-    });
-
-    effect(() => {
-      this.dataSource.data = this.filteredData();
+      if (!this.dataResource.hasValue()) return;
+      const lastPage = Math.max(0, this.dataResource.value().pagination.totalPages - 1);
+      if (this.pageNumber() > lastPage) this.pageNumber.set(lastPage);
     });
   }
 
   onPageChange(event: PageEvent) {
     this.pageSize.set(event.pageSize);
     this.pageNumber.set(event.pageIndex);
+  }
+
+  onSortChange(sort: Sort): void {
+    if (!['expenseDate', 'amount', 'category', 'createdAt'].includes(sort.active)) return;
+    this.sortState.set({
+      sortBy: sort.active as ExpenseSortBy,
+      sortOrder: sort.direction === 'asc' ? 'asc' : 'desc',
+    });
   }
 
   clearCategoryFilter(): void {
