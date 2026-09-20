@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import {
   form,
+  max,
   min,
   minLength,
   required,
@@ -64,6 +65,18 @@ export class ExpenseModalComponent {
     });
     pattern(expense.amount, /^\d+(\.\d+)?$/, {
       message: this.languageService.t('validation.onlyNumbers'),
+    });
+    // The backend DTO is @IsNumber({ maxDecimalPlaces: 2 }) and rejects 12.345
+    // with a 400. The stricter pattern only kicks in once the value is numeric,
+    // so a non-numeric entry still reports "only numbers" and nothing else.
+    pattern(
+      expense.amount,
+      ({ value }) => (/^\d+(\.\d+)?$/.test(value() ?? '') ? /^\d+(\.\d{1,2})?$/ : undefined),
+      { message: this.languageService.t('validation.amountDecimals') },
+    );
+    // Same double-precision value as MAX_EXPENSE_AMOUNT (MAX_SAFE_INTEGER / 100).
+    max(expense.amount, 90071992547409.91, {
+      message: this.languageService.t('validation.amountMax'),
     });
 
     required(expense.category, {

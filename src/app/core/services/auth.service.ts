@@ -76,7 +76,10 @@ export class AuthService {
   }
 
   deleteAccount(password: string): Observable<void> {
-    return this.http.request<void>('DELETE', `${environment.apiUrl}/auth/account`, {
+    // The deployed route currently ignores this body. Keeping the password in
+    // the request makes the client forward-compatible with server-side
+    // verification, which must be implemented by the backend.
+    return this.http.request<void>('DELETE', `${environment.apiUrl}/users/me`, {
       body: { password },
     }).pipe(
       tap(() => {

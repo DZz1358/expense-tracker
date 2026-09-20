@@ -130,6 +130,24 @@ describe('AuthService', () => {
     expect(tokenStorage.getToken()).toBe('old-token');
   });
 
+  it('deletes the current account through /users/me and clears the local session', () => {
+    spyOn(router, 'navigate').and.resolveTo(true);
+    tokenStorage.setToken('token-123');
+    service.updateCurrentUser({ id: 'user-1', email: 'john@example.com' });
+
+    service.deleteAccount('secret123').subscribe();
+
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/users/me`);
+    expect(request.request.method).toBe('DELETE');
+    expect(request.request.body).toEqual({ password: 'secret123' });
+    expect(request.request.headers.get('Authorization')).toBe('Bearer token-123');
+    request.flush(null);
+
+    expect(tokenStorage.getToken()).toBeNull();
+    expect(service.currentUser()).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
   it('removes the token on logout', () => {
     spyOn(router, 'navigate').and.resolveTo(true);
     localStorage.setItem('access_token', 'token-123');

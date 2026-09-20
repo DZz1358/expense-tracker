@@ -80,7 +80,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'category.education': 'Education',
     'category.travel': 'Travel',
     'category.finance': 'Finance',
-    'category.Other': 'Other',
+    'category.other': 'Other',
     'category.all': 'All Categories',
 
     'analytics.title': 'Spending analytics',
@@ -150,6 +150,11 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'expenses.deleteMessage':
       'Delete {name} - {amount}? This action cannot be undone.',
     'expenses.fallbackName': 'Expense',
+    'expenses.added': 'Expense added',
+    'expenses.updated': 'Expense updated',
+    'expenses.deleted': 'Expense deleted',
+    'expenses.saveFailed': 'Could not save the expense. Please try again.',
+    'expenses.deleteFailed': 'Could not delete the expense. Please try again.',
 
     'expenseModal.addTitle': 'Add new expense',
     'expenseModal.editTitle': 'Edit expense',
@@ -163,6 +168,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'validation.amountRequired': 'Amount is required',
     'validation.amountMin': 'Amount must be greater than 0',
     'validation.onlyNumbers': 'Only numbers are allowed',
+    'validation.amountDecimals': 'Up to 2 decimal places are allowed',
+    'validation.amountMax': 'Amount is too large',
     'validation.categoryRequired': 'Category is required',
     'validation.descriptionRequired': 'Description is required',
     'validation.descriptionMin':
@@ -359,7 +366,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'category.education': 'Образование',
     'category.travel': 'Путешествия',
     'category.finance': 'Финансы',
-    'category.Other': 'Другое',
+    'category.other': 'Другое',
     'category.all': 'Все категории',
 
     'analytics.title': 'Аналитика трат',
@@ -427,6 +434,11 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'expenses.deleteMessage':
       'Удалить {name} - {amount}? Это действие нельзя отменить.',
     'expenses.fallbackName': 'Расход',
+    'expenses.added': 'Расход добавлен',
+    'expenses.updated': 'Расход обновлён',
+    'expenses.deleted': 'Расход удалён',
+    'expenses.saveFailed': 'Не удалось сохранить расход. Попробуйте ещё раз.',
+    'expenses.deleteFailed': 'Не удалось удалить расход. Попробуйте ещё раз.',
 
     'expenseModal.addTitle': 'Добавить расход',
     'expenseModal.editTitle': 'Редактировать расход',
@@ -440,6 +452,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'validation.amountRequired': 'Сумма обязательна',
     'validation.amountMin': 'Сумма должна быть больше 0',
     'validation.onlyNumbers': 'Разрешены только числа',
+    'validation.amountDecimals': 'Не более 2 знаков после запятой',
+    'validation.amountMax': 'Сумма слишком большая',
     'validation.categoryRequired': 'Категория обязательна',
     'validation.descriptionRequired': 'Описание обязательно',
     'validation.descriptionMin': 'Описание должно быть минимум 2 символа',
@@ -634,7 +648,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'category.education': 'Освіта',
     'category.travel': 'Подорожі',
     'category.finance': 'Фінанси',
-    'category.Other': 'Інше',
+    'category.other': 'Інше',
     'category.all': 'Усі категорії',
 
     'analytics.title': 'Аналітика витрат',
@@ -701,6 +715,11 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'expenses.deleteMessage':
       'Видалити {name} - {amount}? Цю дію не можна скасувати.',
     'expenses.fallbackName': 'Витрата',
+    'expenses.added': 'Витрату додано',
+    'expenses.updated': 'Витрату оновлено',
+    'expenses.deleted': 'Витрату видалено',
+    'expenses.saveFailed': 'Не вдалося зберегти витрату. Спробуйте ще раз.',
+    'expenses.deleteFailed': 'Не вдалося видалити витрату. Спробуйте ще раз.',
 
     'expenseModal.addTitle': 'Додати витрату',
     'expenseModal.editTitle': 'Редагувати витрату',
@@ -714,6 +733,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     'validation.amountRequired': "Сума обов'язкова",
     'validation.amountMin': 'Сума має бути більшою за 0',
     'validation.onlyNumbers': 'Дозволені тільки числа',
+    'validation.amountDecimals': 'Не більше 2 знаків після коми',
+    'validation.amountMax': 'Сума занадто велика',
     'validation.categoryRequired': "Категорія обов'язкова",
     'validation.descriptionRequired': "Опис обов'язковий",
     'validation.descriptionMin': 'Опис має містити щонайменше 2 символи',

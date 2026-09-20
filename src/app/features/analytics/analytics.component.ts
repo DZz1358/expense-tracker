@@ -14,7 +14,7 @@ import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { environment } from '../../../environments/environment';
 import { LanguageService } from '../../core/i18n/language.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
-import { ExpenseSummary } from '../../models/expense-query.models';
+import { ExpenseSummary, normalizeExpenseSummary } from '../../models/expense-query.models';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../shared/theme/theme.service';
 
@@ -67,12 +67,18 @@ export class AnalyticsComponent {
   };
 
   readonly periodFilters = computed(() => this.analyticsService.getPeriodFilters(this.period()));
+  // `parse` repairs any body shape before it reaches the view model, so a backend
+  // that predates the byDate / activeDays / biggestExpense contract degrades
+  // instead of throwing inside the `viewModel` computed. `defaultValue` is left
+  // out on purpose: it would make `previousResource.hasValue()` true while idle
+  // (the "all time" period has no previous window) and turn `previousTotal` into
+  // 0 instead of null.
   readonly dataResource = httpResource<ExpenseSummary>(() => ({
     url: `${environment.apiUrl}/expenses/summary`,
     method: 'QUERY',
     body: this.periodFilters().current,
     headers: { 'Content-Type': 'application/json' },
-  }));
+  }), { parse: normalizeExpenseSummary });
   readonly previousResource = httpResource<ExpenseSummary>(() => {
     const filters = this.periodFilters().previous;
     return filters ? {
@@ -81,9 +87,11 @@ export class AnalyticsComponent {
       body: filters,
       headers: { 'Content-Type': 'application/json' },
     } : undefined;
-  });
+  }, { parse: normalizeExpenseSummary });
   readonly viewModel = computed(() => this.analyticsService.buildViewModel(
-    this.dataResource.value() ?? EMPTY_EXPENSE_SUMMARY,
+    // `value()` throws in the error state rather than returning undefined, so the
+    // guard has to be `hasValue()`, matching the sibling line below.
+    this.dataResource.hasValue() ? this.dataResource.value() : EMPTY_EXPENSE_SUMMARY,
     this.period(),
     this.previousResource.hasValue() ? this.previousResource.value() : null,
   ));

@@ -110,7 +110,10 @@ export class AppSettingsService {
 
   getCategory(categoryId: string | null | undefined): ExpenseCategoryOption | null {
     if (!categoryId) return null;
-    return this.categories().find((category) => category.id === categoryId) ?? null;
+    // Legacy expenses written before the backend lowercased categories still
+    // store values such as 'Other', so the lookup ignores case and padding.
+    const id = categoryId.trim().toLowerCase();
+    return this.categories().find((category) => category.id.toLowerCase() === id) ?? null;
   }
 
   toUserSettingsRequest(extraSettings: Record<string, unknown> = {}): UpdateUserSettingsRequest {

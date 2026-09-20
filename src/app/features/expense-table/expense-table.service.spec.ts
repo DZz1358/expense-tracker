@@ -74,6 +74,26 @@ describe('ExpenseTableService QUERY requests', () => {
     request.flush({ ...EMPTY_EXPENSE_SUMMARY, total: 200, totalAmount: 5000 });
   });
 
+  it('normalizes legacy summary responses for non-component callers', () => {
+    let result = EMPTY_EXPENSE_SUMMARY;
+    service.querySummary().subscribe((summary) => result = summary);
+    const request = http.expectOne(`${environment.apiUrl}/expenses/summary`);
+    request.flush({
+      total: 2,
+      totalAmount: 30,
+      byCategory: [
+        { category: 'Other', total: 1, totalAmount: 10 },
+        { category: 'other', total: 1, totalAmount: 20 },
+      ],
+    });
+
+    expect(result.byCategory).toEqual([
+      { category: 'other', total: 2, totalAmount: 30 },
+    ]);
+    expect(result.byDate).toEqual([]);
+    expect(result.biggestExpense).toBeNull();
+  });
+
   it('loads every page for account-wide operations and stops at the last page', () => {
     const first = { id: 'first' } as IExpense;
     const second = { id: 'second' } as IExpense;

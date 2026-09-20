@@ -19,7 +19,7 @@ import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { httpResource } from '@angular/common/http';
 
 import { IExpense } from '../../models/expense.interface';
-import { ExpensePage, ExpenseQuery, ExpenseSortBy, ExpenseSortOrder, expenseQueryBody } from '../../models/expense-query.models';
+import { ExpensePage, ExpenseQuery, ExpenseSortBy, ExpenseSortOrder, expenseQueryBody, legacyCompatibleCategoryFilter } from '../../models/expense-query.models';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
 import { environment } from '../../../environments/environment';
 import { ButtonComponent } from '../../shared/button/button.component';
@@ -29,6 +29,7 @@ import { CategoryColorPipe } from '../../shared/pipes/category-color.pipe';
 import { CategoryIconPipe } from '../../shared/pipes/category-icon.pipe';
 import { CategoryLabelPipe } from '../../shared/pipes/category-label.pipe';
 import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
+import { SnackbarService } from '../../shared/snackbar/snackbar.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
 import { LanguageService } from '../../core/i18n/language.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
@@ -50,6 +51,7 @@ export class ExpenseTableComponent {
   viewportServiceService = inject(ViewportServiceService);
   appSettingsService = inject(AppSettingsService);
   languageService = inject(LanguageService);
+  snackbarService = inject(SnackbarService);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
   readonly settings = this.appSettingsService.settings;
@@ -84,7 +86,7 @@ export class ExpenseTableComponent {
     const dateTo = this.tableForm.dateTo().value();
     const { sortBy, sortOrder } = this.sortState();
     return expenseQueryBody({
-      category,
+      category: legacyCompatibleCategoryFilter(category),
       dateFrom,
       dateTo,
       q: this.debouncedSearch(),
@@ -216,14 +218,20 @@ export class ExpenseTableComponent {
       .subscribe((result) => {
         if (!result) return;
         this.expenseTableService.addExpense(result)
-          .subscribe(() => {
-            this.dataResource.reload();
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.dataResource.reload();
+              this.snackbarService.success(this.languageService.t('expenses.added'));
+            },
+            error: (error: unknown) => this.snackbarService.error(
+              this.apiErrorMessage(error, 'expenses.saveFailed'),
+            ),
           });
       });
   }
 
   public openEditExpenseModal(expense: any): void {
-    console.log('expense :>> ', expense);
     this.dialog.open(ExpenseModalComponent, {
       ...this.dialogConfig,
       data: {
@@ -237,8 +245,15 @@ export class ExpenseTableComponent {
       .subscribe((result: IExpense) => {
         if (!result) return;
         this.expenseTableService.updateExpense(result)
-          .subscribe(() => {
-            this.dataResource.reload();
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.dataResource.reload();
+              this.snackbarService.success(this.languageService.t('expenses.updated'));
+            },
+            error: (error: unknown) => this.snackbarService.error(
+              this.apiErrorMessage(error, 'expenses.saveFailed'),
+            ),
           });
       });
   }
@@ -263,10 +278,35 @@ export class ExpenseTableComponent {
       .subscribe((result) => {
         if (!result?.confirmed) return;
         this.expenseTableService.deleteExpense(result.expenseId)
-          .subscribe(() => {
-            this.dataResource.reload();
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.dataResource.reload();
+              this.snackbarService.success(this.languageService.t('expenses.deleted'));
+            },
+            error: (error: unknown) => this.snackbarService.error(
+              this.apiErrorMessage(error, 'expenses.deleteFailed'),
+            ),
           });
       });
+  }
+
+  /**
+   * class-validator failures answer with `message: string[]`, every other
+   * backend error with `message: string`. Both are folded into one line here so
+   * the snackbar never renders `[object Object]` or a comma run-on.
+   */
+  private apiErrorMessage(error: unknown, fallbackKey: string): string {
+    const message = (error as { error?: { message?: unknown } } | null)?.error?.message;
+
+    if (Array.isArray(message)) {
+      const details = message.filter((part): part is string => typeof part === 'string');
+      if (details.length) return details.join('. ');
+    }
+
+    if (typeof message === 'string' && message.trim()) return message.trim();
+
+    return this.languageService.t(fallbackKey);
   }
 
   public formatAmount(amount: number): string {

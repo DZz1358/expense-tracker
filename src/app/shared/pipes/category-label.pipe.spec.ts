@@ -1,8 +1,11 @@
+import { TestBed } from '@angular/core/testing';
+
 import { CategoryLabelPipe } from './category-label.pipe';
 
 describe('CategoryLabelPipe', () => {
   it('create an instance', () => {
-    const pipe = new CategoryLabelPipe();
+    TestBed.configureTestingModule({});
+    const pipe = TestBed.runInInjectionContext(() => new CategoryLabelPipe());
     expect(pipe).toBeTruthy();
   });
 });

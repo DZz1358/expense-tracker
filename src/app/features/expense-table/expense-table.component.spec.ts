@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DateAdapter } from '@angular/material/core';
 import { formatDate } from '@angular/common';
+import { of, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { IExpense } from '../../models/expense.interface';
@@ -111,6 +112,18 @@ describe('ExpenseTableComponent server pagination', () => {
     expect(request.request.body).toEqual({ ...defaultDates, category: 'transport' });
     expect(component.pageNumber()).toBe(0);
     expect(component.expenses()).toEqual([serverExpense]);
+  });
+
+  it('queries both spellings of the legacy Other category', async () => {
+    await respond();
+    component.tableFormModel.update((value) => ({ ...value, category: 'other' }));
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect((await respond()).request.body).toEqual({
+      ...defaultDates,
+      category: ['other', 'Other'],
+    });
   });
 
   it('sends supported sorting to the API and preserves its returned order', async () => {
@@ -378,5 +391,51 @@ describe('ExpenseTableComponent server pagination', () => {
         expect(bounds.left).withContext(`Input ${input.type} at ${width}px`).toBeGreaterThanOrEqual(wrapper.left);
       }
     }
+  });
+
+  it('reloads the table and reports success after adding an expense', async () => {
+    await respond();
+    const result = { ...expense, id: undefined };
+    spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(result) } as any);
+    spyOn(component.expenseTableService, 'addExpense').and.returnValue(of(expense));
+    const reload = spyOn(component.dataResource, 'reload').and.returnValue(true);
+    const success = spyOn(component.snackbarService, 'success');
+
+    component.openAddExpenseModal();
+
+    expect(component.expenseTableService.addExpense).toHaveBeenCalledWith(result);
+    expect(reload).toHaveBeenCalled();
+    expect(success).toHaveBeenCalledWith('Expense added');
+  });
+
+  it('shows joined backend validation messages when editing fails', async () => {
+    await respond();
+    spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(expense) } as any);
+    spyOn(component.expenseTableService, 'updateExpense').and.returnValue(throwError(() => ({
+      error: { message: ['Amount is invalid', 'Category is invalid'] },
+    })));
+    const reload = spyOn(component.dataResource, 'reload').and.returnValue(true);
+    const showError = spyOn(component.snackbarService, 'error');
+
+    component.openEditExpenseModal(expense);
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(showError).toHaveBeenCalledWith('Amount is invalid. Category is invalid');
+  });
+
+  it('reloads the table and reports success after deleting an expense', async () => {
+    await respond();
+    spyOn(component.dialog, 'open').and.returnValue({
+      afterClosed: () => of({ confirmed: true, expenseId: expense.id }),
+    } as any);
+    spyOn(component.expenseTableService, 'deleteExpense').and.returnValue(of(undefined));
+    const reload = spyOn(component.dataResource, 'reload').and.returnValue(true);
+    const success = spyOn(component.snackbarService, 'success');
+
+    component.openDeleteExpenseModal(expense);
+
+    expect(component.expenseTableService.deleteExpense).toHaveBeenCalledWith(expense.id);
+    expect(reload).toHaveBeenCalled();
+    expect(success).toHaveBeenCalledWith('Expense deleted');
   });
 });

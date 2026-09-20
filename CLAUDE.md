@@ -106,8 +106,10 @@ adds `Authorization: Bearer` to requests whose URL starts with `environment.apiU
 request sets the `SKIP_AUTH` `HttpContextToken` (login/register do). On a 401 it clears the token
 and user and navigates to `/login`.
 
-API endpoints in use: `/auth/register`, `/auth/login`, `/auth/account` (DELETE),
-`/users/me`, `/users/me/avatar`, `/users/me/password`, `/expenses` (+ `/expenses/:id`).
+API endpoints in use: `/auth/register`, `/auth/login`, `/users/me` (GET/PATCH/DELETE),
+`/users/me/avatar`, `/users/me/password`, `/expenses` (+ `/expenses/:id`). The deployed
+`DELETE /users/me` route currently ignores the password body, so password verification
+must be implemented on the backend rather than assumed by the frontend.
 
 ## Settings and categories
 

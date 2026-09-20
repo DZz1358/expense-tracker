@@ -33,7 +33,7 @@ Expense Tracker is an Angular application for tracking personal expenses. The ap
 
 ## API
 
-The frontend uses the API URL from [src/environments/environment.ts](/home/denys/expense-tracker/src/environments/environment.ts):
+The frontend uses the API URL from [src/environments/environment.ts](src/environments/environment.ts):
 
 ```ts
 https://test-backend-rho-seven.vercel.app
@@ -45,7 +45,6 @@ Main API areas used by the app:
 - `/auth/login`
 - `/auth/forgot-password`
 - `/auth/reset-password`
-- `/auth/account`
 - `/users/me`
 - `/users/me/avatar`
 - `/users/me/password`
@@ -58,12 +57,21 @@ Expense lists use `QUERY /expenses` with JSON filters and return
 sorting resets pagination to page 1. The frontend uses the returned items and
 total directly for both tables and mobile cards.
 
-Analytics uses `QUERY /expenses/summary` for current and previous period totals
-across the complete selection. In addition to `total`, `totalAmount`, and
-`byCategory`, the API must return `byDate` (UTC daily counts and amounts),
-`activeDays`, and `biggestExpense`. These fields power the timeline, average per
-active day, and largest expense card. Date-only filter boundaries are sent
+Analytics opens on the current UTC calendar month and uses
+`QUERY /expenses/summary` for current and previous period totals across the
+complete selection. `byDate` (UTC daily counts and amounts),
+`activeDays`, and `biggestExpense` power the timeline, average per active day,
+and largest expense card. The frontend normalizes older responses that omit
+these fields to safe empty values. Date-only filter boundaries are sent
 unchanged and interpreted in UTC; `dateTo` includes the final day.
+
+Account deletion uses `DELETE /users/me`. The currently deployed backend does
+not verify the password body; password verification must be enforced server-side
+before it can be treated as a security boundary.
+
+Built-in category IDs are lowercase. The frontend temporarily queries both
+`other` and the legacy `Other` value and merges their analytics buckets so old
+records remain visible until backend data is migrated.
 
 Password recovery requires SMTP configuration on the backend and
 `PASSWORD_RESET_URL` pointing to this frontend's `/reset-password` page.

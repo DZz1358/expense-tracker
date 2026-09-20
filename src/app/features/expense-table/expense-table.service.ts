@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { EMPTY, Observable, expand, reduce } from 'rxjs';
+import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { IExpense } from '../../models/expense.interface';
-import { ExpenseFilters, ExpensePage, ExpenseQuery, ExpenseSummary, expenseQueryBody } from '../../models/expense-query.models';
+import { ExpenseFilters, ExpensePage, ExpenseQuery, ExpenseSummary, expenseQueryBody, normalizeExpenseSummary } from '../../models/expense-query.models';
 
 @Injectable({
   providedIn: 'root',
@@ -21,10 +21,10 @@ export class ExpenseTableService {
   }
 
   querySummary(filters: ExpenseFilters = {}): Observable<ExpenseSummary> {
-    return this.http.request<ExpenseSummary>('QUERY', `${environment.apiUrl}/expenses/summary`, {
+    return this.http.request<unknown>('QUERY', `${environment.apiUrl}/expenses/summary`, {
       body: expenseQueryBody(filters),
       headers: { 'Content-Type': 'application/json' },
-    });
+    }).pipe(map(normalizeExpenseSummary));
   }
 
   getAllExpenses(filters: ExpenseFilters = {}): Observable<IExpense[]> {

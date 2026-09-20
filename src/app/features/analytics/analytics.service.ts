@@ -2,8 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { LanguageService } from '../../core/i18n/language.service';
 import { AppSettingsService, CurrencyCode } from '../../core/services/app-settings.service';
-import { IExpense } from '../../models/expense.interface';
-import { ExpenseFilters, ExpenseSummary } from '../../models/expense-query.models';
+import { ExpenseFilters, ExpenseSummary, ExpenseSummaryItem } from '../../models/expense-query.models';
 
 export type AnalyticsPeriod = 'month' | 'last30' | 'year' | 'all';
 
@@ -26,7 +25,7 @@ export interface AnalyticsViewModel {
   total: number;
   count: number;
   averagePerDay: number;
-  biggestExpense: IExpense | null;
+  biggestExpense: ExpenseSummaryItem | null;
   topCategory: AnalyticsCategoryTotal | null;
   categoryTotals: AnalyticsCategoryTotal[];
   timeline: AnalyticsTimelinePoint[];
@@ -50,21 +49,32 @@ export class AnalyticsService {
   ): AnalyticsViewModel {
     const total = summary.totalAmount;
     const previousTotal = previousSummary?.totalAmount ?? null;
-    const categoryTotals = summary.byCategory.map((value) => {
+    const groupedCategories = new Map<string, { total: number; count: number }>();
+    for (const value of summary.byCategory) {
       const category = this.appSettingsService.getCategory(value.category);
+      const id = category?.id ?? value.category.trim().toLowerCase();
+      if (!id) continue;
+      const previous = groupedCategories.get(id) ?? { total: 0, count: 0 };
+      groupedCategories.set(id, {
+        total: previous.total + value.totalAmount,
+        count: previous.count + value.total,
+      });
+    }
+    const categoryTotals = Array.from(groupedCategories, ([id, value]) => {
+      const category = this.appSettingsService.getCategory(id);
       return {
-        id: value.category,
+        id,
         label: category?.custom
           ? category.label
           : category
-            ? this.languageService.t(`category.${value.category}`)
-            : value.category,
+            ? this.languageService.t(`category.${category.id}`)
+            : id,
         color: category?.color ?? '#9E9E9E',
-        total: value.totalAmount,
-        count: value.total,
-        percentage: total > 0 ? (value.totalAmount / total) * 100 : 0,
+        total: value.total,
+        count: value.count,
+        percentage: total > 0 ? (value.total / total) * 100 : 0,
       };
-    });
+    }).sort((a, b) => b.total - a.total || a.id.localeCompare(b.id));
 
     return {
       total,
@@ -126,22 +136,38 @@ export class AnalyticsService {
     }).format(amount);
   }
 
-  private buildTimeline(byDate: ExpenseSummary['byDate'], period: AnalyticsPeriod): AnalyticsTimelinePoint[] {
+  private buildTimeline(
+    byDate: ExpenseSummary['byDate'] | undefined,
+    period: AnalyticsPeriod,
+  ): AnalyticsTimelinePoint[] {
     const groupByMonth = period === 'year' || period === 'all';
     const totals = new Map<string, number>();
-    for (const point of byDate) {
-      const key = groupByMonth ? point.date.slice(0, 7) : point.date;
+    // Second line of defence: a caller that bypasses normalizeExpenseSummary must
+    // not be able to freeze the page from inside the viewModel computed.
+    for (const point of byDate ?? []) {
+      // A backend that returns a full ISO timestamp instead of a calendar day
+      // still produces a usable chart rather than a RangeError.
+      const day = typeof point.date === 'string' ? point.date.slice(0, 10) : '';
+      if (!day) continue;
+      const key = groupByMonth ? day.slice(0, 7) : day;
       totals.set(key, (totals.get(key) ?? 0) + point.totalAmount);
     }
 
     return Array.from(totals, ([key, total]) => ({
       key,
       total,
-      label: new Intl.DateTimeFormat(this.languageService.dateLocale(), {
-        ...(groupByMonth ? { month: 'short', year: '2-digit' } as const : { month: 'short', day: 'numeric' } as const),
-        timeZone: 'UTC',
-      }).format(new Date(`${groupByMonth ? `${key}-01` : key}T00:00:00Z`)),
+      label: this.timelineLabel(key, groupByMonth),
     }));
+  }
+
+  private timelineLabel(key: string, groupByMonth: boolean): string {
+    const date = new Date(`${groupByMonth ? `${key}-01` : key}T00:00:00Z`);
+    if (Number.isNaN(date.getTime())) return key;
+
+    return new Intl.DateTimeFormat(this.languageService.dateLocale(), {
+      ...(groupByMonth ? { month: 'short', year: '2-digit' } as const : { month: 'short', day: 'numeric' } as const),
+      timeZone: 'UTC',
+    }).format(date);
   }
 
   private dateKey(date: Date): string {

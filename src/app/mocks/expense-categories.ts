@@ -11,7 +11,7 @@ export const EXPENSE_CATEGORY = {
   EDUCATION: 'education',
   TRAVEL: 'travel',
   FINANCE: 'finance',
-  OTHER: 'Other',
+  OTHER: 'other',
 } as const;
 
 export type ExpenseCategory =
