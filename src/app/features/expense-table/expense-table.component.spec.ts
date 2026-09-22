@@ -357,7 +357,7 @@ describe('ExpenseTableComponent server pagination', () => {
     }));
   }
 
-  it('keeps desktop fields equally wide and places mobile clearing beside a narrower date picker', async () => {
+  it('aligns desktop actions with equal fields and places mobile clearing beside a narrower date picker', async () => {
     await respond();
     for (const { width, mobile } of [
       { width: 320, mobile: true }, { width: 390, mobile: true },
@@ -391,6 +391,13 @@ describe('ExpenseTableComponent server pagination', () => {
         expect(bounds.left).withContext(`Input ${input.type} at ${width}px`).toBeGreaterThanOrEqual(wrapper.left);
       }
     }
+
+    const fieldBounds = fixture.nativeElement.querySelector('.category-filter').getBoundingClientRect();
+    const clearBounds = fixture.nativeElement.querySelector('.clear-filters').getBoundingClientRect();
+    const addBounds = fixture.nativeElement.querySelector('app-button button').getBoundingClientRect();
+    const fieldCenter = fieldBounds.top + fieldBounds.height / 2;
+    expect(Math.abs(fieldCenter - (clearBounds.top + clearBounds.height / 2))).toBeLessThan(1);
+    expect(Math.abs(fieldCenter - (addBounds.top + addBounds.height / 2))).toBeLessThan(1);
   });
 
   it('reloads the table and reports success after adding an expense', async () => {

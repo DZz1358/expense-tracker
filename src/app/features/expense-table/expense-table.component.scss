@@ -1,10 +1,3 @@
-.add-expense-button {
-  position: absolute;
-  bottom: 10%;
-  right: 5%;
-  z-index: 100;
-}
-
 .text-truncate {
   max-width: 200px;
 }
@@ -30,7 +23,7 @@
   margin-top: 0.5rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
 
   app-button {
@@ -43,7 +36,7 @@
   flex: 1;
   min-width: 0;
   grid-template-columns: repeat(3, minmax(0, 1fr)) 48px;
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
 
   mat-form-field {
@@ -52,9 +45,8 @@
   }
 
   .clear-filters {
-    align-self: start;
+    align-self: center;
     justify-self: end;
-    margin-top: 4px;
   }
 }
 
