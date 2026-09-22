@@ -313,6 +313,13 @@ describe('ExpenseTableComponent server pagination', () => {
     expect(component.length()).toBe(200);
   }));
 
+  it('keeps the mobile add action below shell overlays', async () => {
+    TestBed.inject(ViewportServiceService).isMobile.set(true);
+    await respond();
+    const addButton: HTMLButtonElement = fixture.nativeElement.querySelector('.add-expense-mobile');
+    expect(Number.parseInt(getComputedStyle(addButton).zIndex, 10)).toBeLessThan(100);
+  });
+
   for (const mobile of [false, true]) {
     it(`selects a date range from the ${mobile ? 'mobile' : 'desktop'} calendar and clears it`, fakeAsync(() => {
       TestBed.inject(ViewportServiceService).isMobile.set(mobile);
