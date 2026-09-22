@@ -1,0 +1,73 @@
+:host {
+  display: block;
+}
+
+.google-sign-in {
+  display: grid;
+  transition: opacity 150ms ease;
+
+  &--busy {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+// Google's button cannot be themed or translated, so it is rendered invisibly on top of a
+// Material button that carries the app's tokens and i18n. Hover and focus are mirrored from the
+// wrapper because the Google iframe swallows pointer and keyboard events.
+.google-sign-in__control {
+  position: relative;
+  width: min(100%, 400px);
+  margin-inline: auto;
+
+  &:hover .google-sign-in__button:not([disabled]) {
+    background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  }
+
+  &:focus-within .google-sign-in__button {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+}
+
+.google-sign-in__button {
+  width: 100%;
+  // Long translations (e.g. uk sign-up on a 320px phone) wrap onto a second line.
+  height: auto;
+  min-height: var(--mat-button-outlined-container-height, 40px);
+  padding-block: 6px;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.google-sign-in__content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.google-sign-in__logo {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.google-sign-in__native {
+  position: absolute;
+  inset: 0;
+  // Material raises .mdc-button__label with z-index: 1; stay above it so the click reaches Google.
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.google-sign-in__hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--mat-sys-on-surface-variant);
+}

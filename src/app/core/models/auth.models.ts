@@ -26,6 +26,12 @@ export interface LoginResponse {
 
 export type RegisterResponse = LoginResponse;
 
+export interface GoogleLoginRequest {
+  credential: string;
+}
+
+export type GoogleLoginResponse = LoginResponse;
+
 export interface ForgotPasswordRequest {
   email: string;
 }

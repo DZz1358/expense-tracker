@@ -5,6 +5,7 @@ Expense Tracker is an Angular application for tracking personal expenses. The ap
 ## What the app does
 
 - Register a new account and log in with email and password.
+- Sign in or sign up with a Google account (Google Identity Services popup flow).
 - Recover an account password through an email reset link.
 - Store the access token locally and attach it to protected API requests.
 - Protect application routes from unauthenticated users.
@@ -43,6 +44,7 @@ Main API areas used by the app:
 
 - `/auth/register`
 - `/auth/login`
+- `/auth/google`
 - `/auth/forgot-password`
 - `/auth/reset-password`
 - `/users/me`
@@ -75,6 +77,14 @@ records remain visible until backend data is migrated.
 
 Password recovery requires SMTP configuration on the backend and
 `PASSWORD_RESET_URL` pointing to this frontend's `/reset-password` page.
+
+Google sign-in posts the Google ID token to `POST /auth/google` and receives the
+same `{ accessToken, user }` response as a regular login. The frontend needs the
+OAuth client id in `environment.googleClientId` (the backend's `GOOGLE_CLIENT_ID`)
+and the frontend origin registered under **Authorized JavaScript origins** in
+Google Cloud Console (origin only, no path; for local development add both
+`http://localhost` and `http://localhost:4200`).
+No client secret or redirect URI is used on the frontend.
 
 ## Project structure
 

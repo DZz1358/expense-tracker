@@ -121,6 +121,12 @@
         <p class="error-message" role="alert">{{ errorMessage() }}</p>
       }
 
+      <div class="auth-divider" aria-hidden="true">
+        <span>{{ 'auth.orDivider' | translate }}</span>
+      </div>
+
+      <app-google-sign-in text="signup_with" [(busy)]="isLoading" />
+
       <p class="auth-link">
         {{ 'auth.hasAccount' | translate }}
         <a routerLink="/login">{{ 'auth.signIn' | translate }}</a>

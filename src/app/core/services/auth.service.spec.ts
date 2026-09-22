@@ -11,6 +11,7 @@ import { authInterceptor, SKIP_AUTH } from '../interceptors/auth.interceptor';
 import { LoginResponse } from '../models/auth.models';
 import { AuthService } from './auth.service';
 import { AuthTokenStorageService } from './auth-token-storage.service';
+import { GoogleIdentityService } from './google-identity.service';
 import { UserService } from './user.service';
 import { Theme } from '../../shared/theme/theme.enum';
 import { ThemeService } from '../../shared/theme/theme.service';
@@ -86,6 +87,53 @@ describe('AuthService', () => {
     expect(document.body.classList.contains(Theme.Dark)).toBeTrue();
   });
 
+  it('exchanges a Google credential for an app session without bearer authentication', () => {
+    const response: LoginResponse = {
+      accessToken: 'token-google',
+      user: { id: 'user-1', email: 'john@example.com', name: 'John' },
+    };
+
+    service.loginWithGoogle('google-id-token').subscribe((result) => {
+      expect(result).toEqual(response);
+    });
+
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/google`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ credential: 'google-id-token' });
+    expect(request.request.context.get(SKIP_AUTH)).toBeTrue();
+    expect(request.request.headers.has('Authorization')).toBeFalse();
+    request.flush(response);
+
+    expect(tokenStorage.getToken()).toBe('token-google');
+    expect(localStorage.getItem('access_token')).not.toContain('google-id-token');
+    expect(service.currentUser()).toEqual(response.user);
+    expect(service.isAuthenticated()).toBeTrue();
+
+    // Protected requests now carry the app JWT, never the Google credential.
+    TestBed.inject(UserService).getMe().subscribe();
+    const me = httpTestingController.expectOne(`${environment.apiUrl}/users/me`);
+    expect(me.request.headers.get('Authorization')).toBe('Bearer token-google');
+    me.flush(response.user);
+  });
+
+  it('keeps the login page in charge of a rejected Google credential', () => {
+    spyOn(router, 'navigate').and.resolveTo(true);
+    let status = 0;
+
+    service.loginWithGoogle('expired').subscribe({
+      next: () => fail('Expected a 401'),
+      error: (error) => (status = error.status),
+    });
+
+    httpTestingController
+      .expectOne(`${environment.apiUrl}/auth/google`)
+      .flush({ message: 'Invalid token' }, { status: 401, statusText: 'Unauthorized' });
+
+    expect(status).toBe(401);
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(service.currentUser()).toBeNull();
+  });
+
   it('applies the refreshed account theme without opening settings', () => {
     TestBed.inject(ThemeService).setTheme(Theme.Dark);
     tokenStorage.setToken('token-123');
@@ -148,6 +196,18 @@ describe('AuthService', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
 
+  it('stops Google auto select when the account is deleted', () => {
+    spyOn(router, 'navigate').and.resolveTo(true);
+    const googleIdentity = TestBed.inject(GoogleIdentityService);
+    spyOn(googleIdentity, 'disableAutoSelect');
+    tokenStorage.setToken('token-123');
+
+    service.deleteAccount('secret123').subscribe();
+    httpTestingController.expectOne(`${environment.apiUrl}/users/me`).flush(null);
+
+    expect(googleIdentity.disableAutoSelect).toHaveBeenCalledTimes(1);
+  });
+
   it('removes the token on logout', () => {
     spyOn(router, 'navigate').and.resolveTo(true);
     localStorage.setItem('access_token', 'token-123');
@@ -157,5 +217,15 @@ describe('AuthService', () => {
     expect(tokenStorage.getToken()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('stops Google auto select on logout', () => {
+    spyOn(router, 'navigate').and.resolveTo(true);
+    const googleIdentity = TestBed.inject(GoogleIdentityService);
+    spyOn(googleIdentity, 'disableAutoSelect');
+
+    service.logout();
+
+    expect(googleIdentity.disableAutoSelect).toHaveBeenCalledTimes(1);
   });
 });

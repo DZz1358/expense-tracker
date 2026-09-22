@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/i18n/language.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { SnackbarService } from '../../../shared/snackbar/snackbar.service';
+import { GoogleSignInComponent } from '../google-sign-in/google-sign-in.component';
 
 interface LoginData {
   email: string;
@@ -22,7 +23,7 @@ interface LoginData {
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe],
+  imports: [CommonModule, RouterLink, MatFormFieldModule, MatIconModule, MatInputModule, MatButtonModule, FormField, TranslatePipe, GoogleSignInComponent],
   templateUrl: './login.component.html',
   styleUrl: '../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

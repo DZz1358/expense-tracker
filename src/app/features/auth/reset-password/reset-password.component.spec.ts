@@ -9,6 +9,7 @@ import { routes } from '../../../app.routes';
 import { LanguageService } from '../../../core/i18n/language.service';
 import { PasswordRecoveryResponse } from '../../../core/models/auth.models';
 import { AuthService } from '../../../core/services/auth.service';
+import { GoogleIdentityService } from '../../../core/services/google-identity.service';
 import { SnackbarService } from '../../../shared/snackbar/snackbar.service';
 import { ForgotPasswordComponent } from '../forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password.component';
@@ -25,12 +26,20 @@ describe('ResetPasswordComponent', () => {
     authService.resetPassword.and.returnValue(of({ success: true, message: 'reset' }));
     authService.isAuthenticated.and.returnValue(true);
     snackbar = jasmine.createSpyObj<SnackbarService>('SnackbarService', ['error', 'success']);
+    // The real routes can land on /login, whose Google button would inject the live Google script.
+    const googleIdentityStub = jasmine.createSpyObj<GoogleIdentityService>(
+      'GoogleIdentityService',
+      ['load', 'initialize', 'release', 'renderButton', 'disableAutoSelect'],
+      { isConfigured: true },
+    );
+    googleIdentityStub.initialize.and.resolveTo();
 
     await TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
         { provide: AuthService, useValue: authService },
         { provide: SnackbarService, useValue: snackbar },
+        { provide: GoogleIdentityService, useValue: googleIdentityStub },
       ],
     }).compileComponents();
 

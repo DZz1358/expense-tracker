@@ -74,6 +74,12 @@
         {{ isLoading() ? ('auth.signingIn' | translate) : ('auth.signIn' | translate) }}
       </button>
 
+      <div class="auth-divider" aria-hidden="true">
+        <span>{{ 'auth.orDivider' | translate }}</span>
+      </div>
+
+      <app-google-sign-in text="signin_with" [(busy)]="isLoading" />
+
       <p class="auth-link">
         {{ 'auth.noAccount' | translate }}
         <a routerLink="/register">{{ 'auth.signUp' | translate }}</a>

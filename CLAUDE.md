@@ -8,8 +8,9 @@ Angular 21 SPA (PWA) for personal expense tracking. Standalone components only, 
 Backend is an external REST API — there is no server code here.
 
 Base URL lives in [src/environments/environment.ts](src/environments/environment.ts)
-(`https://test-backend-rho-seven.vercel.app`). There is no `environment.prod.ts` and no file
-replacement configured — a single environment file is used for every build.
+(`https://test-backend-rho-seven.vercel.app`) next to `googleClientId` (the Google OAuth client
+id, same value as the backend's `GOOGLE_CLIENT_ID`). There is no `environment.prod.ts` and no
+file replacement configured — a single environment file is used for every build.
 
 ## Commands
 
@@ -106,10 +107,74 @@ adds `Authorization: Bearer` to requests whose URL starts with `environment.apiU
 request sets the `SKIP_AUTH` `HttpContextToken` (login/register do). On a 401 it clears the token
 and user and navigates to `/login`.
 
-API endpoints in use: `/auth/register`, `/auth/login`, `/users/me` (GET/PATCH/DELETE),
-`/users/me/avatar`, `/users/me/password`, `/expenses` (+ `/expenses/:id`). The deployed
+API endpoints in use: `/auth/register`, `/auth/login`, `/auth/google`, `/auth/forgot-password`,
+`/auth/reset-password`, `/users/me` (GET/PATCH/DELETE), `/users/me/avatar`, `/users/me/password`,
+`/expenses` (+ `/expenses/:id`, `QUERY /expenses`, `QUERY /expenses/summary`). The deployed
 `DELETE /users/me` route currently ignores the password body, so password verification
 must be implemented on the backend rather than assumed by the frontend.
+
+### Google Sign-In
+
+Uses the official Google Identity Services (GIS) browser SDK in the popup flow. The frontend
+needs only the client id — no client secret, redirect URI, backend callback URL or Passport
+redirect flow. The frontend origin (`http://localhost:4200`, the production origin — origin only,
+no path) must be listed under **Authorized JavaScript origins** for that client in Google Cloud
+Console (for local development add both `http://localhost` and `http://localhost:4200`), otherwise the
+button renders but sign-in fails with `[GSI_LOGGER]: The given origin is not allowed` in the console.
+
+- [google-identity.service.ts](src/app/core/services/google-identity.service.ts) is the only
+  code that touches `google.accounts.id`. It injects `https://accounts.google.com/gsi/client` on
+  first use (Google forbids self-hosting the script; `index.html` deliberately has **no** static
+  `<script>` tag, only a `preconnect`), shares one load promise, wraps the credential callback in
+  `NgZone.run` (GIS calls back outside the Angular zone) and exposes `load` / `initialize` /
+  `release` / `renderButton` / `disableAutoSelect`. Google's `initialize` must run once per page, so
+  the service calls it on the first `initialize(handler)` and later calls only swap the active
+  credential handler; components `release(handler)` on destroy. `renderButton` is synchronous and
+  clears the host (`replaceChildren`) before every render. Types come from `@types/google.accounts`,
+  registered in the `"types"` array of `tsconfig.app.json` and `tsconfig.spec.json`.
+- [google-sign-in.component.ts](src/app/features/auth/google-sign-in/google-sign-in.component.ts)
+  owns the whole flow. **What the user sees is our own `mat-stroked-button`** (Material tokens, so it
+  follows light/dark theme; label from `auth.signInWithGoogle` / `auth.signUpWithGoogle` /
+  `auth.continueWithGoogle`, `auth.signingInWithGoogle` while busy). Google's real button is
+  rendered by the SDK into `.google-sign-in__native`, an `opacity: 0` overlay on top of it, and
+  receives the click — GIS offers no programmatic trigger for the ID-token popup, and its own button
+  cannot be themed and ignores `locale` in favour of the user's Google-account language (it showed
+  Russian text in an English UI). Hover/focus are mirrored onto the visible button via
+  `.google-sign-in__control:hover` / `:focus-within`. Flow: `afterNextRender` → `initialize`; an
+  `afterRenderEffect` (re)renders the hidden GIS button on language / width changes (width clamped to
+  Google's 200–400 px and matched to the visible button so the overlay covers it exactly); the visible
+  button is disabled until `status() === 'ready'`; a hint replaces it when the SDK cannot load. On a
+  credential it calls `AuthService.loginWithGoogle`, shows the `auth.loginSuccess` snackbar and
+  navigates to `/expenses`. `busy` is a `model()` bound two-way to the page's `isLoading`
+  (`[(busy)]="isLoading"`) so the email form and the Google button never run at the same time. Used
+  on `/login` (`text="signin_with"`) and `/register` (`text="signup_with"`).
+- `AuthService.loginWithGoogle(credential)` posts `{ credential }` to `POST /auth/google` with
+  `SKIP_AUTH` (no Bearer header; a 401 from it does not clear the session or redirect) and stores
+  the `GoogleLoginResponse` (an alias of `LoginResponse`) exactly like `login` / `register`
+  (`storeSession`). The Google ID token is never persisted or used as a Bearer token — only the
+  backend `accessToken` is.
+- Backend statuses map to i18n keys in the component: 400 → `auth.googleInvalidCredential`,
+  401 → `auth.googleTokenExpired`, 409 → `auth.googleEmailAlreadyRegistered` (the email already
+  has a password account and is not linked automatically), 503 → `auth.googleNotConfigured`
+  (backend has no `GOOGLE_CLIENT_ID`), anything else → `auth.googleSignInFailed`.
+- `logout()` and `deleteAccount()` go through `clearSession()`, which also calls
+  `disableAutoSelect()`. It is best-effort: the SDK is loaded lazily, so after a page reload it is
+  usually not present at logout time and the call is a no-op. That is fine because the app uses
+  neither One Tap nor `auto_select`, so there is no automatic re-sign-in to block; it does not
+  revoke the Google grant either. Do not load the SDK just to make this call.
+- While `busy`, the whole component gets the `inert` attribute so neither mouse nor keyboard can
+  trigger Google's hidden button twice.
+- Overlay geometry (measured): with an allow-listed origin Google renders an `<iframe>` about 20 px
+  wider and 44 px tall, with the clickable button inside exactly `width` × 40 px, centered; the
+  overlay's `overflow: hidden` clips the excess, so the clickable area equals the visible button.
+  Known limit: when a long label wraps to two lines (ru/uk sign-up below ~330 px) the visible button
+  is ~49 px tall and the top/bottom ~5 px do not react to clicks. With a non-allow-listed origin
+  Google falls back to a DOM `div[role=button]` and logs `[GSI_LOGGER]` instead.
+- Not used on purpose: One Tap / `prompt()`, `use_fedcm_for_button` (the classic popup flow is the
+  default; FedCM for the button is optional per Google and can be enabled in `initialize` later),
+  a static `<script>` tag. If the app ever sets security headers: `Cross-Origin-Opener-Policy` must
+  be `same-origin-allow-popups` (not `same-origin`) and a CSP needs `script-src`/`frame-src`/
+  `connect-src`/`style-src` entries for `https://accounts.google.com/gsi/`.
 
 ## Settings and categories
 
@@ -159,6 +224,13 @@ Karma + Jasmine, spec files next to sources. Most are generated "should create" 
 show the intended style (`provideHttpClient()` + `provideHttpClientTesting()`, `HttpTestingController`,
 `provideRouter([])`). Components that hit `httpResource` need the HTTP testing providers in
 `TestBed`. `localStorage` is real in tests — clear it in `beforeEach` when a spec touches auth or theme.
+Any spec that renders `/login` or `/register` (and therefore `GoogleSignInComponent`) — including
+specs that navigate the real `routes` through `RouterTestingHarness`, like
+`reset-password.component.spec.ts` — must provide a `GoogleIdentityService` stub
+(`jasmine.createSpyObj([...], { isConfigured: true })` with `initialize` resolving); the real service
+would inject the Google script into the Karma page.
+[google-identity.service.spec.ts](src/app/core/services/google-identity.service.spec.ts) shows how to
+fake `window.google` and capture the injected `<script>` when testing the loader itself.
 
 ## Known rough edges (do not treat as the pattern to copy)
 
