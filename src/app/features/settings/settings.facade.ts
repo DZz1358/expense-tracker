@@ -9,6 +9,7 @@ import {
   AppSettings,
   AppSettingsService,
   CurrencyCode,
+  CustomCategoryInput,
   ExpenseCategoryOption,
   ExpenseDateFormat,
 } from '../../core/services/app-settings.service';
@@ -20,7 +21,7 @@ import { ThemeService } from '../../shared/theme/theme.service';
 import { ExpenseTableService } from '../expense-table/expense-table.service';
 
 type SelectOption<TValue extends string> = { value: TValue; label: string };
-export type CustomCategoryChanges = Omit<ExpenseCategoryOption, 'id' | 'custom'>;
+export type CustomCategoryChanges = CustomCategoryInput;
 
 const DATE_FORMAT_PREVIEW_DATE = '2026-12-31T12:00:00';
 

@@ -18,7 +18,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { httpResource } from '@angular/common/http';
 
-import { IExpense } from '../../models/expense.interface';
+import { IExpense, OperationType } from '../../models/expense.interface';
 import { ExpensePage, ExpenseQuery, ExpenseSortBy, ExpenseSortOrder, expenseQueryBody, legacyCompatibleCategoryFilter } from '../../models/expense-query.models';
 import { ViewportServiceService } from '../../core/services/viewport-service.service';
 import { environment } from '../../../environments/environment';
@@ -35,6 +35,15 @@ import { LanguageService } from '../../core/i18n/language.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 import { ExpenseTableService } from './expense-table.service';
+
+/** `''` for type / category means "no filter". */
+interface TableFilters {
+  type: OperationType | '';
+  category: string;
+  dateFrom: string;
+  dateTo: string;
+  q: string;
+}
 
 @Component({
   selector: 'app-expense-table',
@@ -56,7 +65,13 @@ export class ExpenseTableComponent {
   displayedColumns: string[] = ['description', 'category', 'expenseDate', 'amount', 'settings'];
   readonly settings = this.appSettingsService.settings;
 
-  readonly tableFormModel = signal(this.defaultFilters());
+  readonly operationTypeOptions: Array<{ value: OperationType | ''; labelKey: string }> = [
+    { value: '', labelKey: 'operation.all' },
+    { value: 'expense', labelKey: 'operation.expenses' },
+    { value: 'income', labelKey: 'operation.incomes' },
+  ];
+
+  readonly tableFormModel = signal<TableFilters>(this.defaultFilters());
   readonly tableForm = form(this.tableFormModel, (filters) => {
     maxLength(filters.q, 100);
     validate(filters.dateTo, ({ value, valueOf }) => {
@@ -81,11 +96,13 @@ export class ExpenseTableComponent {
     sortBy: 'expenseDate', sortOrder: 'desc',
   });
   readonly filters = computed<ExpenseQuery>(() => {
+    const type = this.tableForm.type().value();
     const category = this.tableForm.category().value();
     const dateFrom = this.tableForm.dateFrom().value();
     const dateTo = this.tableForm.dateTo().value();
     const { sortBy, sortOrder } = this.sortState();
     return expenseQueryBody({
+      type: type || undefined,
       category: legacyCompatibleCategoryFilter(category),
       dateFrom,
       dateTo,
@@ -103,7 +120,7 @@ export class ExpenseTableComponent {
     limit: this.pageSize() === 20 ? undefined : this.pageSize(),
   }));
   readonly dataResource = httpResource<ExpensePage>(() => this.tableForm().invalid() ? undefined : ({
-    url: `${environment.apiUrl}/expenses`,
+    url: `${environment.apiUrl}/operations`,
     method: 'QUERY',
     body: this.query(),
     headers: { 'Content-Type': 'application/json' },
@@ -112,11 +129,11 @@ export class ExpenseTableComponent {
   readonly length = computed(() => this.dataResource.value()?.pagination.total ?? 0);
   readonly hasExpenses = computed(() => this.expenses().length > 0);
   readonly hasCategoryFilter = computed(() => !!this.tableFormModel().category);
-  readonly hasSearchOrDateFilter = computed(() => {
-    const { dateFrom, dateTo } = this.tableFormModel();
-    return !!(dateFrom || dateTo || this.searchText());
+  readonly hasNonCategoryFilter = computed(() => {
+    const { type, dateFrom, dateTo } = this.tableFormModel();
+    return !!(type || dateFrom || dateTo || this.searchText());
   });
-  readonly hasFilters = computed(() => this.hasCategoryFilter() || this.hasSearchOrDateFilter());
+  readonly hasFilters = computed(() => this.hasCategoryFilter() || this.hasNonCategoryFilter());
   selectedCategoryLabel = computed(() => {
     const selectedCategory = this.tableFormModel().category;
     const category = this.appSettingsService.getCategory(selectedCategory);
@@ -134,10 +151,11 @@ export class ExpenseTableComponent {
     maxWidth: '600px',
   };
 
+  /** Category options for the selected operation type; every category when no type is selected. */
   categories = computed(() => {
     return [
       { id: '', label: this.languageService.t('category.all'), color: '', icon: '' },
-      ...this.appSettingsService.categories(),
+      ...this.appSettingsService.categoriesOf(this.tableFormModel().type),
     ]
   })
 
@@ -174,6 +192,17 @@ export class ExpenseTableComponent {
     });
   }
 
+  /** Drops the category filter when it does not belong to the newly selected type. */
+  onTypeChange(type: OperationType | ''): void {
+    this.tableFormModel.update((filters) => ({
+      ...filters,
+      type,
+      category: this.appSettingsService.categoriesOf(type).some((category) => category.id === filters.category)
+        ? filters.category
+        : '',
+    }));
+  }
+
   clearCategoryFilter(): void {
     this.tableFormModel.update((value) => ({
       ...value,
@@ -182,7 +211,7 @@ export class ExpenseTableComponent {
   }
 
   clearFilters(): void {
-    this.tableFormModel.set({ category: '', dateFrom: '', dateTo: '', q: '' });
+    this.tableFormModel.set({ type: '', category: '', dateFrom: '', dateTo: '', q: '' });
     this.debouncedSearch.set('');
   }
 
@@ -192,11 +221,12 @@ export class ExpenseTableComponent {
     this.tableForm[field]().markAsDirty();
   }
 
-  private defaultFilters() {
+  private defaultFilters(): TableFilters {
     const today = this.dateAdapter.today();
     const year = today.getFullYear();
     const month = today.getMonth();
     return {
+      type: '',
       category: '',
       dateFrom: formatDate(new Date(year, month, 1), 'yyyy-MM-dd', 'en'),
       dateTo: formatDate(new Date(year, month + 1, 0), 'yyyy-MM-dd', 'en'),
@@ -231,7 +261,7 @@ export class ExpenseTableComponent {
       });
   }
 
-  public openEditExpenseModal(expense: any): void {
+  public openEditExpenseModal(expense: IExpense): void {
     this.dialog.open(ExpenseModalComponent, {
       ...this.dialogConfig,
       data: {
@@ -260,7 +290,7 @@ export class ExpenseTableComponent {
 
   public openDeleteExpenseModal(expense: IExpense): void {
     const expenseName = expense.description?.trim() || this.languageService.t('expenses.fallbackName');
-    const amount = this.formatAmount(expense.amount);
+    const amount = this.formatSignedAmount(expense);
 
     this.dialog.open(ConfirmationModalComponent, {
       ...this.dialogConfig,
@@ -314,6 +344,12 @@ export class ExpenseTableComponent {
       style: 'currency',
       currency: this.settings().currency,
     }).format(amount);
+  }
+
+  /** Incomes are prefixed with `+` so they stand out from expenses in a mixed list. */
+  public formatSignedAmount(operation: Pick<IExpense, 'type' | 'amount'>): string {
+    const amount = this.formatAmount(operation.amount);
+    return operation.type === 'income' ? `+${amount}` : amount;
   }
 
   public formatExpenseDate(date: string): string {

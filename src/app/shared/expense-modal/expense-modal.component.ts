@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import {
   form,
   max,
@@ -22,6 +23,7 @@ import {
 import { ButtonComponent } from '../button/button.component';
 import { AppSettingsService } from '../../core/services/app-settings.service';
 import { LanguageService } from '../../core/i18n/language.service';
+import { OPERATION_TYPES, OperationType } from '../../models/expense.interface';
 import { TranslatePipe } from '../pipes/translate.pipe';
 import { CategoryLabelPipe } from '../pipes/category-label.pipe';
 @Component({
@@ -33,6 +35,7 @@ import { CategoryLabelPipe } from '../pipes/category-label.pipe';
     MatSelectModule,
     MatDatepickerModule,
     MatButtonModule,
+    MatButtonToggleModule,
     ButtonComponent,
     FormField,
     TranslatePipe,
@@ -47,14 +50,21 @@ export class ExpenseModalComponent {
   appSettingsService = inject(AppSettingsService);
   languageService = inject(LanguageService);
 
-  categories = computed(() => this.appSettingsService.categories());
+  readonly operationTypeOptions = OPERATION_TYPES.map((type) => ({
+    value: type,
+    labelKey: `operation.${type}`,
+  }));
 
   expenseModel = signal({
+    type: 'expense' as OperationType,
     amount: '',
     category: '',
     description: '',
     expenseDate: new Date(),
   });
+
+  /** Only the categories that belong to the selected operation type. */
+  categories = computed(() => this.appSettingsService.categoriesOf(this.expenseModel().type));
 
   expenseForm = form(this.expenseModel, (expense) => {
     required(expense.amount, {
@@ -93,9 +103,22 @@ export class ExpenseModalComponent {
       this.expenseModel.set({
         ...this.expenseModel(),
         ...this.dialogData.expense,
+        // Operations stored before types existed come back without one and are expenses.
+        type: this.dialogData.expense.type ?? 'expense',
         expenseDate: this.dialogData.expense.expenseDate,
       });
     }
+  }
+
+  /** Switches the catalogue and drops a category that does not belong to the new type. */
+  setType(type: OperationType): void {
+    this.expenseModel.update((expense) => ({
+      ...expense,
+      type,
+      category: this.appSettingsService.categoriesOf(type).some((category) => category.id === expense.category)
+        ? expense.category
+        : '',
+    }));
   }
 
   addExpense() {

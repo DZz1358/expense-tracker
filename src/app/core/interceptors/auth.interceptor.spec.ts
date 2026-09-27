@@ -47,10 +47,10 @@ describe('authInterceptor', () => {
   it('adds a bearer token to API requests', () => {
     tokenStorage.setToken('token-123');
 
-    http.get(`${environment.apiUrl}/expenses`).subscribe();
+    http.get(`${environment.apiUrl}/operations`).subscribe();
 
     const request = httpTestingController.expectOne(
-      `${environment.apiUrl}/expenses`,
+      `${environment.apiUrl}/operations`,
     );
 
     expect(request.request.headers.get('Authorization')).toBe(
@@ -98,7 +98,7 @@ describe('authInterceptor', () => {
     tokenStorage.setToken('token-123');
 
     http
-      .get(`${environment.apiUrl}/expenses`, {
+      .get(`${environment.apiUrl}/operations`, {
         headers: {
           Authorization: 'Custom token',
         },
@@ -106,7 +106,7 @@ describe('authInterceptor', () => {
       .subscribe();
 
     const request = httpTestingController.expectOne(
-      `${environment.apiUrl}/expenses`,
+      `${environment.apiUrl}/operations`,
     );
 
     expect(request.request.headers.get('Authorization')).toBe('Custom token');
@@ -119,12 +119,12 @@ describe('authInterceptor', () => {
     tokenStorage.setToken('token-123');
     localStorage.setItem(StorageKey.User, JSON.stringify({ id: 'user-1' }));
 
-    http.get(`${environment.apiUrl}/expenses`).subscribe({
+    http.get(`${environment.apiUrl}/operations`).subscribe({
       error: () => undefined,
     });
 
     const request = httpTestingController.expectOne(
-      `${environment.apiUrl}/expenses`,
+      `${environment.apiUrl}/operations`,
     );
 
     request.flush({}, { status: 401, statusText: 'Unauthorized' });

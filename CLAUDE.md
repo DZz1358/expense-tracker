@@ -109,7 +109,12 @@ and user and navigates to `/login`.
 
 API endpoints in use: `/auth/register`, `/auth/login`, `/auth/google`, `/auth/forgot-password`,
 `/auth/reset-password`, `/users/me` (GET/PATCH/DELETE), `/users/me/avatar`, `/users/me/password`,
-`/expenses` (+ `/expenses/:id`, `QUERY /expenses`, `QUERY /expenses/summary`). The deployed
+`/operations` (+ `/operations/:id`, `QUERY /operations`, `QUERY /operations/summary`); the old
+`/expenses` routes answer 404. Every operation carries `type: 'expense' | 'income'` (`OperationType` in
+[src/app/models/expense.interface.ts](src/app/models/expense.interface.ts)): `POST` requires it, `PATCH`
+may change it, and a `QUERY` body without `type` returns every operation, so the analytics page pins
+`type: 'expense'` while the table sends the selected type filter. The backend keeps the historical
+names `expenseDate` and `biggestExpense` for both types. The deployed
 `DELETE /users/me` route currently ignores the password body, so password verification
 must be implemented on the backend rather than assumed by the frontend.
 
@@ -186,8 +191,11 @@ categories. Settings are **persisted on the backend inside the user object**
 `user.settings` is typed `Record<string, unknown>`.
 
 `categories()` = built-in `EXPENSE_CATEGORY_LIST` from
-[src/app/mocks/expense-categories.ts](src/app/mocks/expense-categories.ts) + user custom
-categories (id shaped `custom_<slug>_<timestamp>`, flagged `custom: true`). Built-in category
+[src/app/mocks/expense-categories.ts](src/app/mocks/expense-categories.ts) + built-in
+`INCOME_CATEGORY_LIST` from [src/app/mocks/income-categories.ts](src/app/mocks/income-categories.ts)
++ user custom categories (id shaped `custom_<slug>_<timestamp>`, flagged `custom: true`). Every option
+carries `type: OperationType`; pickers use `categoriesOf(type)` (custom categories are `expense` unless
+stored with another type) and lookups by id use `getCategory(id)`. Built-in category
 labels are translated via `category.<id>` keys; custom labels are shown verbatim — the pipes in
 `shared/pipes` already handle that split, so use `| categoryLabel`, `| categoryIcon`,
 `| categoryColor` instead of reading the catalogue directly.
@@ -252,3 +260,43 @@ fake `window.google` and capture the injected `<script>` when testing the loader
 
 Branch: `master`. Commit messages are short, lowercase, imperative-ish (`added snackbar`,
 `refactor settings`). Do not commit or push unless asked.
+
+## Change log
+
+### 2026-09-27 — expenses became operations (expense + income)
+
+Backend change: `/expenses` was replaced by `/operations` (the old routes answer 404) and every record
+got `type: 'expense' | 'income'`. `expenseDate` and `biggestExpense` kept their names, no DB migration
+was needed (records without `type` are served and filtered as expenses). Frontend changes made for it:
+
+- **Model.** `OperationType`, `OPERATION_TYPES`, `isOperationType` in
+  [src/app/models/expense.interface.ts](src/app/models/expense.interface.ts); `IExpense.type`,
+  `ExpenseFilters.type`, `ExpenseSummaryItem.type` (normalized to `expense` when missing or invalid).
+- **Service.** `ExpenseTableService` (name kept) now calls `/operations`, `/operations/:id`,
+  `QUERY /operations`, `QUERY /operations/summary`.
+- **Expense table.** A "Type" `mat-select` (all / expenses / income, `operationTypeOptions`) sits in
+  front of the category filter and sends `type` only when one is chosen. The category list follows the
+  type (`categoriesOf`); an incompatible category is dropped on type change (`onTypeChange`). Income
+  amounts render with a `+` prefix in `--mat-sys-tertiary` (`formatSignedAmount`,
+  `.amount-cell--income` / `.amount--income`). `hasSearchOrDateFilter` became `hasNonCategoryFilter`
+  (it includes the type filter). The filter grid is 4 fields + clear button; on mobile type, category
+  and description span the full width and the date picker shares row 4 with the clear button.
+- **Expense modal.** `mat-button-toggle-group` "Expense | Income" bound to `expenseModel().type` with
+  `[value]` + `(change)="setType(...)"` rather than `[formField]`, because switching the type also
+  resets a category that does not belong to it. `type` is part of the POST / PATCH payload, editing may
+  change it, and a stored operation without `type` opens as an expense.
+- **Income categories.** [src/app/mocks/income-categories.ts](src/app/mocks/income-categories.ts):
+  `salary`, `side_job`, `benefits`, `refund`, `gifts`, `other_income`, translated via `category.<id>`.
+  `ExpenseCategoryOption.type` is required; `AppSettingsService.categories()` = expense + income +
+  custom, `categoriesOf(type)` filters them. Custom categories parse `type` from `user.settings` and
+  default to `expense` (`CustomCategoryInput`); there is no UI yet to create custom income categories.
+- **Analytics** stays spending-only: both summary `httpResource`s send `type: 'expense'`
+  (`summaryType`), otherwise the backend would fold incomes into "total spent".
+- **Settings.** "Clear all" loads and deletes every operation, incomes included; wording updated.
+- **i18n.** New keys `operation.all|expense|income|expenses|incomes`, `category.<income ids>`,
+  `expenses.chooseType`, `expenseModal.type`. The values of `nav.expenses`, `expenses.*`,
+  `expenseModal.*` and `settings.clear*` / `settings.loadFailed` now say "operation(s)" in en / ru / uk
+  (keys unchanged). "Add Expense" became "Add operation".
+- **Specs.** Fixtures carry `type`, URLs use `/operations`, new tests cover the type filter, income
+  rendering, the modal toggle and edit flow, `categoriesOf` and summary `type` normalization.
+  `auth.interceptor.spec.ts` uses `/operations` as its sample API URL.

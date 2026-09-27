@@ -1,5 +1,17 @@
 <ng-template #expenseFilters>
   <div class="expense-filters">
+    <mat-form-field class="type-filter" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ "expenses.chooseType" | translate }}</mat-label>
+      <mat-select
+        [formField]="tableForm.type"
+        (selectionChange)="onTypeChange($event.value)"
+      >
+        @for (option of operationTypeOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.labelKey | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <mat-form-field class="category-filter" appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ "expenses.chooseCategory" | translate }}</mat-label>
       <mat-select
@@ -125,9 +137,9 @@
     ) {
       <div class="empty-state">
         <mat-icon>filter_list_off</mat-icon>
-        <h3>{{ (hasSearchOrDateFilter() ? "expenses.emptyFilterTitle" : "expenses.emptyCategoryTitle") | translate }}</h3>
+        <h3>{{ (hasNonCategoryFilter() ? "expenses.emptyFilterTitle" : "expenses.emptyCategoryTitle") | translate }}</h3>
         <p>
-          @if (hasSearchOrDateFilter()) {
+          @if (hasNonCategoryFilter()) {
             {{ "expenses.emptyFilterBody" | translate }}
           } @else {
             {{ "expenses.emptyCategoryBody" | translate: { category: selectedCategoryLabel() } }}
@@ -191,8 +203,13 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             {{ "expenses.amount" | translate }}
           </th>
-          <td mat-cell *matCellDef="let element">
-            {{ formatAmount(element.amount) }}
+          <td
+            mat-cell
+            *matCellDef="let element"
+            class="amount-cell"
+            [class.amount-cell--income]="element.type === 'income'"
+          >
+            {{ formatSignedAmount(element) }}
           </td>
         </ng-container>
 
@@ -263,9 +280,9 @@
     ) {
       <div class="empty-state empty-state-mobile">
         <mat-icon>filter_list_off</mat-icon>
-        <h3>{{ (hasSearchOrDateFilter() ? "expenses.emptyFilterTitle" : "expenses.emptyCategoryTitle") | translate }}</h3>
+        <h3>{{ (hasNonCategoryFilter() ? "expenses.emptyFilterTitle" : "expenses.emptyCategoryTitle") | translate }}</h3>
         <p>
-          @if (hasSearchOrDateFilter()) {
+          @if (hasNonCategoryFilter()) {
             {{ "expenses.emptyFilterBody" | translate }}
           } @else {
             {{ "expenses.emptyCategoryBody" | translate: { category: selectedCategoryLabel() } }}
@@ -292,7 +309,9 @@
                   : ("expenses.noDescription" | translate)
               }}
             </p>
-            <p>{{ formatAmount(expense.amount) }}</p>
+            <p class="amount" [class.amount--income]="expense.type === 'income'">
+              {{ formatSignedAmount(expense) }}
+            </p>
             <span
               class="category-cell"
               [style.color]="$any(expense.category) | categoryColor"

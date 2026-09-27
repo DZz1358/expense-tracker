@@ -10,7 +10,7 @@ describe('AnalyticsComponent summary queries', () => {
   let component: AnalyticsComponent;
   let fixture: ComponentFixture<AnalyticsComponent>;
   let http: HttpTestingController;
-  const url = `${environment.apiUrl}/expenses/summary`;
+  const url = `${environment.apiUrl}/operations/summary`;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -33,11 +33,12 @@ describe('AnalyticsComponent summary queries', () => {
     expect(component.period()).toBe('month');
     expect(requests.length).toBe(2);
     expect(requests.find(request => request.request.body.dateFrom === filters.current.dateFrom)?.request.body)
-      .toEqual(filters.current);
+      .toEqual({ ...filters.current, type: 'expense' });
     expect(requests.find(request => request.request.body.dateFrom === filters.previous?.dateFrom)?.request.body)
-      .toEqual(filters.previous!);
+      .toEqual({ ...filters.previous!, type: 'expense' });
     for (const request of requests) {
       expect(request.request.method).toBe('QUERY');
+      expect(request.request.body.type).toBe('expense');
       expect(request.request.headers.get('Content-Type')).toBe('application/json');
       expect(request.request.body.dateFrom).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(request.request.body.dateTo).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -45,19 +46,19 @@ describe('AnalyticsComponent summary queries', () => {
       expect(request.request.body.limit).toBeUndefined();
       request.flush(EMPTY_EXPENSE_SUMMARY);
     }
-    http.expectNone(`${environment.apiUrl}/expenses`);
+    http.expectNone(`${environment.apiUrl}/operations`);
     await fixture.whenStable();
     fixture.detectChanges();
     expect(component.hasExpenses()).toBeFalse();
   });
 
-  it('changes period through the API and sends an empty body for all-time totals', async () => {
+  it('changes period through the API and pins the expense type even for all-time totals', async () => {
     http.match(url).forEach(request => request.flush(EMPTY_EXPENSE_SUMMARY));
     component.setPeriod('all');
     fixture.detectChanges();
     TestBed.tick();
     const request = http.expectOne(url);
-    expect(request.request.body).toEqual({});
+    expect(request.request.body).toEqual({ type: 'expense' });
     request.flush({ ...EMPTY_EXPENSE_SUMMARY, total: 120, totalAmount: 300, activeDays: 3 });
     await fixture.whenStable();
     fixture.detectChanges();

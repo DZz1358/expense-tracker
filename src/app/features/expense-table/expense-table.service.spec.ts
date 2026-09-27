@@ -31,7 +31,7 @@ describe('ExpenseTableService QUERY requests', () => {
 
   it('sends an empty JSON body with bearer authentication for the default list', () => {
     service.queryExpenses().subscribe();
-    const request = http.expectOne(`${environment.apiUrl}/expenses`);
+    const request = http.expectOne(`${environment.apiUrl}/operations`);
     expect(request.request.method).toBe('QUERY');
     expect(request.request.body).toEqual({});
     expect(request.request.headers.get('Content-Type')).toBe('application/json');
@@ -39,16 +39,16 @@ describe('ExpenseTableService QUERY requests', () => {
     request.flush({ items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
   });
 
-  it('preserves multiple categories, UTC date strings, zero amounts and false booleans', () => {
+  it('preserves the type, multiple categories, UTC date strings, zero amounts and false booleans', () => {
     const filters: ExpenseQuery = {
-      category: ['food', 'transport'], dateFrom: '2026-09-01', dateTo: '2026-09-30',
+      type: 'income', category: ['food', 'transport'], dateFrom: '2026-09-01', dateTo: '2026-09-30',
       minAmount: 0, maxAmount: 100, q: 'coffee', hasAttachment: false,
       page: 2, limit: 100, sortBy: 'amount', sortOrder: 'asc',
     };
     service.queryExpenses(filters).subscribe();
-    const request = http.expectOne(`${environment.apiUrl}/expenses`);
+    const request = http.expectOne(`${environment.apiUrl}/operations`);
     expect(request.request.body).toEqual(filters);
-    expect(request.request.urlWithParams).toBe(`${environment.apiUrl}/expenses`);
+    expect(request.request.urlWithParams).toBe(`${environment.apiUrl}/operations`);
     request.flush({ items: [], pagination: { page: 2, limit: 100, total: 0, totalPages: 0 } });
   });
 
@@ -56,7 +56,7 @@ describe('ExpenseTableService QUERY requests', () => {
     service.queryExpenses({
       category: [], dateFrom: null, dateTo: undefined, q: '', minAmount: 0, hasAttachment: false,
     } as unknown as ExpenseQuery).subscribe();
-    const request = http.expectOne(`${environment.apiUrl}/expenses`);
+    const request = http.expectOne(`${environment.apiUrl}/operations`);
     expect(request.request.body).toEqual({ minAmount: 0, hasAttachment: false });
     request.flush({ items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
   });
@@ -66,7 +66,7 @@ describe('ExpenseTableService QUERY requests', () => {
       expect(summary.total).toBe(200);
       expect(summary.totalAmount).toBe(5000);
     });
-    const request = http.expectOne(`${environment.apiUrl}/expenses/summary`);
+    const request = http.expectOne(`${environment.apiUrl}/operations/summary`);
     expect(request.request.method).toBe('QUERY');
     expect(request.request.body).toEqual({ category: 'food', hasAttachment: true });
     expect(request.request.headers.get('Content-Type')).toBe('application/json');
@@ -77,7 +77,7 @@ describe('ExpenseTableService QUERY requests', () => {
   it('normalizes legacy summary responses for non-component callers', () => {
     let result = EMPTY_EXPENSE_SUMMARY;
     service.querySummary().subscribe((summary) => result = summary);
-    const request = http.expectOne(`${environment.apiUrl}/expenses/summary`);
+    const request = http.expectOne(`${environment.apiUrl}/operations/summary`);
     request.flush({
       total: 2,
       totalAmount: 30,
@@ -99,11 +99,11 @@ describe('ExpenseTableService QUERY requests', () => {
     const second = { id: 'second' } as IExpense;
     let result: IExpense[] | undefined;
     service.getAllExpenses({ category: 'food' }).subscribe((expenses) => result = expenses);
-    const pageOne = http.expectOne(`${environment.apiUrl}/expenses`);
+    const pageOne = http.expectOne(`${environment.apiUrl}/operations`);
     expect(pageOne.request.body).toEqual({ category: 'food', limit: 100 });
     pageOne.flush({ items: [first], pagination: { page: 1, limit: 100, total: 101, totalPages: 2 } });
     expect(result).toBeUndefined();
-    const pageTwo = http.expectOne(`${environment.apiUrl}/expenses`);
+    const pageTwo = http.expectOne(`${environment.apiUrl}/operations`);
     expect(pageTwo.request.body).toEqual({ category: 'food', page: 2, limit: 100 });
     pageTwo.flush({ items: [second], pagination: { page: 2, limit: 100, total: 101, totalPages: 2 } });
     expect(result).toEqual([first, second]);

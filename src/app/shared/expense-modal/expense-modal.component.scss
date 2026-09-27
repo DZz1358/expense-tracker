@@ -17,6 +17,15 @@ mat-form-field {
   flex-direction: column;
 }
 
+.operation-type-toggle {
+  width: 100%;
+  margin-bottom: 1rem;
+
+  mat-button-toggle {
+    flex: 1;
+  }
+}
+
 .add-expense-modal__actions {
   display: flex;
   justify-content: flex-end;

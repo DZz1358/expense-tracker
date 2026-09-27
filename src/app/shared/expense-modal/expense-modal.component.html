@@ -7,6 +7,19 @@
 
 <mat-dialog-content>
   <form class="add-expense-modal__content">
+    <mat-button-toggle-group
+      class="operation-type-toggle"
+      [value]="expenseModel().type"
+      (change)="setType($event.value)"
+      [attr.aria-label]="'expenseModal.type' | translate"
+    >
+      @for (option of operationTypeOptions; track option.value) {
+        <mat-button-toggle [value]="option.value">
+          {{ option.labelKey | translate }}
+        </mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+
     <mat-form-field appearance="outline" class="">
       <mat-label>
         <span>{{ 'expenseModal.amount' | translate }}</span>

@@ -94,6 +94,7 @@ export const EXPENSE_CATEGORY_META: Record<ExpenseCategory, ExpenseCategoryMeta>
 export const EXPENSE_CATEGORY_LIST = Object.entries(EXPENSE_CATEGORY_META).map(
   ([id, meta]) => ({
     id: id as ExpenseCategory,
+    type: 'expense' as const,
     ...meta,
   }),
 );

@@ -1,6 +1,8 @@
 import { computed, Injectable, inject, signal } from '@angular/core';
 
 import { EXPENSE_CATEGORY_LIST } from '../../mocks/expense-categories';
+import { INCOME_CATEGORY_LIST } from '../../mocks/income-categories';
+import { isOperationType, OperationType } from '../../models/expense.interface';
 import { AuthUser, UpdateUserSettingsRequest } from '../models/auth.models';
 import { LocalStorageService } from '../../shared/local-storage/local-storage.service';
 import { StorageKey } from '../../shared/local-storage/storage-key.enum';
@@ -12,11 +14,18 @@ export type AppLanguage = 'en' | 'ru' | 'uk';
 
 export interface ExpenseCategoryOption {
   id: string;
+  /** Which operations may use the category. */
+  type: OperationType;
   label: string;
   icon: string;
   color: string;
   custom?: boolean;
 }
+
+/** What a user supplies for a custom category; `type` defaults to `expense`. */
+export type CustomCategoryInput = Omit<ExpenseCategoryOption, 'id' | 'custom' | 'type'> & {
+  type?: OperationType;
+};
 
 export interface AppSettings {
   language: AppLanguage;
@@ -49,10 +58,18 @@ export class AppSettingsService {
   );
 
   readonly settings = this.settingsSignal.asReadonly();
+  /** Every known category (expense + income + custom) so ids resolve regardless of type. */
   readonly categories = computed<ExpenseCategoryOption[]>(() => [
     ...EXPENSE_CATEGORY_LIST,
+    ...INCOME_CATEGORY_LIST,
     ...this.settingsSignal().customCategories,
   ]);
+
+  /** Categories an operation of `type` may use; all of them when no type is given. */
+  categoriesOf(type: OperationType | '' | null | undefined): ExpenseCategoryOption[] {
+    const categories = this.categories();
+    return type ? categories.filter((category) => category.type === type) : categories;
+  }
 
   updateSetting<TKey extends keyof AppSettings>(
     key: TKey,
@@ -68,7 +85,7 @@ export class AppSettingsService {
     this.settingsSignal.set(DEFAULT_APP_SETTINGS);
   }
 
-  addCustomCategory(category: Omit<ExpenseCategoryOption, 'id' | 'custom'>): void {
+  addCustomCategory(category: CustomCategoryInput): void {
     const id = this.createCategoryId(category.label);
     this.settingsSignal.update((settings) => ({
       ...settings,
@@ -77,6 +94,7 @@ export class AppSettingsService {
         {
           ...category,
           id,
+          type: category.type ?? 'expense',
           custom: true,
         },
       ],
@@ -92,7 +110,7 @@ export class AppSettingsService {
 
   updateCustomCategory(
     categoryId: string,
-    changes: Omit<ExpenseCategoryOption, 'id' | 'custom'>,
+    changes: CustomCategoryInput,
   ): void {
     this.settingsSignal.update((settings) => ({
       ...settings,
@@ -101,6 +119,7 @@ export class AppSettingsService {
           ? {
               ...category,
               ...changes,
+              type: changes.type ?? category.type,
               custom: true,
             }
           : category
@@ -204,6 +223,7 @@ export class AppSettingsService {
       ))
       .map((category) => ({
         id: String(category['id']),
+        type: isOperationType(category['type']) ? category['type'] : 'expense',
         label: String(category['label']),
         icon: String(category['icon']),
         color: String(category['color']),
@@ -214,6 +234,7 @@ export class AppSettingsService {
   private createCategoryOptionFromId(id: string): ExpenseCategoryOption {
     return {
       id,
+      type: 'expense',
       label: id.replace(/^custom_/, '').replace(/_/g, ' '),
       icon: 'sell',
       color: '#607D8B',

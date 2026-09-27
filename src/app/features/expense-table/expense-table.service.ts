@@ -14,14 +14,14 @@ export class ExpenseTableService {
   private http = inject(HttpClient);
 
   queryExpenses(filters: ExpenseQuery = {}): Observable<ExpensePage> {
-    return this.http.request<ExpensePage>('QUERY', `${environment.apiUrl}/expenses`, {
+    return this.http.request<ExpensePage>('QUERY', `${environment.apiUrl}/operations`, {
       body: expenseQueryBody(filters),
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
   querySummary(filters: ExpenseFilters = {}): Observable<ExpenseSummary> {
-    return this.http.request<unknown>('QUERY', `${environment.apiUrl}/expenses/summary`, {
+    return this.http.request<unknown>('QUERY', `${environment.apiUrl}/operations/summary`, {
       body: expenseQueryBody(filters),
       headers: { 'Content-Type': 'application/json' },
     }).pipe(map(normalizeExpenseSummary));
@@ -37,17 +37,17 @@ export class ExpenseTableService {
   }
 
   addExpense(data: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/expenses`, {
+    return this.http.post(`${environment.apiUrl}/operations`, {
       ...data
     })
   }
   updateExpense(data: any): Observable<any> {
-    return this.http.patch(`${environment.apiUrl}/expenses/${data.id}`, {
+    return this.http.patch(`${environment.apiUrl}/operations/${data.id}`, {
       ...data
     })
   }
 
   deleteExpense(id: string): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/expenses/${id}`);
+    return this.http.delete(`${environment.apiUrl}/operations/${id}`);
   }
 }

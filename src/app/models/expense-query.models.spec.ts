@@ -112,6 +112,7 @@ describe('normalizeExpenseSummary', () => {
   it('keeps a well-formed biggestExpense and degrades a malformed one to null', () => {
     const item = {
       id: '000000000000000000000004',
+      type: 'income' as const,
       amount: 40,
       category: 'food',
       expenseDate: '2026-10-01T00:00:00.000Z',
@@ -129,6 +130,7 @@ describe('normalizeExpenseSummary', () => {
       biggestExpense: { id: 'x', amount: 'lots', category: 7 },
     }).biggestExpense).toEqual({
       id: 'x',
+      type: 'expense',
       amount: 0,
       category: '',
       expenseDate: '',
@@ -136,6 +138,14 @@ describe('normalizeExpenseSummary', () => {
       attachmentUrl: null,
       createdAt: null,
     });
+  });
+
+  it('treats a biggestExpense without a valid type as an expense', () => {
+    expect(normalizeExpenseSummary({ biggestExpense: { id: 'x' } }).biggestExpense?.type).toBe('expense');
+    expect(normalizeExpenseSummary({ biggestExpense: { id: 'x', type: 'bogus' } }).biggestExpense?.type)
+      .toBe('expense');
+    expect(normalizeExpenseSummary({ biggestExpense: { id: 'x', type: 'income' } }).biggestExpense?.type)
+      .toBe('income');
   });
 
   it('survives garbage bodies of any type', () => {

@@ -15,6 +15,7 @@ import { environment } from '../../../environments/environment';
 import { LanguageService } from '../../core/i18n/language.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
 import { ExpenseSummary, normalizeExpenseSummary } from '../../models/expense-query.models';
+import { OperationType } from '../../models/expense.interface';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../shared/theme/theme.service';
 
@@ -67,6 +68,9 @@ export class AnalyticsComponent {
   };
 
   readonly periodFilters = computed(() => this.analyticsService.getPeriodFilters(this.period()));
+  // This page is spending analytics. `/operations/summary` aggregates incomes
+  // too unless the query pins the type, so every summary request pins it.
+  private readonly summaryType: OperationType = 'expense';
   // `parse` repairs any body shape before it reaches the view model, so a backend
   // that predates the byDate / activeDays / biggestExpense contract degrades
   // instead of throwing inside the `viewModel` computed. `defaultValue` is left
@@ -74,17 +78,17 @@ export class AnalyticsComponent {
   // (the "all time" period has no previous window) and turn `previousTotal` into
   // 0 instead of null.
   readonly dataResource = httpResource<ExpenseSummary>(() => ({
-    url: `${environment.apiUrl}/expenses/summary`,
+    url: `${environment.apiUrl}/operations/summary`,
     method: 'QUERY',
-    body: this.periodFilters().current,
+    body: { ...this.periodFilters().current, type: this.summaryType },
     headers: { 'Content-Type': 'application/json' },
   }), { parse: normalizeExpenseSummary });
   readonly previousResource = httpResource<ExpenseSummary>(() => {
     const filters = this.periodFilters().previous;
     return filters ? {
-      url: `${environment.apiUrl}/expenses/summary`,
+      url: `${environment.apiUrl}/operations/summary`,
       method: 'QUERY',
-      body: filters,
+      body: { ...filters, type: this.summaryType },
       headers: { 'Content-Type': 'application/json' },
     } : undefined;
   }, { parse: normalizeExpenseSummary });

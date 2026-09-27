@@ -18,12 +18,12 @@ describe('ExpenseTableComponent server pagination', () => {
   let monthStart: Date;
   let monthEnd: Date;
   const expense: IExpense = {
-    id: 'expense-1', amount: 10, category: 'food', description: 'Coffee',
+    id: 'expense-1', type: 'expense', amount: 10, category: 'food', description: 'Coffee',
     expenseDate: '2026-09-01T00:00:00Z', createdAt: '2026-09-01T00:00:00Z',
   };
 
   const respond = async (items: IExpense[] = [expense], page = 1, total = 200, limit = 20) => {
-    const request = http.expectOne(`${environment.apiUrl}/expenses`);
+    const request = http.expectOne(`${environment.apiUrl}/operations`);
     request.flush({ items, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -32,7 +32,7 @@ describe('ExpenseTableComponent server pagination', () => {
   };
 
   const respondNow = (items: IExpense[] = [expense], page = 1, total = 200) => {
-    const request = http.expectOne(`${environment.apiUrl}/expenses`);
+    const request = http.expectOne(`${environment.apiUrl}/operations`);
     request.flush({ items, pagination: { page, limit: 20, total, totalPages: Math.ceil(total / 20) } });
     fixture.detectChanges();
     TestBed.tick();
@@ -166,12 +166,12 @@ describe('ExpenseTableComponent server pagination', () => {
 
   it('shows a filtered empty state and lets the user clear the category', async () => {
     await respond();
-    component.tableFormModel.set({ category: 'food', dateFrom: '', dateTo: '', q: '' });
+    component.tableFormModel.set({ type: '', category: 'food', dateFrom: '', dateTo: '', q: '' });
     fixture.detectChanges();
     TestBed.tick();
     await respond([], 1, 0);
     expect(component.hasCategoryFilter()).toBeTrue();
-    expect(fixture.nativeElement.textContent).toContain('No expenses in this category');
+    expect(fixture.nativeElement.textContent).toContain('No operations in this category');
   });
 
   it('renders the server page as mobile cards using the same total', async () => {
@@ -217,7 +217,7 @@ describe('ExpenseTableComponent server pagination', () => {
       TestBed.tick();
       expect((await respond([], 1, 0)).request.body).toEqual(dates);
       expect(component.hasFilters()).toBeTrue();
-      expect(fixture.nativeElement.textContent).toContain('No matching expenses');
+      expect(fixture.nativeElement.textContent).toContain('No matching operations');
 
       fixture.nativeElement.querySelector('.empty-state button').click();
       fixture.detectChanges();
@@ -236,12 +236,12 @@ describe('ExpenseTableComponent server pagination', () => {
 
     enterFilter('input[type="search"]', 'Co');
     tick(150);
-    http.expectNone(`${environment.apiUrl}/expenses`);
+    http.expectNone(`${environment.apiUrl}/operations`);
     expect(component.pageNumber()).toBe(1);
 
     enterFilter('input[type="search"]', '  Coffee [work]  ');
     tick(299);
-    http.expectNone(`${environment.apiUrl}/expenses`);
+    http.expectNone(`${environment.apiUrl}/operations`);
     tick(1);
     fixture.detectChanges();
     TestBed.tick();
@@ -256,7 +256,7 @@ describe('ExpenseTableComponent server pagination', () => {
 
   it('clears every filter and cancels a pending description search', fakeAsync(() => {
     respondNow();
-    component.tableFormModel.set({ category: 'transport', dateFrom: '2026-09-01', dateTo: '2026-09-30', q: 'Train' });
+    component.tableFormModel.set({ type: '', category: 'transport', dateFrom: '2026-09-01', dateTo: '2026-09-30', q: 'Train' });
     fixture.detectChanges();
     TestBed.tick();
     expect(respondNow().request.body).toEqual({ category: 'transport', dateFrom: '2026-09-01', dateTo: '2026-09-30' });
@@ -273,8 +273,8 @@ describe('ExpenseTableComponent server pagination', () => {
     tick(300);
     fixture.detectChanges();
     TestBed.tick();
-    http.expectNone(`${environment.apiUrl}/expenses`);
-    expect(component.tableFormModel()).toEqual({ category: '', dateFrom: '', dateTo: '', q: '' });
+    http.expectNone(`${environment.apiUrl}/operations`);
+    expect(component.tableFormModel()).toEqual({ type: '', category: '', dateFrom: '', dateTo: '', q: '' });
     const dateInputs: NodeListOf<HTMLInputElement> = fixture.nativeElement.querySelectorAll('.date-filter input');
     expect(Array.from(dateInputs).map((input) => input.value)).toEqual(['', '']);
   }));
@@ -285,7 +285,7 @@ describe('ExpenseTableComponent server pagination', () => {
     component.tableForm.dateTo().markAsDirty();
     fixture.detectChanges();
     TestBed.tick();
-    http.expectNone(`${environment.apiUrl}/expenses`);
+    http.expectNone(`${environment.apiUrl}/operations`);
     expect(component.tableForm.dateTo().invalid()).toBeTrue();
     expect(fixture.nativeElement.textContent).toContain('The start date must not be after the end date.');
 
@@ -379,8 +379,10 @@ describe('ExpenseTableComponent server pagination', () => {
       const fields: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('.expense-filters mat-form-field');
       const widths = Array.from(fields).map((field) => field.getBoundingClientRect().width);
       if (mobile) {
-        expect(Math.abs(widths[0] - widths[1])).withContext(`Fields at ${width}px`).toBeLessThan(1);
-        expect(widths[2]).withContext(`Date picker at ${width}px`).toBeLessThan(widths[0]);
+        const fullWidthFields = widths.slice(0, 3);
+        expect(Math.max(...fullWidthFields) - Math.min(...fullWidthFields))
+          .withContext(`Fields at ${width}px`).toBeLessThan(1);
+        expect(widths[3]).withContext(`Date picker at ${width}px`).toBeLessThan(widths[0]);
         const dateBounds = fixture.nativeElement.querySelector('.date-filter').getBoundingClientRect();
         const clearBounds = fixture.nativeElement.querySelector('.clear-filters').getBoundingClientRect();
         const dateCenter = dateBounds.top + dateBounds.height / 2;
@@ -407,6 +409,79 @@ describe('ExpenseTableComponent server pagination', () => {
     expect(Math.abs(fieldCenter - (addBounds.top + addBounds.height / 2))).toBeLessThan(1);
   });
 
+  it('sends the selected operation type and narrows the categories to it', async () => {
+    await respond();
+    const allIds = component.categories().map((category) => category.id);
+    expect(allIds).toContain('salary');
+    expect(allIds).toContain('housing');
+
+    component.onTypeChange('income');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect((await respond()).request.body).toEqual({ ...defaultDates, type: 'income' });
+    const incomeIds = component.categories().map((category) => category.id);
+    expect(incomeIds[0]).toBe('');
+    expect(incomeIds).toContain('salary');
+    expect(incomeIds).not.toContain('housing');
+    expect(component.hasFilters()).toBeTrue();
+
+    component.tableFormModel.update((value) => ({ ...value, category: 'salary' }));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect((await respond()).request.body).toEqual({ ...defaultDates, type: 'income', category: 'salary' });
+
+    component.onTypeChange('expense');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect((await respond()).request.body).toEqual({ ...defaultDates, type: 'expense' });
+    expect(component.tableFormModel().category).toBe('');
+
+    component.onTypeChange('');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect((await respond()).request.body).toEqual(defaultDates);
+  });
+
+  it('picks the type from the filter control and resets it with the other filters', fakeAsync(() => {
+    respondNow();
+    fixture.nativeElement.querySelector('.type-filter mat-select').click();
+    fixture.detectChanges();
+    tick(250);
+    fixture.detectChanges();
+    const options = Array.from(document.querySelectorAll<HTMLElement>('mat-option'));
+    expect(options.map((option) => option.textContent?.trim())).toEqual(['All operations', 'Expenses', 'Income']);
+    options[2].click();
+    fixture.detectChanges();
+    TestBed.tick();
+    tick(250);
+    fixture.detectChanges();
+    expect(respondNow().request.body).toEqual({ ...defaultDates, type: 'income' });
+
+    fixture.nativeElement.querySelector('.clear-filters').click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(respondNow().request.body).toEqual({});
+    expect(component.tableFormModel().type).toBe('');
+  }));
+
+  it('marks income amounts with a plus sign in table rows and mobile cards', async () => {
+    TestBed.inject(ViewportServiceService).isMobile.set(false);
+    const income: IExpense = { ...expense, id: 'income-1', type: 'income', category: 'salary', amount: 2500 };
+    await respond([expense, income]);
+    const cells = Array.from(fixture.nativeElement.querySelectorAll('td.amount-cell') as NodeListOf<HTMLElement>);
+    expect(cells.map((cell) => cell.textContent?.trim())).toEqual(['€10.00', '+€2,500.00']);
+    expect(cells[0].classList).not.toContain('amount-cell--income');
+    expect(cells[1].classList).toContain('amount-cell--income');
+    expect(fixture.nativeElement.textContent).toContain('Salary');
+
+    TestBed.inject(ViewportServiceService).isMobile.set(true);
+    fixture.detectChanges();
+    TestBed.tick();
+    const amounts = Array.from(fixture.nativeElement.querySelectorAll('.expense-card-item .amount') as NodeListOf<HTMLElement>);
+    expect(amounts.map((amount) => amount.textContent?.trim())).toEqual(['€10.00', '+€2,500.00']);
+    expect(amounts[1].classList).toContain('amount--income');
+  });
+
   it('reloads the table and reports success after adding an expense', async () => {
     await respond();
     const result = { ...expense, id: undefined };
@@ -419,7 +494,7 @@ describe('ExpenseTableComponent server pagination', () => {
 
     expect(component.expenseTableService.addExpense).toHaveBeenCalledWith(result);
     expect(reload).toHaveBeenCalled();
-    expect(success).toHaveBeenCalledWith('Expense added');
+    expect(success).toHaveBeenCalledWith('Operation added');
   });
 
   it('shows joined backend validation messages when editing fails', async () => {
@@ -450,6 +525,6 @@ describe('ExpenseTableComponent server pagination', () => {
 
     expect(component.expenseTableService.deleteExpense).toHaveBeenCalledWith(expense.id);
     expect(reload).toHaveBeenCalled();
-    expect(success).toHaveBeenCalledWith('Expense deleted');
+    expect(success).toHaveBeenCalledWith('Operation deleted');
   });
 });

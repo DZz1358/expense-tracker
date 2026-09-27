@@ -1,9 +1,11 @@
-import { IExpense } from './expense.interface';
+import { IExpense, isOperationType, OperationType } from './expense.interface';
 
 export type ExpenseSortBy = 'expenseDate' | 'amount' | 'category' | 'createdAt';
 export type ExpenseSortOrder = 'asc' | 'desc';
 
 export interface ExpenseFilters {
+  /** Omit to query every operation regardless of its type. */
+  type?: OperationType;
   category?: string | string[];
   dateFrom?: string;
   dateTo?: string;
@@ -31,13 +33,14 @@ export interface ExpensePage {
 }
 
 /**
- * The `biggestExpense` projection of `QUERY /expenses/summary`. It is deliberately
+ * The `biggestExpense` projection of `QUERY /operations/summary`. It is deliberately
  * NOT `IExpense`: the aggregation rebuilds the document by hand, so it carries no
  * `userId`/`updatedAt` and returns explicit `null` where `IExpense` declares
  * optional fields.
  */
 export interface ExpenseSummaryItem {
   id: string;
+  type: OperationType;
   amount: number;
   category: string;
   expenseDate: string;
@@ -91,6 +94,14 @@ function asDateKey(value: unknown): string {
   return typeof value === 'string' && value.length >= 10 ? value.slice(0, 10) : '';
 }
 
+/**
+ * Records created before operations got a type are served by the backend as
+ * expenses, so that is also the fallback for anything unexpected.
+ */
+function asOperationType(value: unknown): OperationType {
+  return isOperationType(value) ? value : 'expense';
+}
+
 function asCategoryId(value: unknown): string {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
 }
@@ -100,6 +111,7 @@ function asSummaryItem(value: unknown): ExpenseSummaryItem | null {
   if (typeof raw['id'] !== 'string') return null;
   return {
     id: raw['id'],
+    type: asOperationType(raw['type']),
     amount: asNumber(raw['amount']),
     category: asCategoryId(raw['category']),
     expenseDate: asText(raw['expenseDate']) ?? '',
